@@ -1,0 +1,12 @@
+.card-action-button.MuiButton-root {
+  min-width: 0;
+  margin: -8px -16px -8px 0;
+  padding: 8px 16px;
+  flex: 0 0 auto;
+  color: var(--color-semantic-text-dark);
+  text-transform: none;
+}
+
+.card-action-button.MuiButton-root:hover {
+  background: var(--color-semantic-surface-secondary);
+}

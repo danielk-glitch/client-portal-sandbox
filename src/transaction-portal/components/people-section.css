@@ -1,0 +1,47 @@
+.people-section.MuiPaper-root {
+  min-width: 0;
+  padding: 32px;
+  border-radius: 14px;
+  background: var(--color-semantic-surface-primary-darkest);
+  scroll-margin-top: 24px;
+}
+
+.people-tabs.MuiTabs-root {
+  min-height: 46px;
+  margin-top: 18px;
+  border-bottom: 1px solid var(--color-semantic-stroke-primary-light);
+}
+
+.people-tabs .MuiTab-root {
+  min-width: 0;
+  min-height: 46px;
+  padding: 8px 12px;
+  color: var(--color-semantic-text-primary);
+  font-size: 0.875rem;
+  text-transform: none;
+}
+
+.people-tabs .MuiTab-root.Mui-selected { color: var(--color-semantic-text-dark); }
+.people-tabs .MuiTabs-indicator { height: 2px; background: var(--color-semantic-text-dark); }
+.people-panel[hidden] { display: none; }
+
+.team-list {
+  display: grid;
+  gap: 24px;
+  margin-top: 22px;
+}
+
+.team-brand-footer { margin-top: 26px; }
+.team-brand-footer .MuiDivider-root { border-color: var(--color-semantic-stroke-primary-light); }
+
+.team-logo {
+  display: block;
+  width: min(190px, 100%);
+  height: auto;
+  margin: 22px auto 2px;
+}
+
+:root[data-color-mode="goth"] .team-logo { filter: invert(1); }
+
+.viewers-panel > .MuiTypography-root { display: block; margin-top: 20px; }
+.viewers-list.MuiStack-root { margin-top: 18px; }

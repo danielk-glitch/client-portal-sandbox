@@ -1,0 +1,28 @@
+.portal-section.MuiPaper-root {
+  min-width: 0;
+  padding: 32px;
+  border-radius: 14px;
+  border-color: var(--color-semantic-stroke-primary-light);
+  background: var(--color-semantic-surface-primary);
+}
+
+.portal-section-heading {
+  padding-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.portal-section-heading-row {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.portal-section > .MuiDivider-root {
+  border-color: var(--color-semantic-stroke-primary-lightest);
+}
+
+.portal-section-content { padding-top: 20px; }

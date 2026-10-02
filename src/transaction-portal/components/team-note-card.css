@@ -1,0 +1,75 @@
+.team-note-card.MuiPaper-root {
+  padding: 32px;
+  border-radius: 10px;
+  border-color: var(--color-semantic-stroke-primary-light);
+  background: var(--color-semantic-surface-primary);
+}
+
+.team-note-card-meta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 20px;
+}
+
+.team-note-card-author {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.team-note-card-avatar.MuiAvatar-root {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  font-size: 11px;
+  color: var(--color-semantic-text-dark);
+  background: var(--color-semantic-surface-secondary);
+}
+
+.team-note-card-meta > .MuiTypography-root {
+  white-space: nowrap;
+}
+
+.team-note-card-time.MuiTypography-root {
+  font-variant-numeric: tabular-nums;
+}
+
+.team-note-card-divider.MuiDivider-root {
+  margin-block: 16px 20px;
+  border-color: var(--color-semantic-stroke-primary-light);
+}
+
+.team-note-card-title.MuiTypography-root {
+  margin: 0;
+}
+
+.team-note-card-body.MuiTypography-root {
+  display: -webkit-box;
+  margin: 8px 0 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  text-wrap: pretty;
+}
+
+.team-note-card-expand.MuiButton-root {
+  min-width: 0;
+  margin: 8px 0 -8px -8px;
+  padding-inline: 8px;
+  color: var(--color-semantic-text-dark);
+}
+
+.team-note-modal-body.MuiTypography-root {
+  margin: 0;
+  max-width: 70ch;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 600px) {
+  .team-note-card-meta {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,252 @@
+.portal-row-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.portal-row-list > li + li {
+  border-top: 1px solid var(--color-semantic-stroke-primary-light);
+}
+
+.portal-person-row {
+  min-width: 0;
+  padding-inline: 17px;
+  align-items: center;
+  gap: 12px;
+}
+
+.portal-person-row-team {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+}
+
+.portal-person-row-viewer {
+  min-height: 40px;
+  display: flex;
+}
+
+.portal-person-avatar.MuiAvatar-root {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-semantic-text-primary);
+  background: var(--color-semantic-surface-secondary);
+}
+
+.portal-person-row-viewer .portal-person-avatar.MuiAvatar-root {
+  width: 40px;
+  height: 40px;
+}
+
+.portal-person-copy { min-width: 0; }
+.portal-person-name.MuiTypography-root,
+.portal-person-role.MuiTypography-root { display: block; }
+.portal-person-role.MuiTypography-root { text-wrap: pretty; }
+
+.portal-person-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.portal-person-action.MuiIconButton-root {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  color: var(--color-semantic-text-primary);
+  background: transparent;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.portal-person-action.MuiIconButton-root:hover {
+  color: var(--color-semantic-text-dark);
+  background: var(--color-semantic-surface-secondary-dark);
+}
+
+.portal-person-action.MuiIconButton-root:focus-visible {
+  outline: 2px solid var(--color-semantic-stroke-primary-dark);
+  outline-offset: 2px;
+}
+
+.portal-date-list {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.portal-date-list::before {
+  position: absolute;
+  top: 32px;
+  bottom: 32px;
+  left: 31px;
+  width: 1px;
+  content: '';
+  background: var(--color-semantic-stroke-primary-light);
+}
+
+.portal-date-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  padding: 18px 0;
+}
+
+.portal-date-row:first-child { padding-top: 0; }
+.portal-date-row:last-child { padding-bottom: 0; }
+
+.portal-date-stamp {
+  position: relative;
+  z-index: 1;
+  width: 64px;
+  min-height: 64px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  border-radius: 50%;
+  color: var(--color-semantic-text-dark);
+  background: var(--color-semantic-surface-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.portal-date-stamp .MuiTypography-root:first-child {
+  color: var(--color-semantic-text-primary);
+  text-transform: uppercase;
+}
+
+.portal-date-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.portal-date-meta.MuiTypography-root {
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.portal-task-row { padding: 20px 0; }
+.portal-task-row:first-child { padding-top: 0; }
+.portal-task-row:last-child { padding-bottom: 0; }
+
+.portal-task-description.MuiTypography-root {
+  display: block;
+  max-width: 70ch;
+  margin-top: 5px;
+}
+
+.portal-task-meta { margin-top: 16px; }
+
+.portal-task-due.MuiChip-root {
+  align-self: flex-start;
+  border-color: var(--color-semantic-stroke-primary-light);
+  color: var(--color-semantic-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.portal-advertising-row {
+  min-height: 68px;
+  padding: 14px 0;
+}
+
+.portal-advertising-row:first-child { padding-top: 0; }
+.portal-advertising-row:last-child { padding-bottom: 0; }
+
+.portal-advertising-icon {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-semantic-text-primary);
+  background: var(--color-semantic-surface-secondary);
+}
+
+.portal-advertising-copy { flex: 1; min-width: 0; }
+.portal-advertising-copy .MuiTypography-root { display: block; }
+.portal-advertising-copy strong {
+  font-weight: 500;
+  color: var(--color-semantic-text-dark);
+}
+
+.portal-advertising-date.MuiTypography-root {
+  min-width: 170px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.portal-feedback-row { padding: 19px 0; }
+.portal-feedback-row:first-child { padding-top: 0; }
+.portal-feedback-row:last-child { padding-bottom: 0; }
+
+.portal-feedback-interest .MuiRating-root { color: var(--color-semantic-text-caution); }
+.portal-metadata-separator.MuiTypography-root { color: var(--color-semantic-text-lightest); }
+.portal-tabular-numbers.MuiTypography-root { font-variant-numeric: tabular-nums; }
+
+.portal-feedback-quote.MuiTypography-root {
+  margin-top: 11px;
+  max-width: 75ch;
+  color: var(--color-semantic-text-primary);
+  text-wrap: pretty;
+}
+
+.portal-document-row {
+  min-height: 76px;
+  padding: 14px 0;
+}
+
+.portal-document-row:first-child { padding-top: 0; }
+.portal-document-row:last-child { padding-bottom: 0; }
+
+.portal-document-icon.MuiAvatar-root {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  color: var(--color-semantic-text-primary);
+  background: var(--color-semantic-surface-secondary);
+}
+
+.portal-document-copy { flex: 1; min-width: 0; }
+.portal-document-copy .MuiTypography-root + .MuiTypography-root {
+  display: block;
+  margin-top: 3px;
+  text-wrap: pretty;
+}
+
+.portal-document-status.MuiChip-root {
+  color: var(--color-semantic-text-primary);
+  border-color: var(--color-semantic-stroke-primary-light);
+}
+
+.portal-document-action.MuiButton-root { min-width: 84px; }
+
+.portal-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 16px;
+}
+
+.portal-detail-item { min-width: 0; }
+.portal-detail-value.MuiTypography-root {
+  display: block;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+  text-wrap: pretty;
+}
+
+@media (max-width: 900px) {
+  .portal-person-row-team { align-items: flex-start; }
+  .portal-person-avatar.MuiAvatar-root { width: 36px; height: 36px; }
+  .portal-advertising-date.MuiTypography-root { min-width: 0; text-align: left; }
+  .portal-document-row { align-items: flex-start; }
+  .portal-document-action.MuiButton-root { align-self: flex-start; margin-left: 54px; }
+}
+
+@media (max-width: 420px) {
+  .portal-feedback-interest { flex-wrap: wrap; }
+}

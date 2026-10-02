@@ -1,0 +1,534 @@
+.seller-portal {
+  min-height: 100vh;
+  color: var(--color-semantic-text-dark);
+  background: var(--color-semantic-surface-primary);
+}
+
+.portal-topbar {
+  border-bottom: 1px solid var(--color-semantic-stroke-primary-light);
+  background: var(--color-semantic-surface-primary);
+}
+
+.portal-topbar-inner {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.portal-brand-link {
+  min-height: 44px;
+  margin-left: -8px;
+  padding-inline: 8px;
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 140ms ease;
+}
+
+.portal-brand-link:hover {
+  background: var(--color-semantic-surface-secondary);
+}
+
+.portal-brand-link:focus-visible {
+  outline: 2px solid var(--color-semantic-stroke-primary-dark);
+  outline-offset: 3px;
+}
+
+.place-wordmark.MuiTypography-root {
+  font-size: 1.12rem;
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  color: var(--color-semantic-text-dark);
+}
+
+.topbar-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--color-semantic-stroke-primary-light);
+}
+
+.preview-chip.MuiChip-root {
+  border-color: var(--color-semantic-stroke-primary-light);
+  color: var(--color-semantic-text-primary);
+}
+
+.account-avatar.MuiAvatar-root {
+  width: 36px;
+  height: 36px;
+  font-size: 0.75rem;
+  background: var(--color-semantic-surface-secondary);
+  color: var(--color-semantic-text-dark);
+}
+
+.account-name {
+  display: grid;
+  gap: 1px;
+}
+
+.portal-main.MuiContainer-root {
+  max-width: 1480px;
+  padding-top: 20px;
+  padding-bottom: 72px;
+}
+
+.eyebrow.MuiTypography-root {
+  display: block;
+  margin-bottom: 16px;
+  color: var(--color-semantic-text-primary);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.listing-overview.MuiPaper-root {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: 440px;
+  overflow: hidden;
+  border-radius: 18px;
+  background: var(--color-semantic-surface-reverse-secondary);
+  box-shadow: var(--elevation-hero);
+}
+
+.listing-photo {
+  position: absolute;
+  inset: 0 0 0 42%;
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--color-semantic-surface-secondary);
+  color: var(--color-semantic-text-primary);
+}
+
+.listing-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+
+.photo-placeholder-content {
+  text-align: center;
+}
+
+.photo-placeholder-content .MuiSvgIcon-root {
+  font-size: 34px;
+  color: var(--color-semantic-text-light);
+}
+
+.listing-summary {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  width: min(610px, calc(100% - 40px));
+  margin: 20px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-semantic-stroke-primary-lightest);
+  border-radius: 14px;
+  background: var(--color-semantic-surface-glass);
+  box-shadow: var(--elevation-raised);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.listing-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.listing-summary-header .eyebrow.MuiTypography-root {
+  margin-bottom: 0;
+}
+
+.listing-team-logo {
+  width: 126px;
+  max-width: 44%;
+  height: auto;
+  object-fit: contain;
+}
+
+:root[data-color-mode="goth"] .listing-team-logo {
+  filter: invert(1);
+}
+
+.listing-statuses {
+  margin-top: 20px;
+}
+
+.status-chip.MuiChip-root {
+  color: var(--color-semantic-text-dark);
+  background: var(--color-semantic-surface-secondary);
+}
+
+.status-chip .MuiChip-icon {
+  color: inherit;
+  font-size: 16px;
+}
+
+.published-chip.MuiChip-root {
+  color: var(--color-semantic-text-primary);
+  border-color: var(--color-semantic-stroke-primary-light);
+}
+
+.listing-address.MuiTypography-root {
+  margin-top: 18px;
+  text-wrap: balance;
+}
+
+.listing-location.MuiTypography-root {
+  margin-top: 4px;
+}
+
+.listing-feature-footer {
+  margin-top: auto;
+  padding-top: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-top: 1px solid var(--color-semantic-stroke-primary-light);
+}
+
+.listing-agent-avatar.MuiAvatar-root {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+}
+
+.listing-agent-name.MuiTypography-root {
+  display: block;
+  margin-top: 4px;
+}
+
+.listing-detail-link.MuiButton-root {
+  min-width: 132px;
+  flex: 0 0 auto;
+}
+
+.priority-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.16fr) minmax(0, 0.84fr);
+  align-items: start;
+  gap: 20px;
+  margin-top: 32px;
+}
+
+.priority-grid .portal-section {
+  box-shadow: var(--elevation-raised);
+}
+
+.transaction-lower-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.transaction-sections {
+  grid-column: span 2;
+  min-width: 0;
+  scroll-margin-top: 24px;
+}
+
+.people-kicker.MuiTypography-root {
+  color: var(--color-semantic-text-primary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dates-drawer-paper.MuiDrawer-paper {
+  width: min(520px, 100%);
+  color: var(--color-semantic-text-dark);
+  background: var(--color-semantic-surface-primary);
+}
+
+.dates-drawer-header {
+  padding: 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--color-semantic-stroke-primary-light);
+}
+
+.dates-drawer-header .MuiTypography-root + .MuiTypography-root {
+  display: block;
+  margin-top: 4px;
+}
+
+.dates-drawer-close.MuiIconButton-root {
+  margin: -8px -8px 0 0;
+  color: var(--color-semantic-text-primary);
+}
+
+.dates-drawer-close.MuiIconButton-root:hover {
+  background: var(--color-semantic-surface-secondary);
+}
+
+.dates-drawer-content {
+  padding: 28px;
+  overflow-y: auto;
+}
+
+.dates-drawer-section-title.MuiTypography-root {
+  display: block;
+  margin-bottom: 20px;
+}
+
+.dates-drawer-content > .MuiDivider-root {
+  margin-block: 32px;
+  border-color: var(--color-semantic-stroke-primary-light);
+}
+
+.portal-section-nav {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  border-bottom: 1px solid var(--color-semantic-stroke-primary-light);
+  background: var(--color-semantic-surface-glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.portal-section-nav .MuiTabs-root {
+  min-height: 56px;
+}
+
+.portal-section-nav .MuiTab-root {
+  min-width: max-content;
+  min-height: 56px;
+  padding-inline: 17px;
+  color: var(--color-semantic-text-primary);
+  font-size: 0.875rem;
+}
+
+.portal-section-nav .MuiTab-root.Mui-selected {
+  color: var(--color-semantic-text-dark);
+}
+
+.portal-section-nav .MuiTabs-indicator {
+  height: 2px;
+  background: var(--color-semantic-text-dark);
+}
+
+.portal-panel {
+  padding-top: 18px;
+}
+
+.portal-tab-content {
+  min-width: 0;
+  padding: 32px;
+}
+
+.portal-panel .portal-section.MuiPaper-root {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.notes-list {
+  width: 100%;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 16px;
+}
+
+.details-grid > .portal-section:nth-child(4) {
+  grid-row: span 2;
+}
+
+.marketing-copy.MuiTypography-root {
+  margin-top: 4px;
+  max-width: 62ch;
+}
+
+.document-icon.MuiAvatar-root {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  color: var(--color-semantic-text-primary);
+  background: var(--color-semantic-surface-secondary);
+}
+
+.document-dialog-title {
+  padding-bottom: 18px;
+}
+
+.document-preview-placeholder {
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  color: var(--color-semantic-text-primary);
+  background: var(--color-semantic-surface-secondary);
+}
+
+.document-preview-placeholder .MuiSvgIcon-root {
+  font-size: 34px;
+}
+
+@media (max-width: 1100px) {
+  .priority-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .transaction-lower-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .transaction-sections {
+    grid-column: auto;
+  }
+
+}
+
+@media (max-width: 620px) {
+  .listing-feature-footer {
+    flex-direction: column;
+    align-items: stretch;
+    margin-top: 28px;
+  }
+
+  .listing-detail-link.MuiButton-root {
+    width: 100%;
+  }
+
+}
+
+@media (max-width: 900px) {
+  .portal-topbar-inner.MuiContainer-root {
+    min-height: 62px;
+    padding-inline: 18px;
+  }
+
+  .preview-chip.MuiChip-root {
+    display: none;
+  }
+
+  .portal-main.MuiContainer-root {
+    padding: 20px 18px 40px;
+  }
+
+  .listing-overview.MuiPaper-root {
+    display: block;
+    min-height: 0;
+    border-radius: 14px;
+  }
+
+  .listing-photo {
+    position: relative;
+    inset: auto;
+    z-index: auto;
+    height: 265px;
+  }
+
+  .listing-image {
+    object-position: 70% 100%;
+  }
+
+  .listing-summary {
+    position: relative;
+    z-index: 1;
+    width: auto;
+    margin: -24px 12px 12px;
+    padding: 32px;
+  }
+
+  .priority-grid {
+    gap: 14px;
+    margin-top: 24px;
+  }
+
+  .transaction-lower-grid {
+    margin-top: 30px;
+  }
+
+  .portal-section-nav .MuiTab-root {
+    min-width: max-content;
+    padding-inline: 14px;
+  }
+
+  .portal-panel {
+    padding-top: 14px;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .details-grid > .portal-section:nth-child(4) {
+    grid-row: auto;
+  }
+
+}
+
+@media (max-width: 420px) {
+  .dates-drawer-header,
+  .dates-drawer-content {
+    padding: 24px;
+  }
+
+  .account-name {
+    display: none;
+  }
+
+  .listing-summary {
+    max-width: calc(100% - 24px);
+  }
+
+  .listing-address.MuiTypography-root {
+    font-size: 1.5rem;
+    line-height: 1.166667;
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    text-wrap: wrap;
+    overflow-wrap: anywhere;
+  }
+
+}
+
+@media (min-width: 600px) and (max-width: 900px) {
+  .listing-photo {
+    height: 350px;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .listing-summary,
+  .portal-section-nav {
+    background: var(--color-semantic-surface-primary);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seller-portal *,
+  .seller-portal *::before,
+  .seller-portal *::after,
+  .dates-drawer-paper,
+  .dates-drawer-paper * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

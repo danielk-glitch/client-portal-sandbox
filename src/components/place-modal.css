@@ -1,0 +1,92 @@
+.place-modal .MuiBackdrop-root {
+  background: color-mix(in oklch, var(--color-semantic-surface-reverse-primary) 48%, transparent);
+}
+
+.place-modal .MuiDialog-paper {
+  width: min(var(--place-modal-width), calc(100vw - 32px));
+  max-width: none;
+  max-height: calc(100dvh - 32px);
+  margin: 16px;
+  overflow: hidden;
+  border-radius: 18px;
+  color: var(--color-semantic-text-dark);
+  background: var(--color-semantic-surface-primary);
+  box-shadow: var(--elevation-hero);
+}
+
+.place-modal-header.MuiDialogTitle-root {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 28px;
+  border-bottom: 1px solid var(--color-semantic-stroke-primary-light);
+}
+
+.place-modal-heading {
+  min-width: 0;
+}
+
+.place-modal-heading .MuiTypography-root {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.place-modal-heading .MuiTypography-root + .MuiTypography-root {
+  margin-top: 6px;
+}
+
+.place-modal-close.MuiIconButton-root {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  margin: -8px -8px -8px 0;
+  color: var(--color-semantic-text-primary);
+}
+
+.place-modal-close.MuiIconButton-root:hover {
+  color: var(--color-semantic-text-dark);
+  background: var(--color-semantic-surface-secondary);
+}
+
+.place-modal-close.MuiIconButton-root:focus-visible {
+  outline: 2px solid var(--color-semantic-stroke-primary-dark);
+  outline-offset: 2px;
+}
+
+.place-modal-content.MuiDialogContent-root {
+  min-height: 0;
+  padding: 24px 28px 28px;
+  overflow-y: auto;
+}
+
+.place-modal-actions.MuiDialogActions-root {
+  gap: 8px;
+  padding: 20px 28px 28px;
+  border-top: 1px solid var(--color-semantic-stroke-primary-light);
+}
+
+.place-modal-actions.MuiDialogActions-root > :not(style) ~ :not(style) {
+  margin-left: 0;
+}
+
+@media (max-width: 600px) {
+  .place-modal-header.MuiDialogTitle-root {
+    padding: 22px;
+  }
+
+  .place-modal-content.MuiDialogContent-root {
+    padding: 22px;
+  }
+
+  .place-modal-actions.MuiDialogActions-root {
+    padding: 18px 22px 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .place-modal .MuiDialog-paper,
+  .place-modal .MuiBackdrop-root {
+    transition-duration: 0.01ms !important;
+  }
+}
