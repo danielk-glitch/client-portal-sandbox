@@ -5,6 +5,7 @@ import StickyNote2Outlined from '@mui/icons-material/StickyNote2Outlined'
 import TaskAltOutlined from '@mui/icons-material/TaskAltOutlined'
 import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined'
 import type { TimelineEvent } from '../types'
+import { PortalIconBadge } from './PortalIconBadge'
 import './activity-event-row.css'
 
 const eventIcons = {
@@ -18,7 +19,7 @@ const eventIcons = {
 export function ActivityEventRow({ event }: { event: TimelineEvent }) {
   return (
     <Box component="li" className="activity-event-row">
-      <Box className="activity-event-icon" aria-hidden="true">{eventIcons[event.type]}</Box>
+      <PortalIconBadge>{eventIcons[event.type]}</PortalIconBadge>
       <Box className="activity-event-copy">
         <Typography variant="titleXS">{event.title}</Typography>
         <Typography variant="bodySStandard" color="text.secondary">{event.description}</Typography>

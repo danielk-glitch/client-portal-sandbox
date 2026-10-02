@@ -2,7 +2,7 @@
 
 ## Working with the user
 
-Unless the user specifies otherwise, assume they are a product designer with little to no technical expertise. Explain work in terms of the experience and visible result, use plain language, and make routine implementation choices without asking the user to decide technical details.
+Unless the user specifies otherwise, assume they are a product designer with little to no technical expertise. Explain work in terms of the experience and visible result, use plain language, and explain implementation choices to the user using simple, easy to understand language.
 
 ## Product context
 
@@ -10,15 +10,13 @@ This repo explores the first product in the PLACE consumer family: a real estate
 
 The portal should give buyers and sellers a clear, high-level view of their transaction through milestones, tasks, comments, and important updates. Make a complicated process feel simple and well managed. Buyers and sellers have different goals, but their experiences should share one underlying system.
 
-The current priority is brand identity, visual language, and design-system foundations. Do not expand into detailed workflows for every transaction participant unless the task calls for it.
-
 ## Brand direction
 
-PLACE should feel premium but attainable, trustworthy, composed, clear, and approachable. Apple and Airbnb are benchmarks for craft and ease, not visual templates. The product voice is calm, concise, and friendly-professional.
+PLACE should feel premium but attainable, trustworthy, composed, clear, and approachable. Apple and Airbnb are benchmarks for craft and ease. The product voice is calm, concise, and friendly-professional.
 
 Preserve the recognizable foundation of the existing PLACE brand at https://place.com/: a primarily monochrome palette, clean sans-serif typography, confident scale, generous spacing, and simple layouts. Refine it for consumer warmth and usability. Avoid conventional corporate real estate software, decorative excess, and overly technical or generic presentation.
 
-The portal may favor agent or team branding roughly 70/30, while nationwide search and homeownership will be primarily PLACE-branded. Support flexible co-branding so PLACE and partner identities feel intentionally composed across products.
+The portal may favor agent or team branding slightly, while nationwide search and homeownership will be primarily PLACE-branded. Support flexible co-branding so PLACE and partner identities feel intentionally composed across products.
 
 ## Design system and component gallery
 

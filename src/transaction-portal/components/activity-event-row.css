@@ -7,7 +7,7 @@
 .activity-event-row {
   min-width: 0;
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr);
+  grid-template-columns: 44px minmax(0, 1fr);
   align-items: start;
   gap: 16px;
   padding-block: 24px;
@@ -23,20 +23,6 @@
 
 .activity-event-row + .activity-event-row {
   border-top: 1px solid var(--color-semantic-stroke-primary-light);
-}
-
-.activity-event-icon {
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  color: var(--color-semantic-text-primary);
-  background: var(--color-semantic-surface-secondary);
-}
-
-.activity-event-icon .MuiSvgIcon-root {
-  font-size: 19px;
 }
 
 .activity-event-copy {
@@ -56,12 +42,7 @@
 
 @media (max-width: 760px) {
   .activity-event-row {
-    grid-template-columns: 34px minmax(0, 1fr);
+    grid-template-columns: 44px minmax(0, 1fr);
     gap: 12px;
-  }
-
-  .activity-event-icon {
-    width: 34px;
-    height: 34px;
   }
 }

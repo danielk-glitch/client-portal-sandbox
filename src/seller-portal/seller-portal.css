@@ -356,14 +356,6 @@
   max-width: 62ch;
 }
 
-.document-icon.MuiAvatar-root {
-  width: 42px;
-  height: 42px;
-  flex: 0 0 auto;
-  color: var(--color-semantic-text-primary);
-  background: var(--color-semantic-surface-secondary);
-}
-
 .document-dialog-title {
   padding-bottom: 18px;
 }

@@ -14,6 +14,7 @@ import {
 import type { ButtonProps } from '@mui/material/Button'
 import type { ReactNode } from 'react'
 import ArrowBackOutlined from '@mui/icons-material/ArrowBackOutlined'
+import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined'
 import PhoneOutlined from '@mui/icons-material/PhoneOutlined'
 import { CardActionButton } from '../components/CardActionButton'
 import { PlaceModal, placeModalWidths, type PlaceModalSize } from '../components/PlaceModal'
@@ -27,6 +28,7 @@ import {
   DetailGrid,
   DocumentRow,
   PeopleSection,
+  PortalIconBadge,
   PortalSection,
   ShowingFeedbackRow,
   TaskRow,
@@ -552,6 +554,22 @@ function PortalPatternsSection() {
       <Box component="details" sx={{ borderTop: 1, borderBottom: 1, borderColor: 'divider', py: 2, '& summary': { cursor: 'pointer', typography: 'labelM', py: 1, '&:focus-visible': { outline: '2px solid var(--color-semantic-stroke-primary-dark)', outlineOffset: 3 } } }}>
         <Box component="summary">Show portal components</Box>
         <Stack spacing={5} sx={{ pt: 4 }}>
+          <PortalPatternSample title="Icon badge" guidance="Use the same neutral badge for activity, advertising, and document icons. Sizes are s (32px), m (44px, default), and l (48px); the icon scales with the circle.">
+            <Stack direction="row" spacing={3} sx={{ alignItems: 'center' }}>
+              <Stack spacing={1} sx={{ alignItems: 'center' }}>
+                <PortalIconBadge size="s"><DescriptionOutlined /></PortalIconBadge>
+                <Typography variant="labelS" color="text.secondary">S · 32px</Typography>
+              </Stack>
+              <Stack spacing={1} sx={{ alignItems: 'center' }}>
+                <PortalIconBadge><DescriptionOutlined /></PortalIconBadge>
+                <Typography variant="labelS" color="text.secondary">M · 44px</Typography>
+              </Stack>
+              <Stack spacing={1} sx={{ alignItems: 'center' }}>
+                <PortalIconBadge size="l"><DescriptionOutlined /></PortalIconBadge>
+                <Typography variant="labelS" color="text.secondary">L · 48px</Typography>
+              </Stack>
+            </Stack>
+          </PortalPatternSample>
           <PortalPatternSample title="People section and rows" guidance="Team and viewer rows share avatar, name, and role styling. Team rows compose optional call and email actions. The parent controls the active tab.">
             <Box sx={{ maxWidth: 460 }}>
               <PeopleSection team={sample.team.slice(0, 3)} viewers={sample.viewers} brand={sample.teamBrand} value={peopleTab} onChange={setPeopleTab} />

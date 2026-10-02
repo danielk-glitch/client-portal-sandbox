@@ -156,17 +156,6 @@
 .portal-advertising-row:first-child { padding-top: 0; }
 .portal-advertising-row:last-child { padding-bottom: 0; }
 
-.portal-advertising-icon {
-  width: 36px;
-  height: 36px;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  color: var(--color-semantic-text-primary);
-  background: var(--color-semantic-surface-secondary);
-}
-
 .portal-advertising-copy { flex: 1; min-width: 0; }
 .portal-advertising-copy .MuiTypography-root { display: block; }
 .portal-advertising-copy strong {
@@ -202,14 +191,6 @@
 
 .portal-document-row:first-child { padding-top: 0; }
 .portal-document-row:last-child { padding-bottom: 0; }
-
-.portal-document-icon.MuiAvatar-root {
-  width: 42px;
-  height: 42px;
-  flex: 0 0 auto;
-  color: var(--color-semantic-text-primary);
-  background: var(--color-semantic-surface-secondary);
-}
 
 .portal-document-copy { flex: 1; min-width: 0; }
 .portal-document-copy .MuiTypography-root + .MuiTypography-root {

@@ -1,0 +1,26 @@
+.portal-icon-badge {
+  --badge-size: 44px;
+  --icon-size: 20px;
+  width: var(--badge-size);
+  height: var(--badge-size);
+  flex: 0 0 var(--badge-size);
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-semantic-text-primary);
+  background: var(--color-semantic-surface-secondary);
+}
+
+.portal-icon-badge .MuiSvgIcon-root {
+  font-size: var(--icon-size);
+}
+
+.portal-icon-badge--s {
+  --badge-size: 32px;
+  --icon-size: 16px;
+}
+
+.portal-icon-badge--l {
+  --badge-size: 48px;
+  --icon-size: 24px;
+}

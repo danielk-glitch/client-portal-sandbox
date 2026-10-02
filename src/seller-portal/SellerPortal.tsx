@@ -44,6 +44,7 @@ import {
   DetailGrid,
   DocumentRow,
   PeopleSection,
+  PortalIconBadge,
   PortalSection,
   ShowingFeedbackRow,
   TaskRow,
@@ -260,7 +261,7 @@ export function SellerPortal({ transaction = sampleSellerTransaction, initialLis
           <>
             <DialogTitle className="document-dialog-title">
               <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-                <Avatar className="document-icon"><InsertDriveFileOutlined /></Avatar>
+                <PortalIconBadge><InsertDriveFileOutlined /></PortalIconBadge>
                 <Box>
                   <Typography variant="titleXS">{selectedDocument.name}</Typography>
                   <Typography variant="labelS" color="text.secondary">{selectedDocument.category}</Typography>

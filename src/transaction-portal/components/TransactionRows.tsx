@@ -12,6 +12,7 @@ import type {
   TransactionTask,
   UpcomingDate,
 } from '../types'
+import { PortalIconBadge } from './PortalIconBadge'
 import './transaction-rows.css'
 
 type Person = Pick<TeamMember, 'name' | 'role' | 'initials' | 'photoUrl'>
@@ -98,7 +99,7 @@ export function TaskRow({ task }: { task: TransactionTask }) {
 export function AdvertisingRow({ event }: { event: AdvertisingEvent }) {
   return (
     <Stack component="li" direction={{ xs: 'column', sm: 'row' }} sx={{ alignItems: { sm: 'center' }, gap: { xs: 1, sm: 2 } }} className="portal-advertising-row">
-      <Box className="portal-advertising-icon" aria-hidden="true"><CampaignOutlined /></Box>
+      <PortalIconBadge><CampaignOutlined /></PortalIconBadge>
       <Box className="portal-advertising-copy">
         <Typography variant="bodySStandard">{event.action} on <strong>{event.platform}</strong></Typography>
         <Typography variant="labelS" color="text.secondary">Added by {event.postedBy}</Typography>
@@ -131,7 +132,7 @@ export function ShowingFeedbackRow({ feedback }: { feedback: ShowingFeedback }) 
 export function DocumentRow({ document, onPreview }: { document: TransactionDocument; onPreview: (document: TransactionDocument) => void }) {
   return (
     <Stack component="li" direction={{ xs: 'column', sm: 'row' }} sx={{ alignItems: { sm: 'center' }, gap: 1.5 }} className="portal-document-row">
-      <Avatar className="portal-document-icon"><InsertDriveFileOutlined /></Avatar>
+      <PortalIconBadge><InsertDriveFileOutlined /></PortalIconBadge>
       <Box className="portal-document-copy">
         <Typography variant="titleXS">{document.name}</Typography>
         <Typography variant="labelS" color="text.secondary">{document.category} · Updated {document.updatedAt} · Added by {document.postedBy}</Typography>
