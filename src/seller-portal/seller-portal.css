@@ -1,5 +1,6 @@
 .seller-portal {
   min-height: 100vh;
+  overflow-x: clip;
   color: var(--color-semantic-text-dark);
   background: var(--color-semantic-surface-primary);
 }
@@ -149,19 +150,27 @@
   margin-bottom: 0;
 }
 
-.listing-team-logo {
-  width: 126px;
-  max-width: 44%;
-  height: auto;
-  object-fit: contain;
-}
-
-:root[data-color-mode="goth"] .listing-team-logo {
-  filter: invert(1);
+.listing-summary-header .partner-brand-lockup {
+  --partner-team-width: 110px;
+  --partner-brokerage-width: 92px;
+  margin-left: auto;
 }
 
 .listing-statuses {
   margin-top: 20px;
+}
+
+.listing-statuses .MuiChip-root {
+  height: 30px;
+}
+
+.listing-statuses .MuiChip-label {
+  padding-inline: 12px;
+}
+
+.listing-statuses .MuiChip-icon {
+  margin-left: 10px;
+  margin-right: -4px;
 }
 
 .status-chip.MuiChip-root {
@@ -217,13 +226,37 @@
 .priority-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.16fr) minmax(0, 0.84fr);
-  align-items: start;
+  grid-auto-rows: 1fr;
+  align-items: stretch;
   gap: 20px;
   margin-top: 32px;
 }
 
 .priority-grid .portal-section {
   box-shadow: var(--elevation-raised);
+}
+
+.upcoming-dates-card .portal-section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.upcoming-dates-card .portal-section-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding-block: 0;
+}
+
+.upcoming-dates-card .portal-date-list {
+  display: grid;
+  flex: 1;
+  grid-auto-rows: 1fr;
+}
+
+.upcoming-dates-card .portal-date-row {
+  padding-block: 0;
 }
 
 .transaction-lower-grid {
@@ -487,7 +520,7 @@
     max-width: calc(100% - 24px);
   }
 
-  .listing-address.MuiTypography-root {
+  .listing-overview--card .listing-address.MuiTypography-root {
     font-size: 1.5rem;
     line-height: 1.166667;
     min-width: 0;
@@ -497,6 +530,12 @@
     overflow-wrap: anywhere;
   }
 
+}
+
+@media (max-width: 620px) {
+  .listing-summary-header {
+    flex-wrap: wrap;
+  }
 }
 
 @media (min-width: 600px) and (max-width: 900px) {
@@ -522,5 +561,249 @@
   .dates-drawer-paper * {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* design-build · self-critique: Clarity5 Warmth5 Restraint4 Craft4 Variety4 SlopFree5 */
+.listing-overview--full.MuiPaper-root {
+  width: 100vw;
+  min-height: 530px;
+  margin-left: calc(50% - 50vw);
+  border-radius: 0;
+  background: var(--color-semantic-surface-reverse-primary);
+  box-shadow: none;
+}
+
+.listing-overview--full::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+    var(--color-semantic-surface-reverse-primary) 0%,
+    var(--color-semantic-surface-reverse-primary) 36%,
+    color-mix(in oklch, var(--color-semantic-surface-reverse-primary) 70%, transparent) 47%,
+    color-mix(in oklch, var(--color-semantic-surface-reverse-primary) 18%, transparent) 60%,
+    transparent 72%);
+}
+
+.listing-overview--full .listing-photo {
+  inset: 0 0 0 35%;
+}
+
+.listing-overview--full .listing-summary {
+  z-index: 2;
+  width: min(610px, calc(100% - 48px));
+  margin: 0 0 0 max(24px, calc((100vw - 1480px) / 2 + 24px));
+  padding: 56px 24px 56px 32px;
+  border: 0;
+  border-radius: 0;
+  color: var(--color-semantic-text-on-color-primary);
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.listing-overview--full .eyebrow.MuiTypography-root,
+.listing-overview--full .people-kicker.MuiTypography-root,
+.listing-overview--full .listing-location.MuiTypography-root {
+  color: var(--color-semantic-text-on-color-light);
+}
+
+.listing-overview--full .published-chip.MuiChip-root {
+  color: var(--color-semantic-text-on-color-primary);
+  border-color: color-mix(in oklch, var(--color-semantic-text-on-color-primary) 34%, transparent);
+}
+
+.listing-overview--full .listing-feature-footer {
+  align-items: flex-end;
+  border-color: color-mix(in oklch, var(--color-semantic-text-on-color-primary) 20%, transparent);
+}
+
+.listing-agent-feature {
+  width: min(100%, 400px);
+  min-width: 0;
+  padding: 20px;
+  border-radius: 14px;
+  color: var(--color-primitive-neutral-800);
+  background: var(--color-primitive-neutral-50);
+  box-shadow: var(--elevation-raised);
+}
+
+.listing-agent-feature-avatar.MuiAvatar-root {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+}
+
+.listing-agent-feature-label.MuiTypography-root {
+  display: block;
+  color: var(--color-primitive-neutral-600);
+}
+
+.listing-agent-feature-name.MuiTypography-root {
+  display: block;
+  margin-top: 4px;
+  text-wrap: balance;
+}
+
+.listing-agent-feature-contacts {
+  margin-top: 18px;
+  padding-top: 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 12px;
+  border-top: 1px solid var(--color-primitive-neutral-200);
+}
+
+.listing-agent-feature-contact {
+  min-width: 0;
+  min-height: 44px;
+  padding: 4px 6px;
+  margin-inline: -6px;
+  display: grid;
+  gap: 2px;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 140ms ease;
+}
+
+.listing-agent-feature-contact .MuiTypography-root:first-child {
+  color: var(--color-primitive-neutral-600);
+}
+
+.listing-agent-feature-contact .MuiTypography-root:last-child {
+  overflow-wrap: anywhere;
+}
+
+.listing-agent-feature-contact:hover {
+  background: var(--color-primitive-neutral-100);
+}
+
+.listing-agent-feature-contact:focus-visible {
+  outline: 2px solid var(--color-primitive-neutral-700);
+  outline-offset: 2px;
+}
+
+.listing-agent-feature-brand {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-primitive-neutral-200);
+}
+
+.listing-agent-feature-brand .partner-brand-lockup {
+  --partner-team-width: 110px;
+  --partner-brokerage-width: 92px;
+}
+
+.listing-overview--full .partner-brand-divider {
+  background: var(--color-primitive-neutral-200);
+}
+
+.listing-overview--full .listing-detail-link.MuiButton-root {
+  color: var(--color-semantic-surface-reverse-primary);
+  background: var(--color-semantic-text-on-color-primary);
+}
+
+.listing-overview--full .listing-detail-link.MuiButton-root:hover {
+  background: var(--color-semantic-text-on-color-light);
+}
+
+.design-panel-trigger.MuiButton-root {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1100;
+  min-height: 48px;
+  padding-inline: 20px;
+  box-shadow: var(--elevation-raised);
+}
+
+.design-panel-paper.MuiDrawer-paper {
+  width: min(380px, 100vw);
+  background: var(--color-semantic-surface-primary);
+}
+
+.design-panel-header {
+  min-height: 88px;
+  padding: 24px 24px 20px 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--color-semantic-stroke-primary-light);
+}
+
+.design-panel-content {
+  display: grid;
+  gap: 14px;
+  padding: 28px;
+}
+
+.design-panel-content .MuiFormControlLabel-root {
+  min-height: 48px;
+  margin-inline: 0;
+}
+
+@media (max-width: 900px) {
+  .listing-overview--full.MuiPaper-root {
+    min-height: 0;
+    border-radius: 0;
+  }
+
+  .listing-overview--full::after {
+    display: none;
+  }
+
+  .listing-overview--full .listing-photo {
+    position: relative;
+    inset: auto;
+  }
+
+  .listing-overview--full .listing-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(to bottom, transparent 65%, var(--color-semantic-surface-reverse-primary) 100%);
+  }
+
+  .listing-overview--full .listing-summary {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 32px 24px 36px;
+    background: var(--color-semantic-surface-reverse-primary);
+  }
+}
+
+@media (max-width: 620px) {
+  .listing-overview--full .listing-feature-footer {
+    align-items: stretch;
+  }
+
+  .listing-agent-feature {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .design-panel-trigger.MuiButton-root {
+    right: 16px;
+    bottom: 16px;
+    width: 48px;
+    min-width: 48px;
+    padding: 0;
+  }
+
+  .design-panel-trigger .MuiButton-startIcon {
+    margin: 0;
+  }
+
+  .design-panel-trigger-label {
+    display: none;
   }
 }

@@ -12,11 +12,15 @@ import type { ReactNode } from 'react'
 import AutoStoriesOutlined from '@mui/icons-material/AutoStoriesOutlined'
 import ArrowBackOutlined from '@mui/icons-material/ArrowBackOutlined'
 import ArrowForwardOutlined from '@mui/icons-material/ArrowForwardOutlined'
+import ArrowOutwardOutlined from '@mui/icons-material/ArrowOutwardOutlined'
 import HomeOutlined from '@mui/icons-material/HomeOutlined'
 import OtherHousesOutlined from '@mui/icons-material/OtherHousesOutlined'
 import { typographyTokens } from './design-tokens'
 import { ComponentGallery } from './component-gallery/ComponentGallery'
 import { SellerPortal } from './seller-portal/SellerPortal'
+import { futureMarketingSnapshot, futureSellerTransaction } from './seller-portal/futureSellerTransaction'
+import { EmailGallery } from './email-templates/EmailGallery'
+import './presentation-dark.css'
 
 type PrototypePage = {
   number: string
@@ -36,7 +40,7 @@ const prototypePages: PrototypePage[] = [
     actionLabel: 'Open seller portal',
     icon: <OtherHousesOutlined />,
     featured: true,
-    href: '/seller',
+    href: '/seller/future-v1',
   },
   {
     number: '02',
@@ -63,27 +67,41 @@ type PrototypeView = {
 
 const sellerViews: PrototypeView[] = [
   { label: 'Current Functionality', href: '/seller' },
-  { label: 'Future Vision', href: '/seller/future-vision' },
+  { label: 'Future v1', href: '/seller/future-v1' },
+]
+
+const resources = [
+  {
+    title: 'Client portal PRD',
+    description: 'Product requirements and direction for the client portal.',
+    href: 'https://app.clickup.com/8562814/v/dc/85a3y-43077/85a3y-57637',
+  },
 ]
 
 function App() {
   const currentPath = window.location.pathname.replace(/\/$/, '') || '/'
   if (currentPath === '/seller') return <SellerPortal />
   if (currentPath === '/seller/listing') return <SellerPortal initialListingOpen />
+  if (currentPath === '/seller/future-v1') {
+    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} basePath="/seller/future-v1" />
+  }
+  if (currentPath === '/seller/future-v1/listing') {
+    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} basePath="/seller/future-v1" initialListingOpen />
+  }
   if (currentPath === '/components') return <ComponentGallery />
   if (currentPath === '/buyer') return <BuyerPortalPreview />
   if (currentPath === '/seller/future-vision') {
     return <UpcomingPage eyebrow="Seller transaction" title="Future Vision" description="A space for the next direction of the seller portal." />
   }
   if (currentPath === '/email-templates') {
-    return <UpcomingPage eyebrow="Communications" title="Email templates" description="The portal’s email and communication templates will live together here." />
+    return <EmailGallery />
   }
   return <SandboxGallery />
 }
 
 function SandboxGallery() {
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box className="presentation-dark" sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary' }}>
       <Box
         component="header"
         sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}
@@ -154,6 +172,54 @@ function SandboxGallery() {
               a clearer, more considered transaction experience.
             </Typography>
           </Stack>
+        </Box>
+
+        <Box component="section" aria-labelledby="resources-title" sx={{ pb: { xs: 8, md: 10 } }}>
+          <Stack spacing={1} sx={{ mb: 2.5 }}>
+            <Typography component="h2" id="resources-title" variant="titleM">
+              Resources
+            </Typography>
+            <Typography variant="bodySStandard" color="text.secondary">
+              Reference documents for the work in this gallery.
+            </Typography>
+          </Stack>
+          <Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none', display: 'grid', gap: 2 }}>
+            {resources.map((resource) => (
+              <Box component="li" key={resource.href}>
+                <Box
+                  component="a"
+                  href={resource.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{
+                    minHeight: 112,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 3,
+                    p: { xs: 2.5, md: 3.5 },
+                    borderRadius: 2,
+                    bgcolor: 'var(--color-semantic-surface-secondary)',
+                    color: 'text.primary',
+                    textDecoration: 'none',
+                    transition: 'background-color 160ms ease',
+                    '&:hover': { bgcolor: 'var(--color-semantic-surface-secondary-dark)' },
+                    '&:active': { bgcolor: 'var(--color-semantic-surface-secondary-darkest)' },
+                    '&:focus-visible': { outline: '2px solid var(--color-semantic-stroke-primary-dark)', outlineOffset: 3 },
+                    '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+                  }}
+                >
+                  <Stack spacing={0.75} sx={{ minWidth: 0 }}>
+                    <Typography variant="titleS">{resource.title}</Typography>
+                    <Typography variant="bodySStandard" color="text.secondary">
+                      {resource.description}
+                    </Typography>
+                  </Stack>
+                  <ArrowOutwardOutlined aria-hidden="true" sx={{ fontSize: 22, flexShrink: 0 }} />
+                </Box>
+              </Box>
+            ))}
+          </Box>
         </Box>
 
         <Box component="section" id="destinations" aria-labelledby="destinations-title" sx={{ pb: 6 }}>

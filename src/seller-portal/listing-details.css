@@ -247,6 +247,10 @@
   font-variant-numeric: tabular-nums;
 }
 
+.listing-sheet-source.MuiTypography-root {
+  font-variant-numeric: tabular-nums;
+}
+
 .listing-sheet-status.MuiChip-root {
   color: var(--color-semantic-text-dark);
   background: var(--color-semantic-surface-secondary);
@@ -370,15 +374,9 @@
   height: 48px;
 }
 
-.listing-sheet-team-logo {
-  width: 140px;
-  max-width: 40%;
-  height: auto;
-  object-fit: contain;
-}
-
-:root[data-color-mode="goth"] .listing-sheet-team-logo {
-  filter: invert(1);
+.listing-sheet-agent .partner-brand-lockup {
+  --partner-team-width: 126px;
+  --partner-brokerage-width: 98px;
 }
 
 @media (max-width: 760px) {
@@ -513,9 +511,6 @@
     flex-direction: column;
   }
 
-  .listing-sheet-team-logo {
-    max-width: 140px;
-  }
 }
 
 @media (prefers-reduced-transparency: reduce) {

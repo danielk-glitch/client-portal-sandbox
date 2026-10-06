@@ -1,7 +1,9 @@
 export { ActivityEventRow } from './ActivityEventRow'
 export { TeamNoteCard } from './TeamNoteCard'
 export { PeopleSection, type PeopleTab } from './PeopleSection'
+export { PartnerBrandLockup, type PartnerBrand } from './PartnerBrandLockup'
 export { PortalSection } from './PortalSection'
+export { PortalFooter } from './PortalFooter'
 export { PortalIconBadge, type PortalIconBadgeSize } from './PortalIconBadge'
 export {
   AdvertisingRow,

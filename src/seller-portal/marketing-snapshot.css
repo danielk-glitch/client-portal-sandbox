@@ -1,0 +1,105 @@
+/* design-build · self-critique: Clarity5 Warmth4 Restraint5 Craft4 Variety4 SlopFree5 */
+.marketing-snapshot.MuiPaper-root {
+  min-width: 0;
+  margin-top: 20px;
+  padding: 32px;
+  border-color: color-mix(in oklch, var(--color-semantic-text-on-color-primary) 14%, transparent);
+  border-radius: 14px;
+  color: var(--color-semantic-text-on-color-primary);
+  background: var(--color-semantic-surface-reverse-primary);
+}
+
+.marketing-snapshot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.marketing-snapshot-eyebrow.MuiTypography-root,
+.marketing-snapshot-label.MuiTypography-root {
+  display: block;
+  color: var(--color-semantic-text-on-color-light);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.marketing-snapshot-eyebrow.MuiTypography-root { margin-bottom: 10px; }
+
+.marketing-snapshot-action.MuiButton-root,
+.marketing-snapshot-see-all.MuiButton-root {
+  min-height: 44px;
+  padding-inline: 12px;
+  flex: 0 0 auto;
+  color: var(--color-semantic-text-on-color-primary);
+  text-transform: none;
+}
+
+.marketing-snapshot-action.MuiButton-root { margin: -8px -12px 0 0; }
+.marketing-snapshot-see-all.MuiButton-root { min-width: 0; margin: -12px -12px -12px 0; }
+
+.marketing-snapshot-action.MuiButton-root:hover,
+.marketing-snapshot-see-all.MuiButton-root:hover {
+  background: color-mix(in oklch, var(--color-semantic-text-on-color-primary) 12%, transparent);
+}
+
+.marketing-snapshot-action.MuiButton-root:focus-visible,
+.marketing-snapshot-see-all.MuiButton-root:focus-visible {
+  outline: 2px solid var(--color-semantic-text-on-color-primary);
+  outline-offset: 2px;
+}
+
+.marketing-snapshot-channels {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 32px;
+  margin-top: 30px;
+}
+
+.marketing-snapshot-channel {
+  min-width: 0;
+  min-height: 116px;
+  padding: 13px 0 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-top: 1px solid color-mix(in oklch, var(--color-semantic-text-on-color-primary) 22%, transparent);
+}
+
+.marketing-snapshot-channel .MuiTypography-bodySStandard { text-wrap: pretty; }
+.marketing-snapshot-channel-value { display: flex; align-items: baseline; gap: 7px; }
+.marketing-snapshot-channel-value .MuiTypography-root { font-variant-numeric: tabular-nums; }
+.marketing-snapshot-channel-value .MuiTypography-labelM { color: var(--color-semantic-text-on-color-light); }
+
+.marketing-snapshot-footer {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 30px;
+  padding: 24px 28px;
+  border-radius: 10px;
+  background: var(--color-semantic-surface-reverse-secondary);
+}
+
+.marketing-snapshot-note { min-width: 0; }
+.marketing-snapshot-note:first-child { padding-right: 32px; }
+.marketing-snapshot-note + .marketing-snapshot-note {
+  padding-left: 32px;
+  border-left: 1px solid color-mix(in oklch, var(--color-semantic-text-on-color-primary) 22%, transparent);
+}
+.marketing-snapshot-note-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.marketing-snapshot-note .MuiTypography-bodySStandard { display: block; margin-top: 8px; max-width: 60ch; text-wrap: pretty; }
+
+@media (max-width: 700px) {
+  .marketing-snapshot.MuiPaper-root { margin-top: 14px; padding: 24px; }
+  .marketing-snapshot-header { flex-direction: column; gap: 12px; }
+  .marketing-snapshot-action.MuiButton-root { margin: 0 0 0 -12px; }
+  .marketing-snapshot-channels { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 18px; margin-top: 22px; }
+  .marketing-snapshot-footer { grid-template-columns: 1fr; padding: 20px; }
+  .marketing-snapshot-note:first-child { padding: 0 0 24px; }
+  .marketing-snapshot-note + .marketing-snapshot-note {
+    padding: 24px 0 0;
+    border-left: 0;
+    border-top: 1px solid color-mix(in oklch, var(--color-semantic-text-on-color-primary) 22%, transparent);
+  }
+}

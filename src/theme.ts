@@ -4,6 +4,8 @@ import { typographyTokens as type } from './design-tokens'
 const color = (token: string) => `var(--color-semantic-${token})`
 const primitive = (token: string) => `var(--color-primitive-${token})`
 
+export const primaryButtonHoverShadow = '0px 0px 12px 1px rgb(0 0 0 / 18%)'
+
 export const theme = createTheme({
   colorSpace: 'oklch',
   palette: {
@@ -24,7 +26,7 @@ export const theme = createTheme({
       main: primitive('blue-600'),
       light: primitive('blue-400'),
       dark: primitive('blue-800'),
-      contrastText: primitive('gray-50'),
+      contrastText: primitive('neutral-50'),
     },
     success: {
       main: color('text-success'),
@@ -84,7 +86,18 @@ export const theme = createTheme({
   components: {
     MuiButton: {
       styleOverrides: {
-        root: { borderRadius: 999, paddingInline: 20, minHeight: 44 },
+        root: {
+          borderRadius: 999,
+          paddingInline: 20,
+          minHeight: 44,
+          '&:where(.MuiButton-contained.MuiButton-colorPrimary:not(.Mui-disabled))': {
+            backgroundColor: color('surface-reverse-secondary'),
+            '&:hover': {
+              backgroundColor: color('surface-reverse-secondary'),
+              boxShadow: primaryButtonHoverShadow,
+            },
+          },
+        },
       },
     },
     MuiChip: {

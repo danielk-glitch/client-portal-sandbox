@@ -6,6 +6,7 @@ import CloseOutlined from '@mui/icons-material/CloseOutlined'
 import GridViewOutlined from '@mui/icons-material/GridViewOutlined'
 import ImageOutlined from '@mui/icons-material/ImageOutlined'
 import type { ListingFact, SellerTransaction } from './sellerTransaction'
+import { PartnerBrandLockup } from '../transaction-portal/components/PartnerBrandLockup'
 import './listing-details.css'
 
 type ListingDetailsSheetProps = {
@@ -124,6 +125,9 @@ export function ListingDetailsSheet({ open, onClose, transaction }: ListingDetai
                     <Chip size="small" label={listing.status} className="listing-sheet-status" />
                     <Chip size="small" label={listing.published ? 'Published' : 'Not published'} variant="outlined" className="listing-sheet-published" />
                   </Stack>
+                  <Typography variant="labelS" color="text.secondary" className="listing-sheet-source">
+                    Listing data from {listing.dataSource}
+                  </Typography>
                 </Box>
               </Box>
 
@@ -215,7 +219,7 @@ export function ListingDetailsSheet({ open, onClose, transaction }: ListingDetai
                       <Typography variant="titleXS">{leadAgent.name}</Typography>
                     </Box>
                   </Stack>
-                  <Box component="img" src={teamBrand.logoUrl} alt={teamBrand.name} className="listing-sheet-team-logo" />
+                  <PartnerBrandLockup brand={teamBrand} />
                 </Box>
               )}
             </Box>

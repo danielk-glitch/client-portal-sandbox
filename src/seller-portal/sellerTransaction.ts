@@ -2,6 +2,7 @@ import sampleHome from '../assets/seller-home.jpg'
 import sampleHomeDeck from '../assets/seller-home-deck.jpg'
 import sampleHomeSetting from '../assets/seller-home-setting.jpg'
 import benKinneyTeamLogo from '../assets/bkt-black-logo.png'
+import kwWesternRealtyLogo from '../assets/kw-western-realty.png'
 import averyAvatar from '../assets/people/avery.jpg'
 import jordanAvatar from '../assets/people/jordan.jpg'
 import morganAvatar from '../assets/people/morgan.jpg'
@@ -45,6 +46,7 @@ export type SellerTransaction = {
     state: string
     postalCode: string
     price: number
+    dataSource: 'MLS' | 'Brivity'
     mlsNumber: string
     status: ListingStatus
     published: boolean
@@ -58,6 +60,10 @@ export type SellerTransaction = {
     name: string
     logoUrl: string
     leadAgentId: string
+    brokerage?: {
+      name: string
+      logoUrl: string
+    }
   }
   team: TeamMember[]
   viewers: TransactionViewer[]
@@ -90,6 +96,7 @@ export const sampleSellerTransaction: SellerTransaction = {
     state: 'MT',
     postalCode: '59901',
     price: 845000,
+    dataSource: 'MLS',
     mlsNumber: '00001428',
     status: 'Under contract',
     published: true,
@@ -107,6 +114,10 @@ export const sampleSellerTransaction: SellerTransaction = {
     name: 'Ben Kinney Team',
     logoUrl: benKinneyTeamLogo,
     leadAgentId: 'agent',
+    brokerage: {
+      name: 'Keller Williams Western Realty',
+      logoUrl: kwWesternRealtyLogo,
+    },
   },
   team: [
     { id: 'agent', name: 'Avery Coleman', role: 'Listing agent', initials: 'AC', photoUrl: averyAvatar, phone: '+14065550101', email: 'avery.coleman@example.com' },

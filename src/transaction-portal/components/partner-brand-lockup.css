@@ -1,0 +1,37 @@
+.partner-brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.partner-brand-lockup img {
+  display: block;
+  height: auto;
+  object-fit: contain;
+  flex-shrink: 1;
+}
+
+.partner-brand-team {
+  width: var(--partner-team-width, 126px);
+  max-height: 52px;
+}
+
+.partner-brand-brokerage {
+  width: var(--partner-brokerage-width, 100px);
+  max-height: 56px;
+}
+
+.partner-brand-divider {
+  width: 1px;
+  height: 32px;
+  flex: 0 0 auto;
+  background: var(--color-semantic-stroke-primary-light);
+}
+
+:root[data-color-mode="goth"] .partner-brand-lockup {
+  padding: 6px;
+  margin: -6px;
+  border-radius: 8px;
+  background: var(--color-semantic-surface-reverse-secondary);
+}

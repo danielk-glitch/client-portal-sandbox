@@ -18,8 +18,13 @@ import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined'
 import PhoneOutlined from '@mui/icons-material/PhoneOutlined'
 import { CardActionButton } from '../components/CardActionButton'
 import { PlaceModal, placeModalWidths, type PlaceModalSize } from '../components/PlaceModal'
+import { SegmentedSwitch, type SegmentedSwitchOption } from '../components/SegmentedSwitch'
 import { typographyTokens } from '../design-tokens'
+import { primaryButtonHoverShadow } from '../theme'
 import { ListingDetailsSheet } from '../seller-portal/ListingDetailsSheet'
+import { ListingOverview } from '../seller-portal/ListingOverview'
+import { MarketingSnapshot } from '../seller-portal/MarketingSnapshot'
+import { futureMarketingSnapshot } from '../seller-portal/futureSellerTransaction'
 import {
   ActivityEventRow,
   AdvertisingRow,
@@ -28,7 +33,9 @@ import {
   DetailGrid,
   DocumentRow,
   PeopleSection,
+  PartnerBrandLockup,
   PortalIconBadge,
+  PortalFooter,
   PortalSection,
   ShowingFeedbackRow,
   TaskRow,
@@ -38,6 +45,8 @@ import {
 } from '../transaction-portal/components'
 import type { TransactionDocument } from '../transaction-portal/types'
 import { sampleSellerTransaction } from '../seller-portal/sellerTransaction'
+import { EmailPreview } from '../email-templates/EmailPreview'
+import { emailTemplates } from '../email-templates/emailTemplates'
 
 const sections = [
   { id: 'typography', name: 'Typography' },
@@ -45,10 +54,12 @@ const sections = [
   { id: 'button', name: 'Button' },
   { id: 'icon-button', name: 'Icon button' },
   { id: 'chip', name: 'Chip' },
+  { id: 'segmented-switch', name: 'Segmented switch' },
   { id: 'paper', name: 'Paper' },
   { id: 'modal', name: 'Modal' },
   { id: 'listing-sheet', name: 'Listing sheet' },
   { id: 'portal-patterns', name: 'Portal patterns' },
+  { id: 'email-blocks', name: 'Email blocks' },
 ] as const
 
 type PreviewState = 'Default' | 'Hover' | 'Pressed' | 'Focus' | 'Disabled' | 'Loading'
@@ -95,8 +106,9 @@ const semanticColorGroups = [
   },
 ] as const
 
-const primitiveColorFamilies = ['gray', 'slate', 'blue', 'sky', 'green', 'yellow', 'red', 'violet'] as const
+const primitiveColorFamilies = ['neutral', 'gray', 'blue', 'sky', 'green', 'yellow', 'red', 'violet'] as const
 const primitiveColorSteps = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'] as const
+const neutralColorSteps = [...primitiveColorSteps, '950'] as const
 const baseColorTokens = ['base-black', 'base-white'] as const
 
 function Section({
@@ -104,7 +116,6 @@ function Section({
   number,
   title,
   description,
-  guidance,
   source,
   kind = 'Component',
   children,
@@ -113,34 +124,25 @@ function Section({
   number: string
   title: string
   description: string
-  guidance: string
   source: string
   kind?: 'Foundation' | 'Component'
   children: ReactNode
 }) {
   return (
     <Box component="section" id={id} aria-labelledby={`${id}-title`} sx={{ scrollMarginTop: 32, py: { xs: 5, md: 7 }, borderTop: 1, borderColor: 'divider' }}>
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) 230px' }, gap: { xs: 3, md: 8 }, mb: 4 }}>
-        <Box>
-          <Typography variant="labelS" color="text.secondary" sx={{ display: 'block', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-            {number} / {kind}
-          </Typography>
-          <Typography component="h2" id={`${id}-title`} variant="titleL" sx={{ mb: 1 }}>
-            {title}
-          </Typography>
-          <Typography variant="bodyMStandard" color="text.secondary" sx={{ maxWidth: 600, textWrap: 'pretty' }}>
-            {description}
-          </Typography>
-        </Box>
-        <Box>
-          <Typography variant="labelS" color="text.secondary" sx={{ display: 'block', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-            Guidance
-          </Typography>
-          <Typography variant="bodySStandard" sx={{ textWrap: 'pretty' }}>{guidance}</Typography>
-          <Typography variant="labelS" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
-            {source}
-          </Typography>
-        </Box>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="labelS" color="text.secondary" sx={{ display: 'block', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          {number} / {kind}
+        </Typography>
+        <Typography component="h2" id={`${id}-title`} variant="titleL" sx={{ mb: 1 }}>
+          {title}
+        </Typography>
+        <Typography variant="bodyMStandard" color="text.secondary" sx={{ maxWidth: 680, textWrap: 'pretty' }}>
+          {description}
+        </Typography>
+        <Typography variant="labelS" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
+          {source}
+        </Typography>
       </Box>
       {children}
     </Box>
@@ -149,18 +151,18 @@ function Section({
 
 function Specimen({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <Box sx={{ minWidth: 0 }}>
-      <Typography variant="labelS" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>{label}</Typography>
-      <Box sx={{ minHeight: 96, display: 'flex', alignItems: 'center', justifyContent: 'center', px: 2, py: 2.5, bgcolor: 'var(--color-semantic-surface-secondary)', borderRadius: 2 }}>
+    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'minmax(0, 1fr) minmax(0, 1fr)' }, alignItems: 'center', gap: { xs: 1.5, sm: 3 }, minWidth: 0 }}>
+      <Typography variant="labelM" color="text.secondary">{label}</Typography>
+      <Box sx={{ width: '100%', minWidth: 0, minHeight: 96, display: 'flex', alignItems: 'center', justifyContent: 'center', px: 2, py: 2.5, bgcolor: 'var(--color-semantic-surface-secondary)', borderRadius: 2 }}>
         {children}
       </Box>
     </Box>
   )
 }
 
-function StateGrid({ children }: { children: ReactNode }) {
+function SpecimenList({ children }: { children: ReactNode }) {
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 156px), 1fr))', gap: 2 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {children}
     </Box>
   )
@@ -171,8 +173,8 @@ function ButtonSection() {
   const [clicks, setClicks] = useState(0)
 
   function stateStyle(state: PreviewState) {
-    if (state === 'Hover') return { boxShadow: theme.shadows[4], '--variant-containedBg': theme.palette.primary.dark }
-    if (state === 'Pressed') return { boxShadow: theme.shadows[8], '--variant-containedBg': theme.palette.primary.dark }
+    if (state === 'Hover') return { boxShadow: primaryButtonHoverShadow, backgroundColor: 'var(--color-semantic-surface-reverse-secondary)' }
+    if (state === 'Pressed') return { boxShadow: theme.shadows[8] }
     if (state === 'Focus') return { outline: '2px solid var(--color-semantic-stroke-primary-dark)', outlineOffset: 3 }
     return undefined
   }
@@ -188,30 +190,30 @@ function ButtonSection() {
       id="button"
       number="03"
       title="Button"
-      description="The shared action control uses the PLACE pill radius and a 44px minimum height. Its color and text roles come from the theme."
-      guidance="Use one contained action per view or decision area. Use outlined or text for supporting actions. Card actions use 16px horizontal padding and align their label with a card’s 32px content edge. Loading keeps the action in place while work completes."
+      description="The shared action control uses the PLACE pill radius and a 44px minimum height. The contained primary button uses the neutral 800 fill and a soft hover shadow."
       source="Theme: MuiButton · src/theme.ts"
     >
       <Typography component="h3" variant="titleXS" sx={{ mb: 2 }}>Variants</Typography>
-      <StateGrid>
+      <SpecimenList>
         {variants.map(({ label, variant, color }) => (
           <Specimen key={label} label={label}>
             <Button variant={variant} color={color} onClick={() => setClicks(value => value + 1)}>Continue</Button>
           </Specimen>
         ))}
-      </StateGrid>
-      <Typography component="h3" variant="titleXS" sx={{ mt: 5, mb: 2 }}>Card action</Typography>
-      <Paper variant="outlined" sx={{ maxWidth: 520, p: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-          <Typography variant="titleS">Recent activity</Typography>
-          <CardActionButton onClick={() => setClicks(value => value + 1)}>See all</CardActionButton>
-        </Box>
-      </Paper>
+        <Specimen label="Card action">
+          <Paper variant="outlined" sx={{ width: '100%', p: { xs: 2, sm: 3 } }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+              <Typography variant="titleS">Recent activity</Typography>
+              <CardActionButton onClick={() => setClicks(value => value + 1)}>See all</CardActionButton>
+            </Box>
+          </Paper>
+        </Specimen>
+      </SpecimenList>
       <Typography component="h3" variant="titleXS" sx={{ mt: 5, mb: 1 }}>States</Typography>
       <Typography variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
         Hover, pressed, and focus are held previews of the primary button. The variants above can be tried directly.
       </Typography>
-      <StateGrid>
+      <SpecimenList>
         {buttonStates.map(state => (
           <Specimen key={state} label={state}>
             <Button
@@ -226,7 +228,7 @@ function ButtonSection() {
             </Button>
           </Specimen>
         ))}
-      </StateGrid>
+      </SpecimenList>
       <Typography aria-live="polite" variant="labelS" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
         {clicks > 0 ? `Sample action used ${clicks} ${clicks === 1 ? 'time' : 'times'}.` : 'Select an enabled button to try it.'}
       </Typography>
@@ -251,20 +253,19 @@ function ChipSection() {
       number="05"
       title="Chip"
       description="Compact status and filter labels use the PLACE small-label typography across MUI chip variants."
-      guidance="Use a plain chip for status. Make a chip clickable only when it changes a filter or selection, and keep its selected state clear in nearby text."
       source="Theme: MuiChip · src/theme.ts"
     >
       <Typography component="h3" variant="titleXS" sx={{ mb: 2 }}>Variants</Typography>
-      <StateGrid>
+      <SpecimenList>
         <Specimen label="Filled"><Chip label="In progress" /></Specimen>
         <Specimen label="Outlined"><Chip label="In progress" variant="outlined" /></Specimen>
         <Specimen label="Small"><Chip label="In progress" size="small" /></Specimen>
-      </StateGrid>
+      </SpecimenList>
       <Typography component="h3" variant="titleXS" sx={{ mt: 5, mb: 1 }}>States</Typography>
       <Typography variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
         Click the default chip to toggle its sample selection. Other state tiles are held previews.
       </Typography>
-      <StateGrid>
+      <SpecimenList>
         {chipStates.map(state => (
           <Specimen key={state} label={state}>
             <Chip
@@ -277,7 +278,44 @@ function ChipSection() {
             />
           </Specimen>
         ))}
-      </StateGrid>
+      </SpecimenList>
+    </Section>
+  )
+}
+
+function SegmentedSwitchSection() {
+  const [audience, setAudience] = useState<'seller' | 'buyer'>('seller')
+  const audienceOptions: readonly SegmentedSwitchOption<'seller' | 'buyer'>[] = [
+    { value: 'seller', label: 'Seller' },
+    { value: 'buyer', label: 'Buyer' },
+  ]
+  const peopleOptions: readonly SegmentedSwitchOption<'team' | 'viewers'>[] = [
+    { value: 'team', label: 'Team' },
+    { value: 'viewers', label: 'Viewers' },
+  ]
+
+  return (
+    <Section
+      id="segmented-switch"
+      number="06"
+      title="Segmented switch"
+      description="A compact control for moving between a few parallel views within the same page."
+      source="SegmentedSwitch · src/components/SegmentedSwitch.tsx"
+    >
+      <SpecimenList>
+        <Specimen label="Default / M">
+          <SegmentedSwitch options={audienceOptions} value={audience} onChange={setAudience} aria-label="Client view" />
+        </Specimen>
+        <Specimen label="Compact / S">
+          <SegmentedSwitch options={peopleOptions} defaultValue="team" size="s" aria-label="People view" />
+        </Specimen>
+        <Specimen label="Disabled">
+          <SegmentedSwitch options={audienceOptions} defaultValue="seller" disabled aria-label="Unavailable client view" />
+        </Specimen>
+      </SpecimenList>
+      <Typography variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
+        Use for two or three related views, not page navigation. The selected option is pressed; inactive options gain a quiet hover fill and every option has a visible keyboard focus state.
+      </Typography>
     </Section>
   )
 }
@@ -291,10 +329,9 @@ function IconButtonSection() {
       number="04"
       title="Icon button"
       description="Quiet icon buttons keep secondary actions available without competing with primary actions."
-      guidance="Use a transparent default, a subtle gray hover fill, visible keyboard focus, and an accessible label. Keep the target at least 44px square."
       source="MUI IconButton · seller portal contact actions"
     >
-      <StateGrid>
+      <SpecimenList>
         {states.map((label) => (
           <Specimen key={label} label={label}>
             <IconButton
@@ -315,7 +352,7 @@ function IconButtonSection() {
             </IconButton>
           </Specimen>
         ))}
-      </StateGrid>
+      </SpecimenList>
     </Section>
   )
 }
@@ -324,26 +361,25 @@ function PaperSection() {
   return (
     <Section
       id="paper"
-      number="06"
+      number="07"
       title="Paper"
       description="Paper provides the quiet surface behind grouped content. The outlined variant uses the system hairline border."
-      guidance="Use a contained surface only when grouping helps comprehension. Seller portal cards use 32px internal padding. The outlined state is useful on the near-white canvas; use spacing and hierarchy first."
       source="Theme: MuiPaper · src/theme.ts"
     >
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' }, gap: 2 }}>
+      <SpecimenList>
         <Specimen label="Default / flat">
           <Paper elevation={0} sx={{ width: '100%', p: 4 }}>
-            <Typography variant="titleXS">Transaction summary</Typography>
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mt: 1 }}>A calm surface for related information.</Typography>
+            <Typography variant="titleXS" sx={{ display: 'block' }}>Transaction summary</Typography>
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mt: 1 }}>A calm surface for related information.</Typography>
           </Paper>
         </Specimen>
         <Specimen label="Outlined">
           <Paper variant="outlined" sx={{ width: '100%', p: 4 }}>
-            <Typography variant="titleXS">Transaction summary</Typography>
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mt: 1 }}>A hairline marks the surface boundary.</Typography>
+            <Typography variant="titleXS" sx={{ display: 'block' }}>Transaction summary</Typography>
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mt: 1 }}>A hairline marks the surface boundary.</Typography>
           </Paper>
         </Specimen>
-      </Box>
+      </SpecimenList>
       <Typography variant="labelS" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
         Paper is a container; hover, pressed, and disabled states are not part of its theme skin.
       </Typography>
@@ -357,19 +393,18 @@ function ModalSection() {
   return (
     <Section
       id="modal"
-      number="07"
+      number="08"
       title="Modal"
       description="A focused overlay built on MUI Dialog, with five predictable widths and one consistent PLACE surface."
-      guidance="Choose the smallest size that comfortably fits the content. Use xs for confirmations, s or m for short flows, and l or xl for richer content. MUI handles focus, Escape, backdrop dismissal, and focus return."
       source="PlaceModal · src/components/PlaceModal.tsx"
     >
-      <StateGrid>
+      <SpecimenList>
         {modalSizes.map(size => (
           <Specimen key={size} label={`${size.toUpperCase()} / ${placeModalWidths[size]}px`}>
             <Button variant="outlined" onClick={() => setActiveSize(size)}>Open modal</Button>
           </Specimen>
         ))}
-      </StateGrid>
+      </SpecimenList>
       <PlaceModal
         open={activeSize !== null}
         onClose={() => setActiveSize(null)}
@@ -398,7 +433,6 @@ function TypographySection() {
       number="01"
       title="Typography"
       description="Seventeen Manrope roles are available as named MUI Typography variants. Each sample below renders with the actual token."
-      guidance="Use Display sparingly, Title for routine headings, Body for reading, Label for controls and metadata, and Metric for meaningful values."
       source="Tokens: src/design-tokens.ts · src/mui.d.ts"
       kind="Foundation"
     >
@@ -421,16 +455,34 @@ function TypographySection() {
   )
 }
 
-function ColorToken({ variable, label, showValue = true }: { variable: string; label: string; showValue?: boolean }) {
-  const value = typeof window === 'undefined'
-    ? `var(${variable})`
-    : getComputedStyle(document.documentElement).getPropertyValue(variable).trim() || `var(${variable})`
+function primitiveReference(variable: string, value: string, styles: CSSStyleDeclaration) {
+  if (variable === '--color-semantic-surface-glass') {
+    return document.documentElement.dataset.colorMode === 'goth' ? 'neutral-900 / 94%' : 'base-white / 94%'
+  }
+
+  for (const family of primitiveColorFamilies) {
+    for (const step of family === 'neutral' ? neutralColorSteps : primitiveColorSteps) {
+      if (styles.getPropertyValue(`--color-primitive-${family}-${step}`).trim() === value) return `${family}-${step}`
+    }
+  }
+
+  for (const token of baseColorTokens) {
+    if (styles.getPropertyValue(`--color-primitive-${token}`).trim() === value) return token
+  }
+
+  return 'Custom color'
+}
+
+function ColorToken({ variable, label, showValue = true, showPrimitiveReference = false }: { variable: string; label: string; showValue?: boolean; showPrimitiveReference?: boolean }) {
+  const styles = typeof window === 'undefined' ? null : getComputedStyle(document.documentElement)
+  const value = styles?.getPropertyValue(variable).trim() || `var(${variable})`
+  const detail = showPrimitiveReference && styles ? primitiveReference(variable, value, styles) : value
 
   return (
     <Box sx={{ minWidth: 0 }}>
       <Box aria-hidden="true" sx={{ height: 48, bgcolor: `var(${variable})`, border: 1, borderColor: 'divider', borderRadius: 1 }} />
       <Typography component="p" variant="labelS" sx={{ mt: 1, mb: 0, overflowWrap: 'anywhere' }}>{label}</Typography>
-      {showValue && <Typography component="p" variant="labelS" color="text.secondary" sx={{ mt: 0.5, mb: 0, overflowWrap: 'anywhere' }}>{value}</Typography>}
+      {showValue && <Typography component="p" variant="labelS" color="text.secondary" sx={{ mt: 0.5, mb: 0, overflowWrap: 'anywhere' }}>{detail}</Typography>}
     </Box>
   )
 }
@@ -441,8 +493,7 @@ function ColorsSection() {
       id="colors"
       number="02"
       title="Colors"
-      description="PLACE color tokens pair semantic roles with a compact set of primitive scales. Each swatch uses the live value from the design token stylesheet."
-      guidance="Use semantic tokens in components so the same role adapts across color modes. Primitive scales are the source palette for defining those roles."
+      description="PLACE color tokens pair semantic roles with a compact set of primitive scales. Semantic swatches show their primitive reference in the current color mode."
       source="Tokens: src/design-tokens.css · Light and Goth modes"
       kind="Foundation"
     >
@@ -453,7 +504,7 @@ function ColorsSection() {
             <Typography component="h4" variant="titleXS" sx={{ mb: 1.5 }}>{group.name}</Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))', gap: 2 }}>
               {group.tokens.map(token => (
-                <ColorToken key={token} label={token} variable={`--color-semantic-${token}`} />
+                <ColorToken key={token} label={token} variable={`--color-semantic-${token}`} showPrimitiveReference />
               ))}
             </Box>
           </Box>
@@ -469,7 +520,7 @@ function ColorsSection() {
           <Box key={family}>
             <Typography component="h4" variant="titleXS" sx={{ mb: 1.5, textTransform: 'capitalize' }}>{family}</Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 54px), 1fr))', gap: 1 }}>
-              {primitiveColorSteps.map(step => {
+              {(family === 'neutral' ? neutralColorSteps : primitiveColorSteps).map(step => {
                 const token = `--color-primitive-${family}-${step}`
                 return <ColorToken key={token} label={step} variable={token} showValue={false} />
               })}
@@ -480,7 +531,7 @@ function ColorsSection() {
           <Typography component="h4" variant="titleXS" sx={{ mb: 1.5 }}>Base</Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))', gap: 2 }}>
             {baseColorTokens.map(token => (
-              <ColorToken key={token} label={token} variable={`--color-primitive-${token}`} />
+              <ColorToken key={token} label={token} variable={`--color-primitive-${token}`} showValue={false} />
             ))}
           </Box>
         </Box>
@@ -496,10 +547,9 @@ function ListingSheetSection() {
   return (
     <Section
       id="listing-sheet"
-      number="08"
+      number="09"
       title="Listing sheet"
       description="A centered listing sheet with a photo grid, full photo feed, structured home details, and an interactive location map."
-      guidance="See all opens the full photo feed. Listing Description uses the MLS description as one content field, followed by facts, interior, exterior, and financial details; the Google map uses an explicitly approximate sample pin. Back returns to the listing; Close, Escape, or the backdrop exits the sheet."
       source="Seller portal · ListingDetailsSheet"
     >
       <Box sx={{ maxWidth: 640, overflow: 'hidden', borderRadius: '32px 32px 0 0', bgcolor: 'background.paper', boxShadow: 'var(--elevation-raised)' }}>
@@ -518,6 +568,7 @@ function ListingSheetSection() {
           <Box>
             <Typography variant="titleS">{listing.address}</Typography>
             <Typography variant="bodySStandard" color="text.secondary">{listing.city}, {listing.state} · {listing.photos.length} photos</Typography>
+            <Typography variant="labelS" color="text.secondary">Listing data from {listing.dataSource}</Typography>
           </Box>
           <Button variant="contained" onClick={() => setOpen(true)}>Preview sheet</Button>
         </Box>
@@ -527,11 +578,10 @@ function ListingSheetSection() {
   )
 }
 
-function PortalPatternSample({ title, guidance, children }: { title: string; guidance: string; children: ReactNode }) {
+function PortalPatternSample({ title, children }: { title: string; children: ReactNode }) {
   return (
     <Box>
-      <Typography component="h3" variant="titleXS" sx={{ mb: 0.5 }}>{title}</Typography>
-      <Typography variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mb: 2 }}>{guidance}</Typography>
+      <Typography component="h3" variant="titleXS" sx={{ mb: 2 }}>{title}</Typography>
       {children}
     </Box>
   )
@@ -540,21 +590,32 @@ function PortalPatternSample({ title, guidance, children }: { title: string; gui
 function PortalPatternsSection() {
   const [peopleTab, setPeopleTab] = useState<PeopleTab>('team')
   const [previewDocument, setPreviewDocument] = useState<TransactionDocument | null>(null)
+  const [listingPreviewOpen, setListingPreviewOpen] = useState(false)
   const sample = sampleSellerTransaction
 
   return (
     <Section
       id="portal-patterns"
-      number="09"
+      number="10"
       title="Portal patterns"
       description="Shared transaction components for seller views and future buyer views. Open this group to inspect the working samples."
-      guidance="Pass transaction content through props and compose rows in lists. The page owns route state and data selection; these components own their visual treatment and local interactions."
       source="Transaction portal · src/transaction-portal/components"
     >
       <Box component="details" sx={{ borderTop: 1, borderBottom: 1, borderColor: 'divider', py: 2, '& summary': { cursor: 'pointer', typography: 'labelM', py: 1, '&:focus-visible': { outline: '2px solid var(--color-semantic-stroke-primary-dark)', outlineOffset: 3 } } }}>
         <Box component="summary">Show portal components</Box>
         <Stack spacing={5} sx={{ pt: 4 }}>
-          <PortalPatternSample title="Icon badge" guidance="Use the same neutral badge for activity, advertising, and document icons. Sizes are s (32px), m (44px, default), and l (48px); the icon scales with the circle.">
+          <PortalPatternSample title="Full-width listing header">
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>The full-width variant groups the agent, side-by-side contact links, and partner logos in one card. The card variant keeps its compact agent row and logos in the header. Both share the same listing header component, photo fade, and status chips.</Typography>
+            <Box sx={{ overflow: 'hidden', borderRadius: 2, '& .listing-overview--full.MuiPaper-root': { width: '100%', minHeight: 450, marginLeft: 0 }, '& .listing-overview--full .listing-summary': { marginLeft: 24 } }}>
+              <ListingOverview
+                transaction={sample}
+                onSeeListing={() => setListingPreviewOpen(true)}
+                variant="full"
+              />
+            </Box>
+            <ListingDetailsSheet open={listingPreviewOpen} onClose={() => setListingPreviewOpen(false)} transaction={sample} />
+          </PortalPatternSample>
+          <PortalPatternSample title="Icon badge">
             <Stack direction="row" spacing={3} sx={{ alignItems: 'center' }}>
               <Stack spacing={1} sx={{ alignItems: 'center' }}>
                 <PortalIconBadge size="s"><DescriptionOutlined /></PortalIconBadge>
@@ -570,12 +631,43 @@ function PortalPatternsSection() {
               </Stack>
             </Stack>
           </PortalPatternSample>
-          <PortalPatternSample title="People section and rows" guidance="Team and viewer rows share avatar, name, and role styling. Team rows compose optional call and email actions. The parent controls the active tab.">
+          <PortalPatternSample title="People section and rows">
             <Box sx={{ maxWidth: 460 }}>
-              <PeopleSection team={sample.team.slice(0, 3)} viewers={sample.viewers} brand={sample.teamBrand} value={peopleTab} onChange={setPeopleTab} />
+              <PeopleSection team={sample.team.slice(0, 3)} viewers={sample.viewers} value={peopleTab} onChange={setPeopleTab} />
             </Box>
           </PortalPatternSample>
-          <PortalPatternSample title="Date event rows" guidance="Use the same date row for upcoming milestones and past events; add attribution as child content when it exists.">
+          <PortalPatternSample title="Team and brokerage logos">
+            <Box sx={{ display: 'inline-flex', p: 3, borderRadius: 2, bgcolor: 'var(--color-semantic-surface-primary-darkest)' }}>
+              <PartnerBrandLockup brand={sample.teamBrand} />
+            </Box>
+          </PortalPatternSample>
+          <PortalPatternSample title="Portal footer">
+            <PortalFooter agent={sample.team.find((member) => member.id === sample.teamBrand.leadAgentId)} brand={sample.teamBrand} />
+          </PortalPatternSample>
+          <PortalPatternSample title="Activity and upcoming dates cards">
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Pair the cards at equal height. Show the next three dates in chronological order and let their rows share the available height without extra vertical padding around the list.</Typography>
+            <Box className="priority-grid" sx={{ mt: 0 }}>
+              <PortalSection title="Recent activity" prominent>
+                <Box component="ol" className="activity-event-list">
+                  {sample.timeline.slice(0, 3).map(event => <ActivityEventRow key={event.id} event={event} />)}
+                </Box>
+              </PortalSection>
+              <Box className="upcoming-dates-card">
+                <PortalSection title="Upcoming Dates" prominent>
+                  <DateEventList>
+                    {[...sample.upcomingDates].sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3).map(date => <DateEventRow key={date.id} {...date} />)}
+                  </DateEventList>
+                </PortalSection>
+              </Box>
+            </Box>
+          </PortalPatternSample>
+          <PortalPatternSample title="Listing marketing snapshot">
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
+              A full-width future seller preview. Six channel rollups use Metric L counts and Label M status text. Advertising and showing feedback share a secondary dark surface with a divider between them; the divider becomes horizontal when the notes stack. The actions open their corresponding portal tabs.
+            </Typography>
+            <MarketingSnapshot data={futureMarketingSnapshot} advertising={sample.advertising} feedback={sample.feedback} onViewActivity={() => { window.location.href = '/seller/future-v1?section=advertising#transaction-information' }} onViewFeedback={() => { window.location.href = '/seller/future-v1?section=feedback#transaction-information' }} />
+          </PortalPatternSample>
+          <PortalPatternSample title="Date event rows">
             <Box sx={{ maxWidth: 600 }}>
               <DateEventList>
                 <DateEventRow {...sample.upcomingDates[0]} />
@@ -585,27 +677,27 @@ function PortalPatternsSection() {
               </DateEventList>
             </Box>
           </PortalPatternSample>
-          <PortalPatternSample title="Activity event rows" guidance="The event type selects the icon. Adjacent rows have a divider and no connecting timeline line.">
+          <PortalPatternSample title="Activity event rows">
             <Box component="ol" className="activity-event-list" sx={{ maxWidth: 760 }}>
               {sample.timeline.slice(0, 2).map(event => <ActivityEventRow key={event.id} event={event} />)}
             </Box>
           </PortalPatternSample>
-          <PortalPatternSample title="Task row" guidance="Keep the task name, description, assignee, and due date together. Lists provide dividers between rows.">
+          <PortalPatternSample title="Task row">
             <TransactionRowList><TaskRow task={sample.tasks[0]} /></TransactionRowList>
           </PortalPatternSample>
-          <PortalPatternSample title="Advertising row" guidance="Show the destination, who added the listing, and the timestamp in one row.">
+          <PortalPatternSample title="Advertising row">
             <TransactionRowList><AdvertisingRow event={sample.advertising[0]} /></TransactionRowList>
           </PortalPatternSample>
-          <PortalPatternSample title="Showing feedback row" guidance="Keep the date, visit type, interest rating, and quoted feedback visible together.">
+          <PortalPatternSample title="Showing feedback row">
             <TransactionRowList><ShowingFeedbackRow feedback={sample.feedback[0]} /></TransactionRowList>
           </PortalPatternSample>
-          <PortalPatternSample title="Team note card" guidance="The white card uses 32px padding. Two lines of body text are shown before See more opens the complete note.">
+          <PortalPatternSample title="Team note card">
             <TeamNoteCard note={sample.notes[0]} />
           </PortalPatternSample>
-          <PortalPatternSample title="Document row" guidance="Preview is an action supplied by the page. The row shows document type, status, and who last updated it.">
+          <PortalPatternSample title="Document row">
             <TransactionRowList><DocumentRow document={sample.documents[0]} onPreview={setPreviewDocument} /></TransactionRowList>
           </PortalPatternSample>
-          <PortalPatternSample title="Detail grid and section" guidance="Compose labeled values inside the shared section surface for transaction facts and custom details.">
+          <PortalPatternSample title="Detail grid and section">
             <PortalSection title="Transaction details">
               <DetailGrid rows={[{ label: 'Status', value: sample.listing.status }, { label: 'MLS number', value: sample.listing.mlsNumber }]} />
             </PortalSection>
@@ -643,7 +735,7 @@ export function ComponentGallery() {
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '170px minmax(0, 1fr)' }, gap: { xs: 2, md: 7 } }}>
           <Box component="nav" aria-label="Gallery sections" sx={{ alignSelf: 'start', position: { md: 'sticky' }, top: { md: 32 }, display: 'flex', flexDirection: { xs: 'row', md: 'column' }, gap: { xs: 2, md: 1 }, overflowX: { xs: 'auto', md: 'visible' }, pb: { xs: 2, md: 0 } }}>
             <Typography variant="labelS" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' }, mb: 1, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              Library / 09
+              Library / 11
             </Typography>
             {sections.map(section => (
               <Box key={section.id} component="a" href={`#${section.id}`} sx={{ flexShrink: 0, color: 'text.primary', textDecoration: 'none', py: 0.75, borderRadius: 1, typography: 'labelM', transition: 'color 150ms ease', '&:hover': { color: 'text.secondary' }, '&:focus-visible': { outline: '2px solid var(--color-semantic-stroke-primary-dark)', outlineOffset: 3 } }}>
@@ -657,10 +749,23 @@ export function ComponentGallery() {
             <ButtonSection />
             <IconButtonSection />
             <ChipSection />
+            <SegmentedSwitchSection />
             <PaperSection />
             <ModalSection />
             <ListingSheetSection />
             <PortalPatternsSection />
+            <Section
+              id="email-blocks"
+              number="11"
+              title="Email blocks"
+              description="The client email family shares a team and brokerage header, property context, body pane, primary action, agent signature, and a centered footer."
+              source="src/email-templates/EmailPreview.tsx · src/email-templates/email-preview.css"
+            >
+              <Box sx={{ maxWidth: 640, mx: 'auto', bgcolor: 'var(--color-semantic-surface-secondary)', p: { xs: 1, sm: 3 } }}>
+                <EmailPreview template={emailTemplates[0]} />
+              </Box>
+              <Button component="a" href="/email-templates" variant="text" sx={{ mt: 3 }}>Review all email templates</Button>
+            </Section>
           </Box>
         </Box>
       </Container>

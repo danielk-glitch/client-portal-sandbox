@@ -1,0 +1,17 @@
+.presentation-dark {
+  color-scheme: dark;
+  --color-semantic-surface-primary: var(--color-primitive-neutral-900);
+  --color-semantic-surface-primary-dark: var(--color-primitive-neutral-800);
+  --color-semantic-surface-primary-darkest: var(--color-primitive-neutral-700);
+  --color-semantic-surface-secondary: var(--color-primitive-neutral-800);
+  --color-semantic-surface-secondary-dark: var(--color-primitive-neutral-700);
+  --color-semantic-surface-secondary-darkest: var(--color-primitive-neutral-600);
+  --color-semantic-surface-reverse-primary: var(--color-primitive-neutral-50);
+  --color-semantic-surface-reverse-secondary: var(--color-primitive-neutral-100);
+  --color-semantic-text-dark: var(--color-primitive-neutral-50);
+  --color-semantic-text-primary: var(--color-primitive-neutral-300);
+  --color-semantic-text-on-color-primary: var(--color-primitive-neutral-900);
+  --color-semantic-stroke-primary-light: var(--color-primitive-neutral-700);
+  --color-semantic-stroke-primary: var(--color-primitive-neutral-600);
+  --color-semantic-stroke-primary-dark: var(--color-primitive-neutral-300);
+}

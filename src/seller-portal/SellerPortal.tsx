@@ -1,4 +1,4 @@
-/* design-build · self-critique: Clarity4 Warmth4 Restraint5 Craft4 Variety4 SlopFree5 */
+/* design-build · self-critique: Clarity5 Warmth4 Restraint4 Craft4 Variety5 SlopFree5 */
 import { useEffect, useRef, useState } from 'react'
 import {
   Avatar,
@@ -12,8 +12,10 @@ import {
   DialogTitle,
   Divider,
   Drawer,
+  FormControlLabel,
   IconButton,
-  Paper,
+  Radio,
+  RadioGroup,
   Stack,
   Tab,
   Tabs,
@@ -21,9 +23,8 @@ import {
 } from '@mui/material'
 import CloseOutlined from '@mui/icons-material/CloseOutlined'
 import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined'
-import HomeOutlined from '@mui/icons-material/HomeOutlined'
-import ImageOutlined from '@mui/icons-material/ImageOutlined'
 import InsertDriveFileOutlined from '@mui/icons-material/InsertDriveFileOutlined'
+import TuneOutlined from '@mui/icons-material/TuneOutlined'
 import {
   sampleSellerTransaction,
   type AdvertisingEvent,
@@ -36,6 +37,8 @@ import {
   type UpcomingDate,
 } from './sellerTransaction'
 import { ListingDetailsSheet } from './ListingDetailsSheet'
+import { ListingOverview, type ListingOverviewVariant } from './ListingOverview'
+import { MarketingSnapshot, type MarketingSnapshotData } from './MarketingSnapshot'
 import {
   ActivityEventRow,
   AdvertisingRow,
@@ -45,6 +48,7 @@ import {
   DocumentRow,
   PeopleSection,
   PortalIconBadge,
+  PortalFooter,
   PortalSection,
   ShowingFeedbackRow,
   TaskRow,
@@ -57,6 +61,7 @@ import './seller-portal.css'
 
 type SellerPortalProps = {
   transaction?: SellerTransaction
+  marketingSnapshot?: MarketingSnapshotData
   initialListingOpen?: boolean
   basePath?: string
 }
@@ -73,7 +78,11 @@ export const portalTabs: Array<{ id: PortalTab; label: string }> = [
   { id: 'documents', label: 'Documents' },
 ]
 
-export function SellerPortal({ transaction = sampleSellerTransaction, initialListingOpen = false, basePath = '/seller' }: SellerPortalProps) {
+export function SellerPortal({ transaction = sampleSellerTransaction, marketingSnapshot, initialListingOpen = false, basePath = '/seller' }: SellerPortalProps) {
+  const [headerVariant, setHeaderVariant] = useState<ListingOverviewVariant>(() =>
+    new URLSearchParams(window.location.search).get('header') === 'full' ? 'full' : 'card',
+  )
+  const [designPanelOpen, setDesignPanelOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<PortalTab>(() => {
     const requestedTab = new URLSearchParams(window.location.search).get('section')
     if (requestedTab === 'timeline') return 'activity'
@@ -86,9 +95,8 @@ export function SellerPortal({ transaction = sampleSellerTransaction, initialLis
   const [datesDrawerOpen, setDatesDrawerOpen] = useState(false)
   const [listingOpen, setListingOpen] = useState(initialListingOpen)
   const listingReturnUrl = useRef(basePath)
-  const listing = transaction.listing
+  const leadAgent = transaction.team.find((member) => member.id === transaction.teamBrand.leadAgentId)
   const listingPath = `${basePath.replace(/\/$/, '')}/listing`
-  const address = `${listing.address}, ${listing.city}, ${listing.state} ${listing.postalCode}`
 
   useEffect(() => {
     const target = window.location.hash.slice(1)
@@ -131,11 +139,27 @@ export function SellerPortal({ transaction = sampleSellerTransaction, initialLis
     window.history.replaceState(null, '', url)
   }
 
+  function selectHeaderVariant(value: ListingOverviewVariant) {
+    setHeaderVariant(value)
+    const url = new URL(window.location.href)
+    if (value === 'full') url.searchParams.set('header', 'full')
+    else url.searchParams.delete('header')
+    window.history.replaceState(null, '', url)
+  }
+
   function showAllActivity() {
     selectTab('activity')
     requestAnimationFrame(() => {
       document.getElementById('transaction-information')?.scrollIntoView({ block: 'start' })
       document.getElementById('seller-tab-activity')?.focus({ preventScroll: true })
+    })
+  }
+
+  function showTransactionTab(value: PortalTab) {
+    selectTab(value)
+    requestAnimationFrame(() => {
+      document.getElementById('transaction-information')?.scrollIntoView({ block: 'start' })
+      document.getElementById(`seller-tab-${value}`)?.focus({ preventScroll: true })
     })
   }
 
@@ -162,7 +186,7 @@ export function SellerPortal({ transaction = sampleSellerTransaction, initialLis
       </Box>
 
       <Container maxWidth="xl" className="portal-main">
-        <ListingOverview transaction={transaction} address={address} onSeeListing={openListing} />
+        <ListingOverview transaction={transaction} onSeeListing={openListing} variant={headerVariant} />
 
         <Box className="priority-grid" aria-label="Current transaction activity">
           <PortalSection
@@ -175,8 +199,18 @@ export function SellerPortal({ transaction = sampleSellerTransaction, initialLis
           <UpcomingDatesPanel dates={transaction.upcomingDates} onSeeAll={() => setDatesDrawerOpen(true)} />
         </Box>
 
+        {marketingSnapshot && (
+          <MarketingSnapshot
+            data={marketingSnapshot}
+            advertising={transaction.advertising}
+            feedback={transaction.feedback}
+            onViewActivity={() => showTransactionTab('advertising')}
+            onViewFeedback={() => showTransactionTab('feedback')}
+          />
+        )}
+
         <Box className="transaction-lower-grid">
-          <PeopleSection team={transaction.team} viewers={transaction.viewers} brand={transaction.teamBrand} value={activePeopleTab} onChange={selectPeopleTab} />
+          <PeopleSection team={transaction.team} viewers={transaction.viewers} value={activePeopleTab} onChange={selectPeopleTab} />
 
           <Box id="transaction-information" className="transaction-sections">
             <Box component="nav" aria-label="Transaction sections" className="portal-section-nav">
@@ -219,6 +253,46 @@ export function SellerPortal({ transaction = sampleSellerTransaction, initialLis
           </Box>
         </Box>
       </Container>
+
+      <PortalFooter agent={leadAgent} brand={transaction.teamBrand} />
+
+      <Button
+        variant="contained"
+        startIcon={<TuneOutlined />}
+        className="design-panel-trigger"
+        onClick={() => setDesignPanelOpen(true)}
+        aria-label="Open design panel"
+      >
+        <Box component="span" className="design-panel-trigger-label">Design panel</Box>
+      </Button>
+
+      <Drawer
+        anchor="right"
+        open={designPanelOpen}
+        onClose={() => setDesignPanelOpen(false)}
+        slotProps={{ paper: { className: 'design-panel-paper', 'aria-label': 'Design panel' } }}
+      >
+        <Box className="design-panel-header">
+          <Box>
+            <Typography component="h2" variant="titleS">Design panel</Typography>
+            <Typography variant="bodySStandard" color="text.secondary">Preview header layouts</Typography>
+          </Box>
+          <IconButton onClick={() => setDesignPanelOpen(false)} aria-label="Close design panel">
+            <CloseOutlined />
+          </IconButton>
+        </Box>
+        <Box className="design-panel-content">
+          <Typography component="h3" variant="titleXS" id="header-layout-label">Header layout</Typography>
+          <RadioGroup
+            aria-labelledby="header-layout-label"
+            value={headerVariant}
+            onChange={(event) => selectHeaderVariant(event.target.value as ListingOverviewVariant)}
+          >
+            <FormControlLabel value="card" control={<Radio />} label="Card" />
+            <FormControlLabel value="full" control={<Radio />} label="Full width" />
+          </RadioGroup>
+        </Box>
+      </Drawer>
 
       <ListingDetailsSheet open={listingOpen} onClose={closeListing} transaction={transaction} />
 
@@ -292,72 +366,6 @@ export function SellerPortal({ transaction = sampleSellerTransaction, initialLis
   )
 }
 
-function ListingOverview({ transaction, address, onSeeListing }: { transaction: SellerTransaction; address: string; onSeeListing: () => void }) {
-  const { listing } = transaction
-  const leadAgent = transaction.team.find((member) => member.id === transaction.teamBrand.leadAgentId)
-
-  return (
-    <Paper component="section" aria-label="Listing overview" className="listing-overview">
-      <Box className="listing-photo">
-        {listing.photoUrl ? (
-          <Box component="img" src={listing.photoUrl} alt={`Listing at ${address}`} className="listing-image" />
-        ) : (
-          <Stack spacing={1} sx={{ alignItems: 'center' }} className="photo-placeholder-content">
-            <ImageOutlined />
-            <Typography variant="labelS">Listing photo</Typography>
-            <Typography variant="labelS" color="text.secondary">Sample image to be added</Typography>
-          </Stack>
-        )}
-      </Box>
-      <Box className="listing-summary">
-        <Box className="listing-summary-header">
-          <Typography variant="labelS" className="eyebrow">Seller transaction</Typography>
-          <Box
-            component="img"
-            src={transaction.teamBrand.logoUrl}
-            alt={transaction.teamBrand.name}
-            className="listing-team-logo"
-          />
-        </Box>
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }} className="listing-statuses">
-          <Chip
-            label={listing.status}
-            size="small"
-            icon={<HomeOutlined />}
-            className="status-chip"
-          />
-          <Chip
-            label={listing.published ? 'Published' : 'Not published'}
-            size="small"
-            variant="outlined"
-            className="published-chip"
-          />
-        </Stack>
-        <Typography variant="titleL" component="h1" className="listing-address">{listing.address}</Typography>
-        <Typography variant="bodySStandard" color="text.secondary" className="listing-location">
-          {listing.city}, {listing.state} {listing.postalCode}
-        </Typography>
-        <Box className="listing-feature-footer">
-          {leadAgent && (
-            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', minWidth: 0 }}>
-              <Avatar src={leadAgent.photoUrl} alt={leadAgent.name} className="listing-agent-avatar">
-                {leadAgent.initials}
-              </Avatar>
-              <Box sx={{ minWidth: 0 }}>
-                <Typography variant="labelS" className="people-kicker">Your listing agent</Typography>
-                <Typography variant="titleXS" className="listing-agent-name">{leadAgent.name}</Typography>
-              </Box>
-            </Stack>
-          )}
-          <Button onClick={onSeeListing} variant="contained" className="listing-detail-link">
-            See Listing
-          </Button>
-        </Box>
-      </Box>
-    </Paper>
-  )
-}
-
 function ActivityPanel({ events }: { events: TimelineEvent[] }) {
   return (
     <Box component="section" aria-label="Activity history" className="portal-tab-content">
@@ -378,13 +386,15 @@ function UpcomingDatesPanel({ dates, onSeeAll }: { dates: UpcomingDate[]; onSeeA
   const nextDates = [...dates].sort((first, second) => first.date.localeCompare(second.date)).slice(0, 3)
 
   return (
-    <PortalSection
-      title="Upcoming Dates"
-      prominent
-      action={<CardActionButton onClick={onSeeAll}>See all</CardActionButton>}
-    >
-      <UpcomingDatesList dates={nextDates} />
-    </PortalSection>
+    <Box className="upcoming-dates-card">
+      <PortalSection
+        title="Upcoming Dates"
+        prominent
+        action={<CardActionButton onClick={onSeeAll}>See all</CardActionButton>}
+      >
+        <UpcomingDatesList dates={nextDates} />
+      </PortalSection>
+    </Box>
   )
 }
 
