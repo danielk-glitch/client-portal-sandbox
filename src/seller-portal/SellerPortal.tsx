@@ -1,5 +1,5 @@
 /* design-build · self-critique: Clarity5 Warmth4 Restraint4 Craft4 Variety5 SlopFree5 */
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
   Avatar,
   Box,
@@ -27,9 +27,7 @@ import InsertDriveFileOutlined from '@mui/icons-material/InsertDriveFileOutlined
 import TuneOutlined from '@mui/icons-material/TuneOutlined'
 import {
   sampleSellerTransaction,
-  type AdvertisingEvent,
   type SellerTransaction,
-  type ShowingFeedback,
   type TeamNote,
   type TimelineEvent,
   type TransactionDocument,
@@ -39,18 +37,19 @@ import {
 import { ListingDetailsSheet } from './ListingDetailsSheet'
 import { ListingOverview, type ListingOverviewVariant } from './ListingOverview'
 import { MarketingSnapshot, type MarketingSnapshotData } from './MarketingSnapshot'
+import { MarketingDashboardSheet, type MarketingDashboardSection } from './MarketingDashboardSheet'
 import {
   ActivityEventRow,
-  AdvertisingRow,
+  ActivityPanel,
   DateEventList,
   DateEventRow,
   DetailGrid,
   DocumentRow,
   PeopleSection,
+  PaginatedTabList,
   PortalIconBadge,
   PortalFooter,
   PortalSection,
-  ShowingFeedbackRow,
   TaskRow,
   TeamNoteCard,
   TransactionRowList,
@@ -66,22 +65,23 @@ type SellerPortalProps = {
   basePath?: string
 }
 
-export type PortalTab = 'activity' | 'tasks' | 'advertising' | 'feedback' | 'notes' | 'details' | 'documents'
+export type PortalTab = 'activity' | 'tasks' | 'notes' | 'details' | 'documents'
 
 export const portalTabs: Array<{ id: PortalTab; label: string }> = [
   { id: 'activity', label: 'Activity' },
   { id: 'tasks', label: 'Tasks' },
-  { id: 'advertising', label: 'Advertising' },
-  { id: 'feedback', label: 'Showing feedback' },
   { id: 'notes', label: 'Notes' },
   { id: 'details', label: 'Details' },
   { id: 'documents', label: 'Documents' },
 ]
 
 export function SellerPortal({ transaction = sampleSellerTransaction, marketingSnapshot, initialListingOpen = false, basePath = '/seller' }: SellerPortalProps) {
-  const [headerVariant, setHeaderVariant] = useState<ListingOverviewVariant>(() =>
-    new URLSearchParams(window.location.search).get('header') === 'full' ? 'full' : 'card',
-  )
+  const portalRef = useRef<HTMLDivElement>(null)
+  const [headerVariant, setHeaderVariant] = useState<ListingOverviewVariant>(() => {
+    const requestedHeader = new URLSearchParams(window.location.search).get('header')
+    if (requestedHeader === 'card' || requestedHeader === 'full') return requestedHeader
+    return 'full'
+  })
   const [designPanelOpen, setDesignPanelOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<PortalTab>(() => {
     const requestedTab = new URLSearchParams(window.location.search).get('section')
@@ -93,15 +93,55 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
   )
   const [selectedDocument, setSelectedDocument] = useState<TransactionDocument | null>(null)
   const [datesDrawerOpen, setDatesDrawerOpen] = useState(false)
+  const [marketingDashboardSection, setMarketingDashboardSection] = useState<MarketingDashboardSection | null>(() => {
+    const requestedDetail = new URLSearchParams(window.location.search).get('marketing')
+    if (requestedDetail === 'advertising' || requestedDetail === 'activity') return 'activity'
+    return requestedDetail === 'overview' || requestedDetail === 'materials' || requestedDetail === 'feedback' ? requestedDetail : null
+  })
   const [listingOpen, setListingOpen] = useState(initialListingOpen)
   const listingReturnUrl = useRef(basePath)
   const leadAgent = transaction.team.find((member) => member.id === transaction.teamBrand.leadAgentId)
   const listingPath = `${basePath.replace(/\/$/, '')}/listing`
 
+  useLayoutEffect(() => {
+    if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    const blocks = portalRef.current?.querySelectorAll<HTMLElement>(
+      '.portal-main > .listing-overview, .priority-grid > .portal-section, .priority-grid > .upcoming-dates-card, .portal-main > .marketing-snapshot, .transaction-lower-grid > .people-section, .transaction-lower-grid > .transaction-sections, .portal-footer',
+    )
+    if (!blocks) return
+
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue
+        const block = entry.target as HTMLElement
+        block.dataset.portalEntrance = 'visible'
+        observer.unobserve(block)
+      }
+    }, { threshold: 0.05 })
+
+    for (const block of blocks) {
+      if (block.dataset.portalEntrance === 'visible') continue
+      block.dataset.portalEntrance = 'pending'
+      observer.observe(block)
+    }
+
+    return () => observer.disconnect()
+  }, [marketingSnapshot])
+
   useEffect(() => {
     const target = window.location.hash.slice(1)
     if (target === 'transaction-information' || target === 'people') {
       document.getElementById(target)?.scrollIntoView()
+    }
+  }, [])
+
+  useEffect(() => {
+    const url = new URL(window.location.href)
+    const section = url.searchParams.get('section')
+    if (section && !portalTabs.some((tab) => tab.id === section)) {
+      url.searchParams.delete('section')
+      window.history.replaceState(null, '', url)
     }
   }, [])
 
@@ -142,7 +182,7 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
   function selectHeaderVariant(value: ListingOverviewVariant) {
     setHeaderVariant(value)
     const url = new URL(window.location.href)
-    if (value === 'full') url.searchParams.set('header', 'full')
+    if (value === 'card') url.searchParams.set('header', 'card')
     else url.searchParams.delete('header')
     window.history.replaceState(null, '', url)
   }
@@ -155,16 +195,17 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
     })
   }
 
-  function showTransactionTab(value: PortalTab) {
-    selectTab(value)
-    requestAnimationFrame(() => {
-      document.getElementById('transaction-information')?.scrollIntoView({ block: 'start' })
-      document.getElementById(`seller-tab-${value}`)?.focus({ preventScroll: true })
-    })
+  function closeMarketingDetail() {
+    setMarketingDashboardSection(null)
+    const url = new URL(window.location.href)
+    if (url.searchParams.has('marketing')) {
+      url.searchParams.delete('marketing')
+      window.history.replaceState(null, '', url)
+    }
   }
 
   return (
-    <Box className="seller-portal">
+    <Box className="seller-portal" ref={portalRef}>
       <Box component="header" className="portal-topbar">
         <Container maxWidth="xl" className="portal-topbar-inner">
           <Box component="a" href="/" className="portal-brand-link" aria-label="PLACE client portal home">
@@ -202,10 +243,9 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
         {marketingSnapshot && (
           <MarketingSnapshot
             data={marketingSnapshot}
-            advertising={transaction.advertising}
             feedback={transaction.feedback}
-            onViewActivity={() => showTransactionTab('advertising')}
-            onViewFeedback={() => showTransactionTab('feedback')}
+            onOpenDashboard={() => setMarketingDashboardSection('overview')}
+            onViewFeedback={() => setMarketingDashboardSection('feedback')}
           />
         )}
 
@@ -242,8 +282,6 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
             >
               {activeTab === 'activity' && <ActivityPanel events={transaction.timeline} />}
               {activeTab === 'tasks' && <TasksPanel tasks={transaction.tasks} />}
-              {activeTab === 'advertising' && <AdvertisingPanel events={transaction.advertising} />}
-              {activeTab === 'feedback' && <FeedbackPanel feedback={transaction.feedback} />}
               {activeTab === 'notes' && <NotesPanel notes={transaction.notes} />}
               {activeTab === 'details' && <DetailsPanel transaction={transaction} />}
               {activeTab === 'documents' && (
@@ -295,6 +333,16 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
       </Drawer>
 
       <ListingDetailsSheet open={listingOpen} onClose={closeListing} transaction={transaction} />
+
+      {marketingSnapshot && (
+        <MarketingDashboardSheet
+          open={marketingDashboardSection !== null}
+          onClose={closeMarketingDetail}
+          initialSection={marketingDashboardSection ?? 'overview'}
+          transaction={transaction}
+          data={marketingSnapshot}
+        />
+      )}
 
       <Drawer
         anchor="right"
@@ -366,14 +414,6 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
   )
 }
 
-function ActivityPanel({ events }: { events: TimelineEvent[] }) {
-  return (
-    <Box component="section" aria-label="Activity history" className="portal-tab-content">
-      <TimelineEventsList events={events} />
-    </Box>
-  )
-}
-
 function TimelineEventsList({ events }: { events: TimelineEvent[] }) {
   return (
     <Box component="ol" className="activity-event-list">
@@ -429,29 +469,13 @@ function PastEventsList({ events }: { events: TimelineEvent[] }) {
 function TasksPanel({ tasks }: { tasks: TransactionTask[] }) {
   return (
     <Box component="section" aria-label="Open tasks" className="portal-tab-content">
-      <TransactionRowList>
-        {tasks.map((task) => <TaskRow key={task.id} task={task} />)}
-      </TransactionRowList>
-    </Box>
-  )
-}
-
-function AdvertisingPanel({ events }: { events: AdvertisingEvent[] }) {
-  return (
-    <Box component="section" aria-label="Advertising activity" className="portal-tab-content">
-      <TransactionRowList>
-        {events.map((event) => <AdvertisingRow key={event.id} event={event} />)}
-      </TransactionRowList>
-    </Box>
-  )
-}
-
-function FeedbackPanel({ feedback }: { feedback: ShowingFeedback[] }) {
-  return (
-    <Box component="section" aria-label="Showing feedback" className="portal-tab-content">
-      <TransactionRowList>
-        {feedback.map((item) => <ShowingFeedbackRow key={item.id} feedback={item} />)}
-      </TransactionRowList>
+      <PaginatedTabList items={tasks} itemName="tasks" ariaLabel="Task pages">
+        {(visibleTasks) => (
+          <TransactionRowList>
+            {visibleTasks.map((task) => <TaskRow key={task.id} task={task} />)}
+          </TransactionRowList>
+        )}
+      </PaginatedTabList>
     </Box>
   )
 }
@@ -459,9 +483,13 @@ function FeedbackPanel({ feedback }: { feedback: ShowingFeedback[] }) {
 function NotesPanel({ notes }: { notes: TeamNote[] }) {
   return (
     <Box component="section" aria-label="Team notes" className="portal-tab-content">
-      <Stack className="notes-list" spacing={2}>
-        {notes.map((note) => <TeamNoteCard key={note.id} note={note} />)}
-      </Stack>
+      <PaginatedTabList items={notes} itemName="notes" ariaLabel="Note pages">
+        {(visibleNotes) => (
+          <Stack className="notes-list" spacing={2}>
+            {visibleNotes.map((note) => <TeamNoteCard key={note.id} note={note} />)}
+          </Stack>
+        )}
+      </PaginatedTabList>
     </Box>
   )
 }
@@ -505,9 +533,13 @@ function DetailsPanel({ transaction }: { transaction: SellerTransaction }) {
 function DocumentsPanel({ documents, onOpen }: { documents: TransactionDocument[]; onOpen: (document: TransactionDocument) => void }) {
   return (
     <Box component="section" aria-label="Transaction documents" className="portal-tab-content">
-      <TransactionRowList>
-        {documents.map((document) => <DocumentRow key={document.id} document={document} onPreview={onOpen} />)}
-      </TransactionRowList>
+      <PaginatedTabList items={documents} itemName="documents" ariaLabel="Document pages">
+        {(visibleDocuments) => (
+          <TransactionRowList>
+            {visibleDocuments.map((document) => <DocumentRow key={document.id} document={document} onPreview={onOpen} />)}
+          </TransactionRowList>
+        )}
+      </PaginatedTabList>
     </Box>
   )
 }

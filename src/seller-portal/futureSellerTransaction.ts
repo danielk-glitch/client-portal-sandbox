@@ -1,9 +1,153 @@
-import { sampleSellerTransaction, type SellerTransaction } from './sellerTransaction'
+import { sampleSellerTransaction, type SellerTransaction, type TimelineEvent } from './sellerTransaction'
 import type { MarketingSnapshotData } from './MarketingSnapshot'
+import { sampleMarketingMaterials } from './marketingMaterials'
 
-export const futureSellerTransaction: SellerTransaction = structuredClone(sampleSellerTransaction)
+const additionalTimelineEvents: TimelineEvent[] = [
+  {
+    id: 'event-5',
+    title: 'In-person showing completed',
+    description: 'A buyer toured your home with their agent.',
+    occurredAt: '09/10/2026 · 02:15 PM',
+    actor: 'Ben Kinney Team',
+    type: 'showing',
+  },
+  {
+    id: 'event-6',
+    title: 'Neighborhood mailers delivered',
+    description: 'The latest round of listing mailers reached nearby homes.',
+    occurredAt: '09/09/2026 · 11:20 AM',
+    actor: 'Kendall Ortiz',
+    type: 'listing',
+  },
+  {
+    id: 'event-7',
+    title: 'Social campaign launched',
+    description: 'Your listing was featured across the team’s social channels.',
+    occurredAt: '09/08/2026 · 09:30 AM',
+    actor: 'Kendall Ortiz',
+    type: 'listing',
+  },
+  {
+    id: 'event-8',
+    title: 'Open house summary shared',
+    description: 'Your team sent a recap of attendance and buyer questions.',
+    occurredAt: '09/07/2026 · 04:45 PM',
+    actor: 'Avery Coleman',
+    type: 'note',
+  },
+  {
+    id: 'event-9',
+    title: 'Open house held',
+    description: 'Visitors toured the home during the weekend open house.',
+    occurredAt: '09/06/2026 · 03:00 PM',
+    actor: 'Avery Coleman',
+    type: 'showing',
+  },
+  {
+    id: 'event-10',
+    title: 'Video tour added',
+    description: 'The property video is now part of the online listing.',
+    occurredAt: '09/04/2026 · 12:10 PM',
+    actor: 'Robin Hayes',
+    type: 'listing',
+  },
+  {
+    id: 'event-11',
+    title: 'Listing mailers sent',
+    description: 'Printed property details were mailed to nearby homes.',
+    occurredAt: '09/03/2026 · 10:05 AM',
+    actor: 'Kendall Ortiz',
+    type: 'listing',
+  },
+  {
+    id: 'event-12',
+    title: 'First showing feedback received',
+    description: 'Your team shared an early buyer’s impressions of the home.',
+    occurredAt: '09/02/2026 · 05:40 PM',
+    actor: 'Ben Kinney Team',
+    type: 'showing',
+  },
+  {
+    id: 'event-13',
+    title: 'Listing published',
+    description: 'Your home went live for buyers to discover.',
+    occurredAt: '09/01/2026 · 08:55 AM',
+    actor: 'Robin Hayes',
+    type: 'listing',
+  },
+  {
+    id: 'event-14',
+    title: 'Marketing plan approved',
+    description: 'You approved the launch plan and listing materials.',
+    occurredAt: '08/30/2026 · 01:25 PM',
+    actor: 'Tim Bennett',
+    type: 'task',
+  },
+  {
+    id: 'event-15',
+    title: 'Listing preparation completed',
+    description: 'Your team finished the initial listing checklist.',
+    occurredAt: '08/28/2026 · 03:15 PM',
+    actor: 'Avery Coleman',
+    type: 'task',
+  },
+  {
+    id: 'event-16',
+    title: 'Photography scheduled',
+    description: 'Your team booked the property photo session.',
+    occurredAt: '08/26/2026 · 11:10 AM',
+    actor: 'Robin Hayes',
+    type: 'listing',
+  },
+  {
+    id: 'event-17',
+    title: 'Home preparation notes shared',
+    description: 'Your team sent suggestions for getting the home ready to show.',
+    occurredAt: '08/25/2026 · 02:35 PM',
+    actor: 'Avery Coleman',
+    type: 'note',
+  },
+  {
+    id: 'event-18',
+    title: 'Listing price reviewed',
+    description: 'You and Avery discussed the proposed listing price.',
+    occurredAt: '08/24/2026 · 04:20 PM',
+    actor: 'Avery Coleman',
+    type: 'note',
+  },
+  {
+    id: 'event-19',
+    title: 'Property details received',
+    description: 'You shared the information needed to prepare the listing.',
+    occurredAt: '08/22/2026 · 09:15 AM',
+    actor: 'Tim Bennett',
+    type: 'document',
+  },
+  {
+    id: 'event-20',
+    title: 'Listing team toured the home',
+    description: 'Your team walked through the property and noted its key features.',
+    occurredAt: '08/20/2026 · 01:40 PM',
+    actor: 'Avery Coleman',
+    type: 'listing',
+  },
+  {
+    id: 'event-21',
+    title: 'Listing consultation completed',
+    description: 'You met with Avery to discuss your selling goals and next steps.',
+    occurredAt: '08/18/2026 · 10:30 AM',
+    actor: 'Avery Coleman',
+    type: 'note',
+  },
+]
+
+export const futureSellerTransaction: SellerTransaction = {
+  ...structuredClone(sampleSellerTransaction),
+  timeline: [...sampleSellerTransaction.timeline, ...additionalTimelineEvents],
+}
 
 export const futureMarketingSnapshot: MarketingSnapshotData = {
+  materials: sampleMarketingMaterials,
   channels: [
     { label: 'Mailer campaigns', count: 2, unit: 'sent' },
     { label: 'Digital ads', count: 4, unit: 'live' },

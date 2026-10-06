@@ -1,0 +1,46 @@
+.tab-list-content {
+  min-width: 0;
+  scroll-margin-top: 72px;
+}
+
+.tab-list-pagination {
+  margin-top: 32px;
+  padding-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid var(--color-semantic-stroke-primary-light);
+}
+
+.tab-list-pagination .MuiPaginationItem-root {
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 8px;
+  color: var(--color-semantic-text-dark);
+}
+
+.tab-list-pagination .MuiPaginationItem-root:hover {
+  background: var(--color-semantic-surface-primary-darkest);
+}
+
+.tab-list-pagination .MuiPaginationItem-root.Mui-selected {
+  color: var(--color-semantic-text-on-color-primary);
+  background: var(--color-semantic-text-dark);
+}
+
+.tab-list-pagination .MuiPaginationItem-root.Mui-selected:hover {
+  background: var(--color-semantic-text-primary);
+}
+
+.tab-list-pagination .MuiPaginationItem-root:focus-visible {
+  outline: 2px solid var(--color-semantic-stroke-primary-dark);
+  outline-offset: 2px;
+}
+
+@media (max-width: 620px) {
+  .tab-list-pagination {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

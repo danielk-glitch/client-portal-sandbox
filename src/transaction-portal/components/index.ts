@@ -1,4 +1,6 @@
 export { ActivityEventRow } from './ActivityEventRow'
+export { ActivityPanel } from './ActivityPanel'
+export { PaginatedTabList } from './PaginatedTabList'
 export { TeamNoteCard } from './TeamNoteCard'
 export { PeopleSection, type PeopleTab } from './PeopleSection'
 export { PartnerBrandLockup, type PartnerBrand } from './PartnerBrandLockup'

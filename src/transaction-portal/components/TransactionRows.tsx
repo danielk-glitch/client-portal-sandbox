@@ -2,6 +2,8 @@ import type { ReactNode } from 'react'
 import { Avatar, Box, Button, Chip, IconButton, Rating, Stack, Typography } from '@mui/material'
 import CampaignOutlined from '@mui/icons-material/CampaignOutlined'
 import EmailOutlined from '@mui/icons-material/EmailOutlined'
+import Favorite from '@mui/icons-material/Favorite'
+import FavoriteBorder from '@mui/icons-material/FavoriteBorder'
 import InsertDriveFileOutlined from '@mui/icons-material/InsertDriveFileOutlined'
 import PhoneOutlined from '@mui/icons-material/PhoneOutlined'
 import type {
@@ -96,15 +98,17 @@ export function TaskRow({ task }: { task: TransactionTask }) {
   )
 }
 
-export function AdvertisingRow({ event }: { event: AdvertisingEvent }) {
+export function AdvertisingRow({ event, compact = false }: { event: AdvertisingEvent; compact?: boolean }) {
+  const [month, day, year] = event.occurredAt.split(' · ')[0].split('/')
+  const shortDate = `${month}/${day}/${year.slice(-2)}`
   return (
-    <Stack component="li" direction={{ xs: 'column', sm: 'row' }} sx={{ alignItems: { sm: 'center' }, gap: { xs: 1, sm: 2 } }} className="portal-advertising-row">
-      <PortalIconBadge><CampaignOutlined /></PortalIconBadge>
+    <Stack component="li" direction={compact ? 'column' : { xs: 'column', sm: 'row' }} sx={{ alignItems: compact ? 'flex-start' : { sm: 'center' }, gap: compact ? 0.75 : { xs: 1, sm: 2 } }} className="portal-advertising-row">
+      {!compact && <PortalIconBadge><CampaignOutlined /></PortalIconBadge>}
       <Box className="portal-advertising-copy">
         <Typography variant="bodySStandard">{event.action} on <strong>{event.platform}</strong></Typography>
-        <Typography variant="labelS" color="text.secondary">Added by {event.postedBy}</Typography>
+        <Typography variant="labelS" color="text.secondary">Added by {event.postedBy}{compact && ` · ${shortDate}`}</Typography>
       </Box>
-      <Typography variant="labelS" color="text.secondary" className="portal-advertising-date">{event.occurredAt}</Typography>
+      {!compact && <Typography variant="labelS" color="text.secondary" className="portal-advertising-date">{event.occurredAt}</Typography>}
     </Stack>
   )
 }
@@ -119,9 +123,7 @@ export function ShowingFeedbackRow({ feedback }: { feedback: ShowingFeedback }) 
           <Typography variant="bodySStandard" color="text.secondary">{feedback.showingType}</Typography>
         </Stack>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }} className="portal-feedback-interest">
-          <Typography variant="labelS" color="text.secondary">Interest</Typography>
-          <Rating value={feedback.interest} max={5} readOnly size="small" aria-label={`Interest ${feedback.interest} out of 5`} />
-          <Typography variant="labelS" className="portal-tabular-numbers">{feedback.interest}/5</Typography>
+          <Rating value={feedback.interest} max={5} readOnly size="small" icon={<Favorite fontSize="inherit" />} emptyIcon={<FavoriteBorder fontSize="inherit" />} aria-label={`Interest ${feedback.interest} out of 5`} />
         </Stack>
       </Stack>
       <Typography variant="bodySStandard" className="portal-feedback-quote">“{feedback.feedback}”</Typography>

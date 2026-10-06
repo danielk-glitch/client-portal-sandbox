@@ -118,6 +118,8 @@
   text-transform: uppercase;
 }
 
+.portal-date-stamp .MuiTypography-root:last-child { font-size: 1.375rem; }
+
 .portal-date-copy {
   min-width: 0;
   display: grid;
@@ -173,7 +175,8 @@
 .portal-feedback-row:first-child { padding-top: 0; }
 .portal-feedback-row:last-child { padding-bottom: 0; }
 
-.portal-feedback-interest .MuiRating-root { color: var(--color-semantic-text-caution); }
+.portal-feedback-interest .MuiRating-root { color: var(--color-primitive-base-black); }
+.portal-feedback-interest .MuiRating-iconEmpty { color: var(--color-primitive-neutral-400); opacity: 1; }
 .portal-metadata-separator.MuiTypography-root { color: var(--color-semantic-text-lightest); }
 .portal-tabular-numbers.MuiTypography-root { font-variant-numeric: tabular-nums; }
 

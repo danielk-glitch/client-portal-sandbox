@@ -24,9 +24,11 @@ import { primaryButtonHoverShadow } from '../theme'
 import { ListingDetailsSheet } from '../seller-portal/ListingDetailsSheet'
 import { ListingOverview } from '../seller-portal/ListingOverview'
 import { MarketingSnapshot } from '../seller-portal/MarketingSnapshot'
-import { futureMarketingSnapshot } from '../seller-portal/futureSellerTransaction'
+import { MarketingDashboardSheet, type MarketingDashboardSection } from '../seller-portal/MarketingDashboardSheet'
+import { futureMarketingSnapshot, futureSellerTransaction } from '../seller-portal/futureSellerTransaction'
 import {
   ActivityEventRow,
+  ActivityPanel,
   AdvertisingRow,
   DateEventList,
   DateEventRow,
@@ -289,9 +291,9 @@ function SegmentedSwitchSection() {
     { value: 'seller', label: 'Seller' },
     { value: 'buyer', label: 'Buyer' },
   ]
-  const peopleOptions: readonly SegmentedSwitchOption<'team' | 'viewers'>[] = [
-    { value: 'team', label: 'Team' },
-    { value: 'viewers', label: 'Viewers' },
+  const viewOptions: readonly SegmentedSwitchOption<'list' | 'map'>[] = [
+    { value: 'list', label: 'List' },
+    { value: 'map', label: 'Map' },
   ]
 
   return (
@@ -307,7 +309,7 @@ function SegmentedSwitchSection() {
           <SegmentedSwitch options={audienceOptions} value={audience} onChange={setAudience} aria-label="Client view" />
         </Specimen>
         <Specimen label="Compact / S">
-          <SegmentedSwitch options={peopleOptions} defaultValue="team" size="s" aria-label="People view" />
+          <SegmentedSwitch options={viewOptions} defaultValue="list" size="s" aria-label="Search view" />
         </Specimen>
         <Specimen label="Disabled">
           <SegmentedSwitch options={audienceOptions} defaultValue="seller" disabled aria-label="Unavailable client view" />
@@ -589,6 +591,7 @@ function PortalPatternSample({ title, children }: { title: string; children: Rea
 
 function PortalPatternsSection() {
   const [peopleTab, setPeopleTab] = useState<PeopleTab>('team')
+  const [marketingDashboardSection, setMarketingDashboardSection] = useState<MarketingDashboardSection | null>(null)
   const [previewDocument, setPreviewDocument] = useState<TransactionDocument | null>(null)
   const [listingPreviewOpen, setListingPreviewOpen] = useState(false)
   const sample = sampleSellerTransaction
@@ -603,9 +606,12 @@ function PortalPatternsSection() {
     >
       <Box component="details" sx={{ borderTop: 1, borderBottom: 1, borderColor: 'divider', py: 2, '& summary': { cursor: 'pointer', typography: 'labelM', py: 1, '&:focus-visible': { outline: '2px solid var(--color-semantic-stroke-primary-dark)', outlineOffset: 3 } } }}>
         <Box component="summary">Show portal components</Box>
-        <Stack spacing={5} sx={{ pt: 4 }}>
+      <Stack spacing={5} sx={{ pt: 4 }}>
+          <Typography variant="bodySStandard" color="text.secondary">
+            On the seller page, the listing header and main blocks fade upward by 8px as they first enter view. Paired cards follow 55ms apart. The entrance plays once, stays off tab changes, and is removed for reduced motion.
+          </Typography>
           <PortalPatternSample title="Full-width listing header">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>The full-width variant groups the agent, side-by-side contact links, and partner logos in one card. The card variant keeps its compact agent row and logos in the header. Both share the same listing header component, photo fade, and status chips.</Typography>
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>The full-width variant anchors the address and listing action at the lower left, with the agent, contact links, and partner logos in a separate card at the far right. The compact variant keeps its agent row and logos in the header. Both share the same photo fade and status chips.</Typography>
             <Box sx={{ overflow: 'hidden', borderRadius: 2, '& .listing-overview--full.MuiPaper-root': { width: '100%', minHeight: 450, marginLeft: 0 }, '& .listing-overview--full .listing-summary': { marginLeft: 24 } }}>
               <ListingOverview
                 transaction={sample}
@@ -632,6 +638,9 @@ function PortalPatternsSection() {
             </Stack>
           </PortalPatternSample>
           <PortalPatternSample title="People section and rows">
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
+              Your Team and Viewers each fill half the tab bar. Reduced top padding balances the tab label with the space below the last row. Tabs change the visible panel and support keyboard navigation.
+            </Typography>
             <Box sx={{ maxWidth: 460 }}>
               <PeopleSection team={sample.team.slice(0, 3)} viewers={sample.viewers} value={peopleTab} onChange={setPeopleTab} />
             </Box>
@@ -663,9 +672,10 @@ function PortalPatternsSection() {
           </PortalPatternSample>
           <PortalPatternSample title="Listing marketing snapshot">
             <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
-              A full-width future seller preview. Six channel rollups use Metric L counts and Label M status text. Advertising and showing feedback share a secondary dark surface with a divider between them; the divider becomes horizontal when the notes stack. The actions open their corresponding portal tabs.
+              The summary card opens a centered marketing dashboard with prominent channel metrics, all produced materials, advertising updates, and showing feedback. Its feedback See all action opens the same dashboard at the feedback section. Materials use sample previews built from the listing photos and can be opened for a larger view.
             </Typography>
-            <MarketingSnapshot data={futureMarketingSnapshot} advertising={sample.advertising} feedback={sample.feedback} onViewActivity={() => { window.location.href = '/seller/future-v1?section=advertising#transaction-information' }} onViewFeedback={() => { window.location.href = '/seller/future-v1?section=feedback#transaction-information' }} />
+            <MarketingSnapshot data={futureMarketingSnapshot} feedback={sample.feedback} onOpenDashboard={() => setMarketingDashboardSection('overview')} onViewFeedback={() => setMarketingDashboardSection('feedback')} />
+            <MarketingDashboardSheet open={marketingDashboardSection !== null} onClose={() => setMarketingDashboardSection(null)} initialSection={marketingDashboardSection ?? 'overview'} transaction={futureSellerTransaction} data={futureMarketingSnapshot} />
           </PortalPatternSample>
           <PortalPatternSample title="Date event rows">
             <Box sx={{ maxWidth: 600 }}>
@@ -680,6 +690,14 @@ function PortalPatternsSection() {
           <PortalPatternSample title="Activity event rows">
             <Box component="ol" className="activity-event-list" sx={{ maxWidth: 760 }}>
               {sample.timeline.slice(0, 2).map(event => <ActivityEventRow key={event.id} event={event} />)}
+            </Box>
+          </PortalPatternSample>
+          <PortalPatternSample title="Paginated activity history">
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
+              List tabs show up to 10 rows per page, then reveal page controls and a visible range count. This future seller sample has 21 activity updates across three pages; the Recent activity card stays limited to three.
+            </Typography>
+            <Box sx={{ maxWidth: 760, border: 1, borderColor: 'divider', borderRadius: 2 }}>
+              <ActivityPanel events={futureSellerTransaction.timeline} />
             </Box>
           </PortalPatternSample>
           <PortalPatternSample title="Task row">

@@ -3,103 +3,187 @@
   min-width: 0;
   margin-top: 20px;
   padding: 32px;
-  border-color: color-mix(in oklch, var(--color-semantic-text-on-color-primary) 14%, transparent);
+  border-color: var(--color-semantic-stroke-primary-light);
   border-radius: 14px;
-  color: var(--color-semantic-text-on-color-primary);
-  background: var(--color-semantic-surface-reverse-primary);
+  color: var(--color-semantic-text-dark);
+  background: var(--color-semantic-surface-primary);
+  box-shadow: var(--elevation-raised);
 }
 
 .marketing-snapshot-header {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
-  gap: 24px;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-semantic-stroke-primary-lightest);
 }
 
-.marketing-snapshot-eyebrow.MuiTypography-root,
-.marketing-snapshot-label.MuiTypography-root {
-  display: block;
-  color: var(--color-semantic-text-on-color-light);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.marketing-snapshot-eyebrow.MuiTypography-root { margin-bottom: 10px; }
-
-.marketing-snapshot-action.MuiButton-root,
 .marketing-snapshot-see-all.MuiButton-root {
   min-height: 44px;
   padding-inline: 12px;
   flex: 0 0 auto;
-  color: var(--color-semantic-text-on-color-primary);
+  color: var(--color-semantic-text-dark);
   text-transform: none;
 }
 
-.marketing-snapshot-action.MuiButton-root { margin: -8px -12px 0 0; }
 .marketing-snapshot-see-all.MuiButton-root { min-width: 0; margin: -12px -12px -12px 0; }
 
-.marketing-snapshot-action.MuiButton-root:hover,
 .marketing-snapshot-see-all.MuiButton-root:hover {
-  background: color-mix(in oklch, var(--color-semantic-text-on-color-primary) 12%, transparent);
+  background: var(--color-semantic-surface-primary-darkest);
 }
 
 .marketing-snapshot-action.MuiButton-root:focus-visible,
 .marketing-snapshot-see-all.MuiButton-root:focus-visible {
-  outline: 2px solid var(--color-semantic-text-on-color-primary);
+  outline: 2px solid var(--color-semantic-stroke-primary-dark);
   outline-offset: 2px;
+}
+
+.marketing-snapshot-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr);
+  gap: 40px;
+  margin-top: 20px;
+  align-items: stretch;
 }
 
 .marketing-snapshot-channels {
   min-width: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0 32px;
-  margin-top: 30px;
 }
 
 .marketing-snapshot-channel {
   min-width: 0;
-  min-height: 116px;
-  padding: 13px 0 14px;
+  min-height: 100px;
+  padding: 16px 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: end;
+  align-items: end;
+  column-gap: 14px;
+  border-top: 1px solid var(--color-semantic-stroke-primary-light);
+}
+
+.marketing-snapshot-channel:nth-child(-n + 2) { border-top: 0; }
+
+.marketing-snapshot-channel-label.MuiTypography-root {
+  min-width: 0;
+  text-wrap: balance;
+}
+.marketing-snapshot-channel-value {
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  border-top: 1px solid color-mix(in oklch, var(--color-semantic-text-on-color-primary) 22%, transparent);
+  align-items: flex-end;
+  gap: 6px;
+  text-align: right;
 }
-
-.marketing-snapshot-channel .MuiTypography-bodySStandard { text-wrap: pretty; }
-.marketing-snapshot-channel-value { display: flex; align-items: baseline; gap: 7px; }
 .marketing-snapshot-channel-value .MuiTypography-root { font-variant-numeric: tabular-nums; }
-.marketing-snapshot-channel-value .MuiTypography-labelM { color: var(--color-semantic-text-on-color-light); }
+.marketing-snapshot-channel-value .MuiTypography-labelS { color: var(--color-semantic-text-primary); }
 
-.marketing-snapshot-footer {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: 30px;
+.marketing-snapshot-feedback {
+  min-width: 0;
   padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
   border-radius: 10px;
-  background: var(--color-semantic-surface-reverse-secondary);
+  background: var(--color-semantic-surface-primary-dark);
 }
 
-.marketing-snapshot-note { min-width: 0; }
-.marketing-snapshot-note:first-child { padding-right: 32px; }
-.marketing-snapshot-note + .marketing-snapshot-note {
-  padding-left: 32px;
-  border-left: 1px solid color-mix(in oklch, var(--color-semantic-text-on-color-primary) 22%, transparent);
+.marketing-snapshot-feedback-heading {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
-.marketing-snapshot-note-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.marketing-snapshot-note .MuiTypography-bodySStandard { display: block; margin-top: 8px; max-width: 60ch; text-wrap: pretty; }
+
+.marketing-snapshot-label.MuiTypography-root {
+  display: block;
+  color: var(--color-semantic-text-primary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.marketing-snapshot-feedback-slides {
+  min-width: 0;
+  padding-block: 24px;
+  display: grid;
+  flex: 1;
+  align-items: center;
+}
+.marketing-snapshot-feedback-slide {
+  grid-area: 1 / 1;
+  min-width: 0;
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 180ms ease, visibility 180ms ease;
+}
+.marketing-snapshot-feedback-slide[data-active="true"] {
+  opacity: 1;
+  visibility: visible;
+}
+.marketing-snapshot-feedback-slide .MuiRating-root { color: var(--color-primitive-base-black); }
+.marketing-snapshot-feedback-slide .MuiRating-iconEmpty { color: var(--color-primitive-neutral-400); opacity: 1; }
+.marketing-snapshot-feedback-quote.MuiTypography-root { text-wrap: pretty; }
+.marketing-snapshot-feedback-footer {
+  min-width: 0;
+  padding-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  border-top: 1px solid var(--color-semantic-stroke-primary-light);
+}
+.marketing-snapshot-feedback-meta.MuiTypography-root {
+  min-width: 0;
+  flex: 1 1 150px;
+  color: var(--color-semantic-text-primary);
+}
+.marketing-snapshot-feedback-controls {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.marketing-snapshot-feedback-controls .MuiIconButton-root {
+  width: 40px;
+  height: 40px;
+  color: var(--color-semantic-text-dark);
+  border: 1px solid var(--color-semantic-stroke-primary-light);
+}
+.marketing-snapshot-feedback-controls .MuiIconButton-root:hover {
+  background: var(--color-semantic-surface-primary-darkest);
+}
+.marketing-snapshot-feedback-controls .MuiIconButton-root:focus-visible {
+  outline: 2px solid var(--color-semantic-stroke-primary-dark);
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .marketing-snapshot-content { grid-template-columns: 1fr; gap: 24px; }
+}
 
 @media (max-width: 700px) {
   .marketing-snapshot.MuiPaper-root { margin-top: 14px; padding: 24px; }
-  .marketing-snapshot-header { flex-direction: column; gap: 12px; }
-  .marketing-snapshot-action.MuiButton-root { margin: 0 0 0 -12px; }
-  .marketing-snapshot-channels { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 18px; margin-top: 22px; }
-  .marketing-snapshot-footer { grid-template-columns: 1fr; padding: 20px; }
-  .marketing-snapshot-note:first-child { padding: 0 0 24px; }
-  .marketing-snapshot-note + .marketing-snapshot-note {
-    padding: 24px 0 0;
-    border-left: 0;
-    border-top: 1px solid color-mix(in oklch, var(--color-semantic-text-on-color-primary) 22%, transparent);
-  }
+  .marketing-snapshot-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .marketing-snapshot-action.MuiButton-root { margin: 0 0 0 -16px; }
+  .marketing-snapshot-content { margin-top: 22px; }
+  .marketing-snapshot-channels { gap: 0 18px; }
+  .marketing-snapshot-feedback { padding: 20px; }
+}
+
+@media (max-width: 580px) {
+  .marketing-snapshot-channels { grid-template-columns: 1fr; }
+  .marketing-snapshot-channel { min-height: 78px; }
+  .marketing-snapshot-channel:nth-child(2) { border-top: 1px solid var(--color-semantic-stroke-primary-light); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketing-snapshot-feedback-slide { transition: none; }
 }

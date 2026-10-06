@@ -55,39 +55,12 @@ export function ListingOverview({ transaction, onSeeListing, variant = 'card' }:
         >
           {listing.city}, {listing.state} {listing.postalCode}
         </Typography>
-        <Box className="listing-feature-footer">
-          {leadAgent && variant === 'full' && (
-            <Box className="listing-agent-feature">
-              <Stack direction="row" spacing={1.75} sx={{ alignItems: 'center', minWidth: 0 }}>
-                <Avatar src={leadAgent.photoUrl} alt={leadAgent.name} className="listing-agent-feature-avatar">
-                  {leadAgent.initials}
-                </Avatar>
-                <Box sx={{ minWidth: 0 }}>
-                  <Typography variant="labelS" className="listing-agent-feature-label">Your listing agent</Typography>
-                  <Typography variant="titleS" className="listing-agent-feature-name">{leadAgent.name}</Typography>
-                </Box>
-              </Stack>
-              {(leadAgent.phone || leadAgent.email) && (
-                <Box className="listing-agent-feature-contacts">
-                  {leadAgent.phone && (
-                    <Box component="a" href={`tel:${leadAgent.phone}`} className="listing-agent-feature-contact">
-                      <Typography variant="labelS">Phone</Typography>
-                      <Typography variant="bodySStandard">{formatPhoneNumber(leadAgent.phone)}</Typography>
-                    </Box>
-                  )}
-                  {leadAgent.email && (
-                    <Box component="a" href={`mailto:${leadAgent.email}`} className="listing-agent-feature-contact">
-                      <Typography variant="labelS">Email</Typography>
-                      <Typography variant="bodySStandard">{leadAgent.email}</Typography>
-                    </Box>
-                  )}
-                </Box>
-              )}
-              <Box className="listing-agent-feature-brand">
-                <PartnerBrandLockup brand={transaction.teamBrand} />
-              </Box>
-            </Box>
-          )}
+        {variant === 'full' && (
+          <Button onClick={onSeeListing} variant="contained" className="listing-detail-link listing-detail-link--full">
+            See Listing
+          </Button>
+        )}
+        {variant === 'card' && <Box className="listing-feature-footer">
           {leadAgent && variant === 'card' && (
             <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', minWidth: 0 }}>
               <Avatar src={leadAgent.photoUrl} alt={leadAgent.name} className="listing-agent-avatar">
@@ -102,8 +75,42 @@ export function ListingOverview({ transaction, onSeeListing, variant = 'card' }:
           <Button onClick={onSeeListing} variant="contained" className="listing-detail-link">
             See Listing
           </Button>
-        </Box>
+        </Box>}
       </Box>
+      {leadAgent && variant === 'full' && (
+        <Box className="listing-agent-feature">
+          <Box className="listing-agent-feature-info">
+            <Stack direction="row" spacing={1.75} sx={{ alignItems: 'center', minWidth: 0 }}>
+              <Avatar src={leadAgent.photoUrl} alt={leadAgent.name} className="listing-agent-feature-avatar">
+                {leadAgent.initials}
+              </Avatar>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography variant="labelS" className="listing-agent-feature-label">Your listing agent</Typography>
+                <Typography variant="titleS" className="listing-agent-feature-name">{leadAgent.name}</Typography>
+              </Box>
+            </Stack>
+            {(leadAgent.phone || leadAgent.email) && (
+              <Box className="listing-agent-feature-contacts">
+                {leadAgent.phone && (
+                  <Box component="a" href={`tel:${leadAgent.phone}`} className="listing-agent-feature-contact">
+                    <Typography variant="labelS">Phone</Typography>
+                    <Typography variant="bodySStandard">{formatPhoneNumber(leadAgent.phone)}</Typography>
+                  </Box>
+                )}
+                {leadAgent.email && (
+                  <Box component="a" href={`mailto:${leadAgent.email}`} className="listing-agent-feature-contact">
+                    <Typography variant="labelS">Email</Typography>
+                    <Typography variant="bodySStandard">{leadAgent.email}</Typography>
+                  </Box>
+                )}
+              </Box>
+            )}
+          </Box>
+          <Box className="listing-agent-feature-brand">
+            <PartnerBrandLockup brand={transaction.teamBrand} />
+          </Box>
+        </Box>
+      )}
     </Paper>
   )
 }

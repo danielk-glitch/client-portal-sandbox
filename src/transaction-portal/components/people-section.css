@@ -1,24 +1,42 @@
 .people-section.MuiPaper-root {
   min-width: 0;
-  padding: 32px;
+  padding: 8px 32px 32px;
   border-radius: 14px;
   background: var(--color-semantic-surface-primary-darkest);
   scroll-margin-top: 24px;
 }
 
-.people-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+.people-tabs {
+  border-bottom: 1px solid var(--color-semantic-stroke-primary-light);
 }
 
-.people-heading .segmented-switch {
-  margin-left: auto;
+.people-tabs .MuiTabs-list {
+  width: 100%;
 }
 
-.people-heading .segmented-switch-option {
-  min-width: 76px;
+.people-tabs .MuiTab-root {
+  min-width: 0;
+  max-width: none;
+  min-height: 48px;
+  flex: 1 1 50%;
+  padding: 0;
+  color: var(--color-semantic-text-primary);
+  font-size: 0.875rem;
+  text-transform: none;
+}
+
+.people-tabs .MuiTab-root.Mui-selected {
+  color: var(--color-semantic-text-dark);
+}
+
+.people-tabs .MuiTabs-indicator {
+  height: 2px;
+  background: var(--color-semantic-text-dark);
+}
+
+.people-tabs .MuiTab-root:focus-visible {
+  outline: 2px solid var(--color-semantic-stroke-primary-dark);
+  outline-offset: -2px;
 }
 
 .people-panel[hidden] { display: none; }
@@ -38,11 +56,6 @@
 
 @media (max-width: 400px) {
   .people-section.MuiPaper-root {
-    padding: 24px;
-  }
-
-  .people-heading .segmented-switch-option {
-    min-width: 0;
-    padding-inline: 14px;
+    padding: 0 24px 24px;
   }
 }

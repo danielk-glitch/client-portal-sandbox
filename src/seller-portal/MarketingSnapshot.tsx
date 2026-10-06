@@ -1,61 +1,87 @@
 /* design-build · self-critique: Clarity5 Warmth4 Restraint5 Craft4 Variety4 SlopFree5 */
-import { Box, Button, Paper, Typography } from '@mui/material'
+import { useState } from 'react'
+import { Box, Button, IconButton, Paper, Rating, Typography } from '@mui/material'
 import ArrowForwardOutlined from '@mui/icons-material/ArrowForwardOutlined'
-import type { AdvertisingEvent, ShowingFeedback } from './sellerTransaction'
+import ChevronLeftOutlined from '@mui/icons-material/ChevronLeftOutlined'
+import ChevronRightOutlined from '@mui/icons-material/ChevronRightOutlined'
+import Favorite from '@mui/icons-material/Favorite'
+import FavoriteBorder from '@mui/icons-material/FavoriteBorder'
+import type { ShowingFeedback } from './sellerTransaction'
+import type { MarketingMaterial } from './marketingMaterials'
+import { CardActionButton } from '../components/CardActionButton'
 import './marketing-snapshot.css'
 
 export type MarketingSnapshotData = {
   channels: Array<{ label: string; count: number; unit: string }>
+  materials: MarketingMaterial[]
 }
 
-export function MarketingSnapshot({ data, advertising, feedback, onViewActivity, onViewFeedback }: {
+export function MarketingSnapshot({ data, feedback, onOpenDashboard, onViewFeedback }: {
   data: MarketingSnapshotData
-  advertising: AdvertisingEvent[]
   feedback: ShowingFeedback[]
-  onViewActivity: () => void
+  onOpenDashboard: () => void
   onViewFeedback: () => void
 }) {
-  const latestAd = advertising[advertising.length - 1]
-  const latestFeedback = feedback[0]
+  const [selectedFeedbackIndex, setSelectedFeedbackIndex] = useState(0)
+  const activeFeedbackIndex = Math.min(selectedFeedbackIndex, Math.max(feedback.length - 1, 0))
+  const activeFeedback = feedback[activeFeedbackIndex]
 
   return (
     <Paper component="section" variant="outlined" className="marketing-snapshot" aria-labelledby="marketing-snapshot-title">
       <Box className="marketing-snapshot-header">
-        <Box>
-          <Typography variant="labelS" className="marketing-snapshot-eyebrow">Listing marketing</Typography>
-          <Typography component="h2" variant="titleM" id="marketing-snapshot-title">Your home is getting seen.</Typography>
-        </Box>
-        <Button className="marketing-snapshot-action" variant="text" onClick={onViewActivity} endIcon={<ArrowForwardOutlined />}>
-          See marketing activity
-        </Button>
+        <Typography component="h2" variant="titleS" id="marketing-snapshot-title">Listing Marketing</Typography>
+        <CardActionButton className="marketing-snapshot-action" onClick={onOpenDashboard} endIcon={<ArrowForwardOutlined />}>
+          View marketing dashboard
+        </CardActionButton>
       </Box>
 
-      <Box className="marketing-snapshot-channels" aria-label="Marketing materials and campaigns">
-        {data.channels.map((channel) => (
-          <Box className="marketing-snapshot-channel" key={channel.label}>
-            <Typography variant="bodySStandard">{channel.label}</Typography>
-            <Box className="marketing-snapshot-channel-value">
-              <Typography variant="metricL">{channel.count}</Typography>
-              <Typography variant="labelM">{channel.unit}</Typography>
+      <Box className="marketing-snapshot-content">
+        <Box className="marketing-snapshot-channels" aria-label="Marketing materials and campaigns">
+          {data.channels.map((channel) => (
+            <Box className="marketing-snapshot-channel" key={channel.label}>
+              <Typography variant="bodySStandard" className="marketing-snapshot-channel-label">{channel.label}</Typography>
+              <Box className="marketing-snapshot-channel-value">
+                <Typography variant="metricL">{channel.count}</Typography>
+                <Typography variant="labelS">{channel.unit}</Typography>
+              </Box>
             </Box>
-          </Box>
-        ))}
-      </Box>
+          ))}
+        </Box>
 
-      <Box className="marketing-snapshot-footer">
-        {latestAd && (
-          <Box className="marketing-snapshot-note">
-            <Typography variant="labelS" className="marketing-snapshot-label">Latest advertising update</Typography>
-            <Typography variant="bodySStandard">{latestAd.action} on {latestAd.platform}</Typography>
-          </Box>
-        )}
-        {latestFeedback && (
-          <Box className="marketing-snapshot-note">
-            <Box className="marketing-snapshot-note-heading">
-              <Typography variant="labelS" className="marketing-snapshot-label">Latest showing feedback</Typography>
+        {activeFeedback && (
+          <Box className="marketing-snapshot-feedback" role="group" aria-roledescription="carousel" aria-label="Showing feedback">
+            <Box className="marketing-snapshot-feedback-heading">
+              <Typography variant="labelS" className="marketing-snapshot-label">Showing feedback</Typography>
               <Button className="marketing-snapshot-see-all" variant="text" onClick={onViewFeedback} aria-label="See all showing feedback">See all</Button>
             </Box>
-            <Typography variant="bodySStandard">“{latestFeedback.feedback}”</Typography>
+            <Box className="marketing-snapshot-feedback-slides" aria-live="polite" aria-atomic="true">
+              {feedback.map((item, index) => (
+                <Box
+                  key={item.id}
+                  className="marketing-snapshot-feedback-slide"
+                  data-active={index === activeFeedbackIndex}
+                  aria-hidden={index !== activeFeedbackIndex}
+                >
+                  <Rating value={item.interest} max={5} readOnly size="small" icon={<Favorite fontSize="inherit" />} emptyIcon={<FavoriteBorder fontSize="inherit" />} aria-label={`Interest ${item.interest} out of 5`} />
+                  <Typography variant="bodyLStandard" className="marketing-snapshot-feedback-quote">“{item.feedback}”</Typography>
+                </Box>
+              ))}
+            </Box>
+            <Box className="marketing-snapshot-feedback-footer">
+              <Typography variant="bodySStandard" className="marketing-snapshot-feedback-meta">
+                {activeFeedback.showingType} · {activeFeedback.date}
+              </Typography>
+              {feedback.length > 1 && (
+                <Box className="marketing-snapshot-feedback-controls">
+                  <IconButton aria-label="Previous showing feedback" onClick={() => setSelectedFeedbackIndex((activeFeedbackIndex - 1 + feedback.length) % feedback.length)}>
+                    <ChevronLeftOutlined fontSize="small" />
+                  </IconButton>
+                  <IconButton aria-label="Next showing feedback" onClick={() => setSelectedFeedbackIndex((activeFeedbackIndex + 1) % feedback.length)}>
+                    <ChevronRightOutlined fontSize="small" />
+                  </IconButton>
+                </Box>
+              )}
+            </Box>
           </Box>
         )}
       </Box>
