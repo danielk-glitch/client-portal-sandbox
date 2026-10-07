@@ -58,6 +58,8 @@ import {
   type PeopleTab,
 } from '../transaction-portal/components'
 import { CardActionButton } from '../components/CardActionButton'
+import { AnnotationLayer } from '../components/AnnotationLayer'
+import { sellerAnnotations } from './sellerAnnotations'
 import './seller-portal.css'
 
 type SellerPortalProps = {
@@ -309,18 +311,21 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
 
       <PortalFooter agent={leadAgent} brand={transaction.teamBrand} />
 
-      <Button
-        variant="contained"
-        startIcon={<TuneOutlined />}
-        className="design-panel-trigger"
-        onClick={(event) => setDesignPanelAnchor(event.currentTarget)}
-        aria-label="Open design panel"
-        aria-haspopup="dialog"
-        aria-expanded={Boolean(designPanelAnchor)}
-        aria-controls={designPanelAnchor ? 'seller-design-panel' : undefined}
-      >
-        <Box component="span" className="design-panel-trigger-label">Design panel</Box>
-      </Button>
+      <Box className="floating-design-tools">
+        {marketingSnapshot && <AnnotationLayer annotations={sellerAnnotations} />}
+        <Button
+          variant="contained"
+          startIcon={<TuneOutlined />}
+          className="design-panel-trigger"
+          onClick={(event) => setDesignPanelAnchor(event.currentTarget)}
+          aria-label="Open design panel"
+          aria-haspopup="dialog"
+          aria-expanded={Boolean(designPanelAnchor)}
+          aria-controls={designPanelAnchor ? 'seller-design-panel' : undefined}
+        >
+          <Box component="span" className="design-panel-trigger-label">Design panel</Box>
+        </Button>
+      </Box>
 
       <Popover
         id="seller-design-panel"

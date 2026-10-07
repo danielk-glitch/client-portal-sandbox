@@ -158,8 +158,9 @@
 .portal-advertising-row:first-child { padding-top: 0; }
 .portal-advertising-row:last-child { padding-bottom: 0; }
 
-.portal-advertising-copy { flex: 1; min-width: 0; }
+.portal-advertising-copy { flex: 1; min-width: 0; display: grid; gap: 6px; }
 .portal-advertising-copy .MuiTypography-root { display: block; }
+.portal-advertising-meta.MuiTypography-root { color: var(--color-semantic-text-light); }
 .portal-advertising-copy strong {
   font-weight: 500;
   color: var(--color-semantic-text-dark);

@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined'
 import HomeOutlined from '@mui/icons-material/HomeOutlined'
 import StickyNote2Outlined from '@mui/icons-material/StickyNote2Outlined'
@@ -21,12 +21,12 @@ export function ActivityEventRow({ event }: { event: TimelineEvent }) {
     <Box component="li" className="activity-event-row">
       <PortalIconBadge>{eventIcons[event.type]}</PortalIconBadge>
       <Box className="activity-event-copy">
-        <Typography variant="titleXS">{event.title}</Typography>
-        <Typography variant="bodySStandard" color="text.secondary">{event.description}</Typography>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.5} sx={{ justifyContent: 'space-between' }}>
-          <Typography variant="labelS" className="activity-event-actor">{event.actor}</Typography>
+        <Box className="activity-event-heading">
+          <Typography variant="titleXS">{event.title}</Typography>
           <Typography variant="labelS" color="text.secondary" className="activity-event-date">{event.occurredAt}</Typography>
-        </Stack>
+        </Box>
+        <Typography variant="bodySStandard" color="text.secondary">{event.description}</Typography>
+        <Typography variant="labelS" className="activity-event-actor">{event.actor}</Typography>
       </Box>
     </Box>
   )

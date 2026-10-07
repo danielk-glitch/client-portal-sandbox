@@ -32,11 +32,21 @@
   gap: 6px;
 }
 
+.activity-event-heading {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 8px 16px;
+}
+
 .activity-event-actor.MuiTypography-root {
   color: var(--color-semantic-text-primary);
 }
 
 .activity-event-date.MuiTypography-root {
+  max-width: 140px;
+  text-align: right;
   font-variant-numeric: tabular-nums;
 }
 

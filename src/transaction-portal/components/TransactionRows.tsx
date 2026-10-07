@@ -106,7 +106,7 @@ export function AdvertisingRow({ event, compact = false }: { event: AdvertisingE
       {!compact && <PortalIconBadge><CampaignOutlined /></PortalIconBadge>}
       <Box className="portal-advertising-copy">
         <Typography variant="bodySStandard">{event.action} on <strong>{event.platform}</strong></Typography>
-        <Typography variant="labelS" color="text.secondary">Added by {event.postedBy}{compact && ` · ${shortDate}`}</Typography>
+        <Typography variant="labelS" className="portal-advertising-meta">Added by {event.postedBy}{compact && ` · ${shortDate}`}</Typography>
       </Box>
       {!compact && <Typography variant="labelS" color="text.secondary" className="portal-advertising-date">{event.occurredAt}</Typography>}
     </Stack>

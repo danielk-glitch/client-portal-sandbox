@@ -154,10 +154,12 @@ export function MarketingDashboardSheet({ open, onClose, initialSection, transac
           <Box component="section" id="marketing-dashboard-materials" className="marketing-dashboard-section marketing-dashboard-materials" aria-labelledby="marketing-dashboard-materials-title">
             <Box className="marketing-dashboard-section-intro">
               <Box>
-                <Typography component="h2" variant="titleM" id="marketing-dashboard-materials-title">Marketing materials</Typography>
+                <Box className="marketing-dashboard-category-title">
+                  <Typography component="h2" variant="titleM" id="marketing-dashboard-materials-title">Marketing materials</Typography>
+                  <Typography variant="labelM" color="text.secondary" aria-label={`${materials.length} materials`}>{materials.length}</Typography>
+                </Box>
                 <Typography variant="bodyMStandard" color="text.secondary">The creative your team has produced for your home.</Typography>
               </Box>
-              <Typography variant="labelM" color="text.secondary">{materials.length} materials</Typography>
             </Box>
 
             {categories.map((category) => {

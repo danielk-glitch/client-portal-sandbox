@@ -28,6 +28,7 @@ export function ListingDetailsSheet({ open, onClose, transaction }: ListingDetai
     ? listing.photos
     : listing.photoUrl ? [{ url: listing.photoUrl, alt: `Exterior of ${listing.address}` }] : []
   const highlights = details.property.filter(({ label }) => ['Bedrooms', 'Bathrooms', 'Interior size', 'Lot size'].includes(label))
+  const mlsNumber = details.listingFacts.find(({ label }) => label === 'MLS #')?.value
   const { latitude, longitude, zoom } = details.approximateMapPin
   const mapUrl = `https://www.google.com/maps?q=${latitude},${longitude}&z=${zoom}&output=embed`
 
@@ -113,7 +114,7 @@ export function ListingDetailsSheet({ open, onClose, transaction }: ListingDetai
             <Box className="listing-sheet-content">
               <Box className="listing-sheet-intro">
                 <Box>
-                  <Typography variant="labelS" className="listing-sheet-eyebrow">{details.propertyType} · {listing.city}, {listing.state}</Typography>
+                  {mlsNumber && <Typography variant="labelS" className="listing-sheet-eyebrow">MLS # {mlsNumber}</Typography>}
                   <Typography component="h1" variant="titleL" className="listing-sheet-address">{listing.address}</Typography>
                   <Typography variant="bodyMStandard" color="text.secondary">
                     {listing.city}, {listing.state} {listing.postalCode}
@@ -124,10 +125,8 @@ export function ListingDetailsSheet({ open, onClose, transaction }: ListingDetai
                   <Stack direction="row" spacing={1} sx={{ justifyContent: { xs: 'flex-start', md: 'flex-end' }, flexWrap: 'wrap' }}>
                     <Chip size="small" label={listing.status} className="listing-sheet-status" />
                     <Chip size="small" label={listing.published ? 'Published' : 'Not published'} variant="outlined" className="listing-sheet-published" />
+                    <Chip size="small" label={`Source: ${listing.dataSource}`} variant="outlined" className="listing-sheet-source" />
                   </Stack>
-                  <Typography variant="labelS" color="text.secondary" className="listing-sheet-source">
-                    Listing data from {listing.dataSource}
-                  </Typography>
                 </Box>
               </Box>
 
@@ -135,7 +134,7 @@ export function ListingDetailsSheet({ open, onClose, transaction }: ListingDetai
                 {highlights.map(({ label, value }) => (
                   <Box key={label}>
                     <Typography variant="titleS" className="listing-sheet-highlight-value">{value}</Typography>
-                    <Typography variant="labelS" color="text.secondary">{label}</Typography>
+                    <Typography variant="labelM" color="text.secondary">{label}</Typography>
                   </Box>
                 ))}
               </Box>
@@ -171,9 +170,20 @@ export function ListingDetailsSheet({ open, onClose, transaction }: ListingDetai
 
               <Divider />
 
-              <Box component="section" aria-labelledby="listing-financial-title" className="listing-sheet-detail-section listing-sheet-narrow-section">
-                <Typography component="h2" variant="titleS" id="listing-financial-title">Financial details</Typography>
-                <FactList facts={details.financialDetails} />
+              <Box className="listing-sheet-detail-columns listing-sheet-detail-section listing-sheet-overview-columns">
+                <Box component="section" aria-labelledby="listing-financial-title">
+                  <Typography component="h2" variant="titleS" id="listing-financial-title">Financial details</Typography>
+                  <FactList facts={details.financialDetails} />
+                </Box>
+                <Box component="section" aria-labelledby="listing-information-title">
+                  <Typography component="h2" variant="titleS" id="listing-information-title">Listing information</Typography>
+                  <FactList facts={[
+                    { label: 'Date listed', value: details.dateListed },
+                    { label: 'Days on market', value: String(listing.daysOnMarket) },
+                    { label: 'Expiration', value: listing.expiration },
+                    { label: 'Last updated', value: listing.lastUpdated },
+                  ]} />
+                </Box>
               </Box>
 
               <Divider />
@@ -198,23 +208,11 @@ export function ListingDetailsSheet({ open, onClose, transaction }: ListingDetai
                 </Box>
               </Box>
 
-              <Divider />
-
-              <Box component="section" aria-labelledby="listing-information-title" className="listing-sheet-detail-section listing-sheet-narrow-section">
-                <Typography component="h2" variant="titleS" id="listing-information-title">Listing information</Typography>
-                <FactList facts={[
-                  { label: 'Date listed', value: details.dateListed },
-                  { label: 'Days on market', value: String(listing.daysOnMarket) },
-                  { label: 'Expiration', value: listing.expiration },
-                  { label: 'Last updated', value: listing.lastUpdated },
-                ]} />
-              </Box>
-
               {leadAgent && (
                 <Box className="listing-sheet-agent">
                   <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
                     <Avatar src={leadAgent.photoUrl} alt={leadAgent.name} className="listing-sheet-agent-avatar">{leadAgent.initials}</Avatar>
-                    <Box>
+                    <Box className="listing-sheet-agent-copy">
                       <Typography variant="labelS" color="text.secondary">Your listing agent</Typography>
                       <Typography variant="titleXS">{leadAgent.name}</Typography>
                     </Box>

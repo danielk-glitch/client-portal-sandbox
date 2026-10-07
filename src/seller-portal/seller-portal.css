@@ -762,11 +762,19 @@
   }
 }
 
-.design-panel-trigger.MuiButton-root {
+.floating-design-tools {
   position: fixed;
   right: 24px;
   bottom: 24px;
   z-index: 1100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.floating-design-tools .design-panel-trigger.MuiButton-root,
+.floating-design-tools .annotation-layer-trigger.MuiButton-root {
+  position: static;
   min-height: 48px;
   padding-inline: 20px;
   box-shadow: var(--elevation-raised);
@@ -866,9 +874,13 @@
 }
 
 @media (max-width: 420px) {
-  .design-panel-trigger.MuiButton-root {
+  .floating-design-tools {
     right: 16px;
     bottom: 16px;
+  }
+
+  .floating-design-tools .design-panel-trigger.MuiButton-root,
+  .floating-design-tools .annotation-layer-trigger.MuiButton-root {
     width: 48px;
     min-width: 48px;
     padding: 0;

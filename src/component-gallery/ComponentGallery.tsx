@@ -17,6 +17,7 @@ import ArrowBackOutlined from '@mui/icons-material/ArrowBackOutlined'
 import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined'
 import PhoneOutlined from '@mui/icons-material/PhoneOutlined'
 import { CardActionButton } from '../components/CardActionButton'
+import { AnnotationLayer, AnnotationMarker } from '../components/AnnotationLayer'
 import { PlaceModal, placeModalWidths, type PlaceModalSize } from '../components/PlaceModal'
 import { SegmentedSwitch, type SegmentedSwitchOption } from '../components/SegmentedSwitch'
 import { typographyTokens } from '../design-tokens'
@@ -63,6 +64,7 @@ const sections = [
   { id: 'listing-sheet', name: 'Listing sheet' },
   { id: 'portal-patterns', name: 'Portal patterns' },
   { id: 'email-blocks', name: 'Email blocks' },
+  { id: 'annotations', name: 'Annotations' },
 ] as const
 
 type PreviewState = 'Default' | 'Hover' | 'Pressed' | 'Focus' | 'Disabled' | 'Loading'
@@ -555,6 +557,9 @@ function ListingSheetSection() {
       description="A centered listing sheet with a photo grid, full photo feed, structured home details, and an interactive location map."
       source="Seller portal · ListingDetailsSheet"
     >
+      <Typography variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+        The MLS number sits above the address with standard label spacing. Status, publication, and source tags sit 12px below the price. The description fills the available width and sits 8px below its heading. Highlight labels use the medium size, while Financial details and Listing information share a row above the map on wide screens. The agent footer uses horizontal dividers like the main portal footer.
+      </Typography>
       <Box sx={{ maxWidth: 640, overflow: 'hidden', borderRadius: '32px 32px 0 0', bgcolor: 'background.paper', boxShadow: 'var(--elevation-raised)' }}>
         <Box sx={{ height: 230, display: 'grid', gridTemplateColumns: '2fr 1fr', gridTemplateRows: 'repeat(2, minmax(0, 1fr))', gap: 1, overflow: 'hidden' }}>
           {listing.photos.slice(0, 3).map((photo, index) => (
@@ -569,9 +574,10 @@ function ListingSheetSection() {
         </Box>
         <Box sx={{ p: 3, display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
           <Box>
+            <Typography variant="labelS" color="text.secondary">MLS # {sampleSellerTransaction.details.listingFacts.find(({ label }) => label === 'MLS #')?.value}</Typography>
             <Typography variant="titleS">{listing.address}</Typography>
             <Typography variant="bodySStandard" color="text.secondary">{listing.city}, {listing.state} · {listing.photos.length} photos</Typography>
-            <Typography variant="labelS" color="text.secondary">Listing data from {listing.dataSource}</Typography>
+            <Chip size="small" label={`Source: ${listing.dataSource}`} variant="outlined" sx={{ mt: 1 }} />
           </Box>
           <Button variant="contained" onClick={() => setOpen(true)}>Preview sheet</Button>
         </Box>
@@ -674,7 +680,7 @@ function PortalPatternsSection() {
           </PortalPatternSample>
           <PortalPatternSample title="Listing marketing snapshot">
             <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
-              Channel labels use the body scale and a clear gap between metric columns. Compare the current showing feedback card with three layout directions: an open editorial quote, a side rail, and a framed note. Each keeps the same feedback and carousel controls. The See all action opens the marketing dashboard at showing feedback.
+              Channel labels use the body scale and a clear gap between metric columns. Compare the current showing feedback card with three layout directions: an open editorial quote, a side rail, and a framed note. Each keeps the same feedback and carousel controls. The See all action opens the marketing dashboard at showing feedback. In the dashboard, the total sits beside Marketing materials, matching the category counts.
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }} aria-label="Showing feedback layouts">
               {marketingFeedbackLayouts.map((layout) => (
@@ -697,6 +703,9 @@ function PortalPatternsSection() {
             </Box>
           </PortalPatternSample>
           <PortalPatternSample title="Activity event rows">
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
+              Align the date and time with the row title; keep the actor below the description.
+            </Typography>
             <Box component="ol" className="activity-event-list" sx={{ maxWidth: 760 }}>
               {sample.timeline.slice(0, 2).map(event => <ActivityEventRow key={event.id} event={event} />)}
             </Box>
@@ -713,6 +722,9 @@ function PortalPatternsSection() {
             <TransactionRowList><TaskRow task={sample.tasks[0]} /></TransactionRowList>
           </PortalPatternSample>
           <PortalPatternSample title="Advertising row">
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
+              Give the attribution line 6px of space below the update title and use the lighter text color.
+            </Typography>
             <TransactionRowList><AdvertisingRow event={sample.advertising[0]} /></TransactionRowList>
           </PortalPatternSample>
           <PortalPatternSample title="Showing feedback row">
@@ -762,7 +774,7 @@ export function ComponentGallery() {
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '170px minmax(0, 1fr)' }, gap: { xs: 2, md: 7 } }}>
           <Box component="nav" aria-label="Gallery sections" sx={{ alignSelf: 'start', position: { md: 'sticky' }, top: { md: 32 }, display: 'flex', flexDirection: { xs: 'row', md: 'column' }, gap: { xs: 2, md: 1 }, overflowX: { xs: 'auto', md: 'visible' }, pb: { xs: 2, md: 0 } }}>
             <Typography variant="labelS" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' }, mb: 1, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              Library / 11
+              Library / 12
             </Typography>
             {sections.map(section => (
               <Box key={section.id} component="a" href={`#${section.id}`} sx={{ flexShrink: 0, color: 'text.primary', textDecoration: 'none', py: 0.75, borderRadius: 1, typography: 'labelM', transition: 'color 150ms ease', '&:hover': { color: 'text.secondary' }, '&:focus-visible': { outline: '2px solid var(--color-semantic-stroke-primary-dark)', outlineOffset: 3 } }}>
@@ -792,6 +804,30 @@ export function ComponentGallery() {
                 <EmailPreview template={emailTemplates[0]} />
               </Box>
               <Button component="a" href="/email-templates" variant="text" sx={{ mt: 3 }}>Review all email templates</Button>
+            </Section>
+            <Section
+              id="annotations"
+              number="12"
+              title="Annotations"
+              description="Designer notes sit above a page when the blue Annotations button is on. Markers default to a matching blue new-feature badge, while the note identifies its audience. Hover, focus, or click to read it."
+              source="src/components/AnnotationLayer.tsx · src/components/annotation-layer.css"
+            >
+              <Box id="annotation-gallery-demo" sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', mb: 3, p: 3, bgcolor: 'var(--color-semantic-surface-secondary)', borderRadius: 2 }}>
+                <AnnotationLayer
+                  className="annotation-layer-trigger--inline"
+                  annotations={[{ id: 'gallery', target: '#annotation-gallery-demo', audience: 'design', title: 'Gallery note', note: 'The blue control stays visible while the layer is off. An active ring appears when notes are shown.' }]}
+                />
+                <Typography variant="bodySStandard" color="text.secondary">Switch the layer on to preview the active state.</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center', p: 4, bgcolor: 'var(--color-semantic-surface-secondary)', borderRadius: 2 }}>
+                <AnnotationMarker audience="design" title="Design note" note="Use for visual and interaction guidance." />
+                <AnnotationMarker audience="engineering" title="Engineering note" note="Use for implementation behavior." />
+                <AnnotationMarker audience="product" title="Product note" note="Use for product intent and priorities." popoverSide="left" />
+                <AnnotationMarker audience="business" title="Business note" note="Use for operational context." popoverSide="left" />
+              </Box>
+              <Typography variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
+                Add a note with a target selector, audience, title, and text. Markers default to blue with a new-feature icon; use the optional tone or icon props when a later annotation needs its own treatment. Missing targets are skipped.
+              </Typography>
             </Section>
           </Box>
         </Box>

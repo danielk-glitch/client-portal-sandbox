@@ -18,7 +18,6 @@
 
 .listing-sheet-eyebrow.MuiTypography-root {
   color: var(--color-semantic-text-primary);
-  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -247,16 +246,13 @@
   font-variant-numeric: tabular-nums;
 }
 
-.listing-sheet-source.MuiTypography-root {
-  font-variant-numeric: tabular-nums;
-}
-
 .listing-sheet-status.MuiChip-root {
   color: var(--color-semantic-text-dark);
   background: var(--color-semantic-surface-secondary);
 }
 
-.listing-sheet-published.MuiChip-root {
+.listing-sheet-published.MuiChip-root,
+.listing-sheet-source.MuiChip-root {
   color: var(--color-semantic-text-primary);
   border-color: var(--color-semantic-stroke-primary-light);
 }
@@ -282,8 +278,8 @@
 }
 
 .listing-sheet-description.MuiTypography-root {
-  max-width: 65ch;
-  margin-top: 20px;
+  display: block;
+  margin-top: 8px;
   text-wrap: pretty;
 }
 
@@ -328,10 +324,6 @@
   gap: clamp(40px, 6vw, 104px);
 }
 
-.listing-sheet-narrow-section {
-  max-width: 590px;
-}
-
 .listing-sheet-map-heading {
   display: flex;
   align-items: end;
@@ -359,14 +351,14 @@
 }
 
 .listing-sheet-agent {
-  margin-top: 4px;
-  padding: 28px;
+  min-height: 116px;
+  padding-block: 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  border-radius: 14px;
-  background: var(--color-semantic-surface-secondary);
+  border-top: 1px solid var(--color-semantic-stroke-primary-light);
+  border-bottom: 1px solid var(--color-semantic-stroke-primary-light);
 }
 
 .listing-sheet-agent-avatar.MuiAvatar-root {
@@ -374,9 +366,20 @@
   height: 48px;
 }
 
+.listing-sheet-agent-copy .MuiTypography-root {
+  display: block;
+}
+
 .listing-sheet-agent .partner-brand-lockup {
   --partner-team-width: 126px;
   --partner-brokerage-width: 98px;
+}
+
+@media (max-width: 900px) {
+  .listing-sheet-overview-columns {
+    grid-template-columns: 1fr;
+    gap: 44px;
+  }
 }
 
 @media (max-width: 760px) {

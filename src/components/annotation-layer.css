@@ -1,0 +1,132 @@
+.annotation-layer-trigger.MuiButton-root {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1100;
+  min-height: 48px;
+  padding-inline: 20px;
+  border: 1px solid var(--color-primitive-blue-700);
+  background: var(--color-primitive-blue-700);
+  color: var(--color-primitive-neutral-50);
+  box-shadow: var(--elevation-raised);
+}
+
+.annotation-layer-trigger.MuiButton-root:hover {
+  border-color: var(--color-primitive-blue-800);
+  background: var(--color-primitive-blue-800);
+  color: var(--color-primitive-neutral-50);
+}
+
+.annotation-layer-trigger.MuiButton-root[aria-pressed="true"] {
+  border-color: var(--color-primitive-blue-800);
+  background: var(--color-primitive-blue-800);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primitive-blue-700) 26%, transparent), var(--elevation-raised);
+}
+
+.annotation-layer-trigger.MuiButton-root.annotation-layer-trigger--inline {
+  position: static;
+}
+
+.annotation-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1150;
+  pointer-events: none;
+}
+
+.annotation-layer-position {
+  position: fixed;
+  pointer-events: auto;
+}
+
+.annotation-marker-group {
+  position: relative;
+  display: inline-flex;
+}
+
+.annotation-marker {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 3px solid var(--color-semantic-surface-primary);
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--marker-fill) 30%, transparent), 0 7px 18px oklch(0 0 0 / 0.24);
+  background: var(--marker-fill);
+  color: var(--color-primitive-neutral-50);
+  cursor: pointer;
+  font-size: 23px;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.annotation-marker { --marker-fill: var(--color-primitive-blue-700); }
+.annotation-marker[data-tone="neutral"] { --marker-fill: var(--color-primitive-neutral-900); }
+.annotation-marker[data-tone="violet"] { --marker-fill: var(--color-primitive-violet-700); }
+.annotation-marker[data-tone="green"] { --marker-fill: var(--color-primitive-green-700); }
+
+.annotation-marker:hover,
+.annotation-marker[aria-expanded="true"] {
+  transform: scale(1.06);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--marker-fill) 38%, transparent), 0 10px 24px oklch(0 0 0 / 0.3);
+}
+
+.annotation-marker:focus-visible {
+  outline: 2px solid var(--color-semantic-stroke-primary-darkest);
+  outline-offset: 3px;
+}
+
+.annotation-popover {
+  position: absolute;
+  top: 48px;
+  left: 0;
+  display: grid;
+  gap: 8px;
+  width: min(280px, calc(100vw - 32px));
+  padding: 17px 18px 18px;
+  border: 1px solid var(--color-semantic-stroke-primary-light);
+  border-radius: 12px;
+  background: var(--color-semantic-surface-primary);
+  box-shadow: var(--elevation-raised);
+  color: var(--color-semantic-text-dark);
+  font-family: inherit;
+  text-align: left;
+}
+
+.annotation-marker-group--left .annotation-popover { left: auto; right: 0; }
+.annotation-marker-group--above .annotation-popover { top: auto; bottom: 48px; }
+
+.annotation-popover-audience {
+  width: fit-content;
+  padding: 3px 8px;
+  border-radius: 99px;
+  background: var(--color-semantic-surface-secondary);
+  color: var(--color-semantic-text-primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.annotation-popover-audience[data-audience="engineering"] { color: var(--color-primitive-blue-700); background: var(--color-primitive-blue-50); }
+.annotation-popover-audience[data-audience="product"] { color: var(--color-primitive-violet-700); background: var(--color-primitive-violet-50); }
+.annotation-popover-audience[data-audience="business"] { color: var(--color-primitive-green-700); background: var(--color-primitive-green-50); }
+
+.annotation-popover-title { font-size: 14px; font-weight: 700; line-height: 1.35; }
+.annotation-popover-note { font-size: 13px; line-height: 1.55; color: var(--color-semantic-text-primary); }
+
+@media (max-width: 420px) {
+  .annotation-layer-trigger.MuiButton-root {
+    right: 16px;
+    bottom: 16px;
+    width: 48px;
+    min-width: 48px;
+    padding: 0;
+  }
+  .annotation-layer-trigger .MuiButton-startIcon { margin: 0; }
+  .annotation-layer-trigger-label { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .annotation-marker { transition: none; }
+}
