@@ -8,6 +8,7 @@ import Favorite from '@mui/icons-material/Favorite'
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder'
 import type { ShowingFeedback } from './sellerTransaction'
 import type { MarketingMaterial } from './marketingMaterials'
+import type { MarketingFeedbackLayout } from './marketingFeedbackLayouts'
 import { CardActionButton } from '../components/CardActionButton'
 import './marketing-snapshot.css'
 
@@ -16,9 +17,10 @@ export type MarketingSnapshotData = {
   materials: MarketingMaterial[]
 }
 
-export function MarketingSnapshot({ data, feedback, onOpenDashboard, onViewFeedback }: {
+export function MarketingSnapshot({ data, feedback, feedbackLayout = 'current', onOpenDashboard, onViewFeedback }: {
   data: MarketingSnapshotData
   feedback: ShowingFeedback[]
+  feedbackLayout?: MarketingFeedbackLayout
   onOpenDashboard: () => void
   onViewFeedback: () => void
 }) {
@@ -39,7 +41,7 @@ export function MarketingSnapshot({ data, feedback, onOpenDashboard, onViewFeedb
         <Box className="marketing-snapshot-channels" aria-label="Marketing materials and campaigns">
           {data.channels.map((channel) => (
             <Box className="marketing-snapshot-channel" key={channel.label}>
-              <Typography variant="bodySStandard" className="marketing-snapshot-channel-label">{channel.label}</Typography>
+              <Typography variant="bodyMStandard" className="marketing-snapshot-channel-label">{channel.label}</Typography>
               <Box className="marketing-snapshot-channel-value">
                 <Typography variant="metricL">{channel.count}</Typography>
                 <Typography variant="labelS">{channel.unit}</Typography>
@@ -49,23 +51,22 @@ export function MarketingSnapshot({ data, feedback, onOpenDashboard, onViewFeedb
         </Box>
 
         {activeFeedback && (
-          <Box className="marketing-snapshot-feedback" role="group" aria-roledescription="carousel" aria-label="Showing feedback">
+          <Box className="marketing-snapshot-feedback" data-layout={feedbackLayout} role="group" aria-roledescription="carousel" aria-label="Showing feedback">
             <Box className="marketing-snapshot-feedback-heading">
               <Typography variant="labelS" className="marketing-snapshot-label">Showing feedback</Typography>
               <Button className="marketing-snapshot-see-all" variant="text" onClick={onViewFeedback} aria-label="See all showing feedback">See all</Button>
             </Box>
             <Box className="marketing-snapshot-feedback-slides" aria-live="polite" aria-atomic="true">
-              {feedback.map((item, index) => (
-                <Box
-                  key={item.id}
-                  className="marketing-snapshot-feedback-slide"
-                  data-active={index === activeFeedbackIndex}
-                  aria-hidden={index !== activeFeedbackIndex}
-                >
-                  <Rating value={item.interest} max={5} readOnly size="small" icon={<Favorite fontSize="inherit" />} emptyIcon={<FavoriteBorder fontSize="inherit" />} aria-label={`Interest ${item.interest} out of 5`} />
-                  <Typography variant="bodyLStandard" className="marketing-snapshot-feedback-quote">“{item.feedback}”</Typography>
-                </Box>
-              ))}
+              {feedback.map((item, index) => {
+                const rating = <Rating value={item.interest} max={5} readOnly size="small" icon={<Favorite fontSize="inherit" />} emptyIcon={<FavoriteBorder fontSize="inherit" />} aria-label={`Interest ${item.interest} out of 5`} />
+                const quote = <Typography variant="bodyLStandard" className="marketing-snapshot-feedback-quote">“{item.feedback}”</Typography>
+                const quoteFirst = feedbackLayout === 'editorial' || feedbackLayout === 'note'
+                return (
+                  <Box key={item.id} className="marketing-snapshot-feedback-slide" data-active={index === activeFeedbackIndex} aria-hidden={index !== activeFeedbackIndex}>
+                    {quoteFirst ? <>{quote}{rating}</> : <>{rating}{quote}</>}
+                  </Box>
+                )
+              })}
             </Box>
             <Box className="marketing-snapshot-feedback-footer">
               <Typography variant="bodySStandard" className="marketing-snapshot-feedback-meta">

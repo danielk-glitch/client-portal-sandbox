@@ -24,6 +24,7 @@ import { primaryButtonHoverShadow } from '../theme'
 import { ListingDetailsSheet } from '../seller-portal/ListingDetailsSheet'
 import { ListingOverview } from '../seller-portal/ListingOverview'
 import { MarketingSnapshot } from '../seller-portal/MarketingSnapshot'
+import { marketingFeedbackLayouts, type MarketingFeedbackLayout } from '../seller-portal/marketingFeedbackLayouts'
 import { MarketingDashboardSheet, type MarketingDashboardSection } from '../seller-portal/MarketingDashboardSheet'
 import { futureMarketingSnapshot, futureSellerTransaction } from '../seller-portal/futureSellerTransaction'
 import {
@@ -591,6 +592,7 @@ function PortalPatternSample({ title, children }: { title: string; children: Rea
 
 function PortalPatternsSection() {
   const [peopleTab, setPeopleTab] = useState<PeopleTab>('team')
+  const [feedbackLayout, setFeedbackLayout] = useState<MarketingFeedbackLayout>('current')
   const [marketingDashboardSection, setMarketingDashboardSection] = useState<MarketingDashboardSection | null>(null)
   const [previewDocument, setPreviewDocument] = useState<TransactionDocument | null>(null)
   const [listingPreviewOpen, setListingPreviewOpen] = useState(false)
@@ -672,9 +674,16 @@ function PortalPatternsSection() {
           </PortalPatternSample>
           <PortalPatternSample title="Listing marketing snapshot">
             <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
-              The summary card opens a centered marketing dashboard with prominent channel metrics, all produced materials, advertising updates, and showing feedback. Its feedback See all action opens the same dashboard at the feedback section. Materials use sample previews built from the listing photos and can be opened for a larger view.
+              Channel labels use the body scale and a clear gap between metric columns. Compare the current showing feedback card with three layout directions: an open editorial quote, a side rail, and a framed note. Each keeps the same feedback and carousel controls. The See all action opens the marketing dashboard at showing feedback.
             </Typography>
-            <MarketingSnapshot data={futureMarketingSnapshot} feedback={sample.feedback} onOpenDashboard={() => setMarketingDashboardSection('overview')} onViewFeedback={() => setMarketingDashboardSection('feedback')} />
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }} aria-label="Showing feedback layouts">
+              {marketingFeedbackLayouts.map((layout) => (
+                <Button key={layout.id} size="small" variant={feedbackLayout === layout.id ? 'contained' : 'outlined'} onClick={() => setFeedbackLayout(layout.id)}>
+                  {layout.label}
+                </Button>
+              ))}
+            </Box>
+            <MarketingSnapshot data={futureMarketingSnapshot} feedback={sample.feedback} feedbackLayout={feedbackLayout} onOpenDashboard={() => setMarketingDashboardSection('overview')} onViewFeedback={() => setMarketingDashboardSection('feedback')} />
             <MarketingDashboardSheet open={marketingDashboardSection !== null} onClose={() => setMarketingDashboardSection(null)} initialSection={marketingDashboardSection ?? 'overview'} transaction={futureSellerTransaction} data={futureMarketingSnapshot} />
           </PortalPatternSample>
           <PortalPatternSample title="Date event rows">

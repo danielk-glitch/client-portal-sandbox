@@ -14,6 +14,7 @@ import {
   Drawer,
   FormControlLabel,
   IconButton,
+  Popover,
   Radio,
   RadioGroup,
   Stack,
@@ -37,6 +38,7 @@ import {
 import { ListingDetailsSheet } from './ListingDetailsSheet'
 import { ListingOverview, type ListingOverviewVariant } from './ListingOverview'
 import { MarketingSnapshot, type MarketingSnapshotData } from './MarketingSnapshot'
+import { marketingFeedbackLayouts, type MarketingFeedbackLayout } from './marketingFeedbackLayouts'
 import { MarketingDashboardSheet, type MarketingDashboardSection } from './MarketingDashboardSheet'
 import {
   ActivityEventRow,
@@ -82,7 +84,11 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
     if (requestedHeader === 'card' || requestedHeader === 'full') return requestedHeader
     return 'full'
   })
-  const [designPanelOpen, setDesignPanelOpen] = useState(false)
+  const [designPanelAnchor, setDesignPanelAnchor] = useState<HTMLElement | null>(null)
+  const [feedbackLayout, setFeedbackLayout] = useState<MarketingFeedbackLayout>(() => {
+    const requestedLayout = new URLSearchParams(window.location.search).get('feedback')
+    return marketingFeedbackLayouts.find((layout) => layout.id === requestedLayout)?.id ?? 'current'
+  })
   const [activeTab, setActiveTab] = useState<PortalTab>(() => {
     const requestedTab = new URLSearchParams(window.location.search).get('section')
     if (requestedTab === 'timeline') return 'activity'
@@ -187,6 +193,14 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
     window.history.replaceState(null, '', url)
   }
 
+  function selectFeedbackLayout(value: MarketingFeedbackLayout) {
+    setFeedbackLayout(value)
+    const url = new URL(window.location.href)
+    if (value === 'current') url.searchParams.delete('feedback')
+    else url.searchParams.set('feedback', value)
+    window.history.replaceState(null, '', url)
+  }
+
   function showAllActivity() {
     selectTab('activity')
     requestAnimationFrame(() => {
@@ -244,6 +258,7 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
           <MarketingSnapshot
             data={marketingSnapshot}
             feedback={transaction.feedback}
+            feedbackLayout={feedbackLayout}
             onOpenDashboard={() => setMarketingDashboardSection('overview')}
             onViewFeedback={() => setMarketingDashboardSection('feedback')}
           />
@@ -298,39 +313,52 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
         variant="contained"
         startIcon={<TuneOutlined />}
         className="design-panel-trigger"
-        onClick={() => setDesignPanelOpen(true)}
+        onClick={(event) => setDesignPanelAnchor(event.currentTarget)}
         aria-label="Open design panel"
+        aria-haspopup="dialog"
+        aria-expanded={Boolean(designPanelAnchor)}
+        aria-controls={designPanelAnchor ? 'seller-design-panel' : undefined}
       >
         <Box component="span" className="design-panel-trigger-label">Design panel</Box>
       </Button>
 
-      <Drawer
-        anchor="right"
-        open={designPanelOpen}
-        onClose={() => setDesignPanelOpen(false)}
-        slotProps={{ paper: { className: 'design-panel-paper', 'aria-label': 'Design panel' } }}
+      <Popover
+        id="seller-design-panel"
+        open={Boolean(designPanelAnchor)}
+        anchorEl={designPanelAnchor}
+        onClose={() => setDesignPanelAnchor(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        disableScrollLock
+        slotProps={{ paper: { className: 'design-panel-paper', role: 'dialog', 'aria-label': 'Design panel' } }}
       >
         <Box className="design-panel-header">
           <Box>
             <Typography component="h2" variant="titleS">Design panel</Typography>
-            <Typography variant="bodySStandard" color="text.secondary">Preview header layouts</Typography>
+            <Typography variant="bodySStandard" color="text.secondary">Preview page layouts</Typography>
           </Box>
-          <IconButton onClick={() => setDesignPanelOpen(false)} aria-label="Close design panel">
+          <IconButton onClick={() => setDesignPanelAnchor(null)} aria-label="Close design panel">
             <CloseOutlined />
           </IconButton>
         </Box>
         <Box className="design-panel-content">
-          <Typography component="h3" variant="titleXS" id="header-layout-label">Header layout</Typography>
-          <RadioGroup
-            aria-labelledby="header-layout-label"
-            value={headerVariant}
-            onChange={(event) => selectHeaderVariant(event.target.value as ListingOverviewVariant)}
-          >
-            <FormControlLabel value="card" control={<Radio />} label="Card" />
-            <FormControlLabel value="full" control={<Radio />} label="Full width" />
-          </RadioGroup>
+          <Box className="design-panel-option-section">
+            <Typography component="h3" variant="titleXS" id="header-layout-label">Header layout</Typography>
+            <RadioGroup aria-labelledby="header-layout-label" value={headerVariant} onChange={(event) => selectHeaderVariant(event.target.value as ListingOverviewVariant)}>
+              <FormControlLabel value="card" control={<Radio />} label="Card" />
+              <FormControlLabel value="full" control={<Radio />} label="Full width" />
+            </RadioGroup>
+          </Box>
+          {marketingSnapshot && (
+            <Box className="design-panel-option-section">
+              <Typography component="h3" variant="titleXS" id="feedback-layout-label">Showing feedback layout</Typography>
+              <RadioGroup aria-labelledby="feedback-layout-label" value={feedbackLayout} onChange={(event) => selectFeedbackLayout(event.target.value as MarketingFeedbackLayout)}>
+                {marketingFeedbackLayouts.map((layout) => <FormControlLabel key={layout.id} value={layout.id} control={<Radio />} label={layout.label} />)}
+              </RadioGroup>
+            </Box>
+          )}
         </Box>
-      </Drawer>
+      </Popover>
 
       <ListingDetailsSheet open={listingOpen} onClose={closeListing} transaction={transaction} />
 

@@ -772,14 +772,17 @@
   box-shadow: var(--elevation-raised);
 }
 
-.design-panel-paper.MuiDrawer-paper {
-  width: min(380px, 100vw);
+.design-panel-paper.MuiPopover-paper {
+  width: min(340px, calc(100vw - 24px));
+  max-height: min(70vh, 620px);
+  border: 1px solid var(--color-semantic-stroke-primary-light);
+  border-radius: 14px;
   background: var(--color-semantic-surface-primary);
+  box-shadow: var(--elevation-raised);
 }
 
 .design-panel-header {
-  min-height: 88px;
-  padding: 24px 24px 20px 28px;
+  padding: 18px 18px 16px 22px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -789,8 +792,14 @@
 
 .design-panel-content {
   display: grid;
-  gap: 14px;
-  padding: 28px;
+  gap: 20px;
+  padding: 20px 22px 24px;
+}
+
+.design-panel-option-section { display: grid; gap: 8px; }
+.design-panel-option-section + .design-panel-option-section {
+  padding-top: 18px;
+  border-top: 1px solid var(--color-semantic-stroke-primary-light);
 }
 
 .design-panel-content .MuiFormControlLabel-root {
