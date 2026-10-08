@@ -83,6 +83,8 @@
   display: grid;
   gap: 8px;
   width: min(280px, calc(100vw - 32px));
+  max-height: min(400px, calc(100vh - 96px));
+  overflow-y: auto;
   padding: 17px 18px 18px;
   border: 1px solid var(--color-semantic-stroke-primary-light);
   border-radius: 12px;
@@ -113,7 +115,7 @@
 .annotation-popover-audience[data-audience="business"] { color: var(--color-primitive-green-700); background: var(--color-primitive-green-50); }
 
 .annotation-popover-title { font-size: 14px; font-weight: 700; line-height: 1.35; }
-.annotation-popover-note { font-size: 13px; line-height: 1.55; color: var(--color-semantic-text-primary); }
+.annotation-popover-note { font-size: 13px; line-height: 1.55; color: var(--color-semantic-text-primary); white-space: pre-line; }
 
 @media (max-width: 420px) {
   .annotation-layer-trigger.MuiButton-root {

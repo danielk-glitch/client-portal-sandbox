@@ -197,25 +197,45 @@
 
 .portal-document-row {
   min-height: 76px;
-  padding: 14px 0;
+  padding: 24px 0;
 }
 
 .portal-document-row:first-child { padding-top: 0; }
 .portal-document-row:last-child { padding-bottom: 0; }
 
-.portal-document-copy { flex: 1; min-width: 0; }
-.portal-document-copy .MuiTypography-root + .MuiTypography-root {
-  display: block;
-  margin-top: 3px;
-  text-wrap: pretty;
+.portal-document-row .portal-icon-badge { align-self: flex-start; }
+
+.portal-document-copy {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 6px;
 }
+
+.portal-document-copy .MuiTypography-root { text-wrap: pretty; }
+
+.portal-document-attribution.MuiTypography-root { color: var(--color-semantic-text-primary); }
 
 .portal-document-status.MuiChip-root {
   color: var(--color-semantic-text-primary);
   border-color: var(--color-semantic-stroke-primary-light);
 }
 
-.portal-document-action.MuiButton-root { min-width: 84px; }
+.portal-document-action.MuiButton-root {
+  min-width: 84px;
+  color: var(--color-semantic-text-dark);
+  border-color: var(--color-semantic-stroke-primary);
+}
+
+.portal-document-action.MuiButton-root:hover {
+  border-color: var(--color-semantic-stroke-primary-dark);
+  background: var(--color-semantic-surface-primary-darkest);
+}
+
+.portal-document-action.MuiButton-root:focus-visible {
+  outline: 2px solid var(--color-semantic-stroke-primary-dark);
+  outline-offset: 2px;
+}
 
 .portal-detail-grid {
   display: grid;

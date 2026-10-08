@@ -61,6 +61,7 @@ body:has(.seller-portal--polestar),
 
 .seller-portal--polestar .portal-topbar-inner.MuiContainer-root {
   min-height: 76px;
+  max-width: 1600px;
 }
 
 .seller-portal--polestar .place-wordmark.MuiTypography-root {
@@ -83,7 +84,7 @@ body:has(.seller-portal--polestar),
 }
 
 .seller-portal--polestar .portal-main.MuiContainer-root {
-  max-width: 1440px;
+  max-width: 1600px;
   padding-top: 12px;
   padding-bottom: 88px;
 }
@@ -139,7 +140,7 @@ body:has(.seller-portal--polestar),
   max-width: 650px;
   margin-top: 28px;
   color: var(--ps-ink);
-  font-size: clamp(2.75rem, 4.1vw, 4.5rem);
+  font-size: clamp(2.5rem, 3.7vw, 4rem);
   line-height: 1.08;
   text-wrap: balance;
 }
@@ -148,13 +149,24 @@ body:has(.seller-portal--polestar),
   color: var(--ps-ink-2);
 }
 .seller-portal--polestar .listing-feature-footer {
+  align-items: center;
   border-top-color: var(--ps-rule);
+}
+.seller-portal--polestar .listing-feature-footer .partner-brand-lockup {
+  --partner-team-width: 110px;
+  --partner-brokerage-width: 92px;
+  flex: 0 1 auto;
+  margin-top: 0;
+  margin-left: auto;
 }
 .seller-portal--polestar .listing-agent-avatar.MuiAvatar-root { border-radius: 2px; }
 .seller-portal--polestar .listing-agent-name.MuiTypography-root { color: var(--ps-ink); }
-.seller-portal--polestar .partner-brand-lockup img { filter: grayscale(1) brightness(0) invert(1); }
-.seller-portal--polestar img { filter: grayscale(1); }
-.seller-portal--polestar .people-section img { filter: none; }
+.seller-portal--polestar .partner-brand-lockup {
+  padding: 8px;
+  border-radius: 2px;
+  background: var(--ps-ink);
+}
+.seller-portal--polestar .partner-brand-divider { background: var(--ps-rule); }
 
 .seller-portal--polestar .MuiButton-contained,
 .seller-portal--polestar .listing-detail-link.MuiButton-root {
@@ -169,6 +181,18 @@ body:has(.seller-portal--polestar),
 .seller-portal--polestar .listing-detail-link.MuiButton-root:hover {
   background: var(--ps-ink-2);
   box-shadow: none;
+}
+.seller-portal--polestar .listing-overview--card .listing-detail-link--image.MuiButton-root {
+  position: absolute;
+  z-index: 1;
+  right: 16px;
+  bottom: 16px;
+  width: auto;
+  background: var(--ps-ink);
+  color: var(--ps-paper);
+}
+.seller-portal--polestar .listing-overview--card .listing-detail-link--image.MuiButton-root:hover {
+  background: var(--ps-ink-2);
 }
 .seller-portal--polestar .MuiButton-text { color: var(--ps-ink); }
 .seller-portal--polestar .MuiButton-text:hover { background: var(--ps-paper-3); }
@@ -230,6 +254,20 @@ body:has(.seller-portal--polestar),
   border-color: var(--ps-rule);
 }
 
+@media (min-width: 901px) {
+  .seller-portal--polestar .advertising-snapshot-secondary {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .seller-portal--polestar .advertising-snapshot-showings {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
 .seller-portal--polestar .transaction-lower-grid {
   grid-template-columns: minmax(290px, 0.9fr) minmax(0, 2.1fr);
   gap: 48px;
@@ -258,12 +296,14 @@ body:has(.seller-portal--polestar),
 .seller-portal--polestar .portal-panel { padding: 8px 0 24px; }
 .seller-portal--polestar .portal-tab-content { padding-inline: 8px; }
 .seller-portal--polestar .portal-panel .portal-section.MuiPaper-root { color: var(--ps-ink); }
+.seller-portal--polestar .portal-task-due.MuiChip-root { color: var(--color-primitive-base-white); }
 .seller-portal--polestar .team-note-card.MuiPaper-root {
   border-radius: 0;
   background: var(--ps-paper-3);
   box-shadow: none;
 }
 .seller-portal--polestar .portal-footer { color: var(--ps-ink); background: var(--ps-paper); }
+.seller-portal--polestar .portal-footer-inner.MuiContainer-root { max-width: 1600px; }
 .seller-portal--polestar .portal-footer-content { border-color: var(--ps-rule); }
 .seller-portal--polestar .portal-footer-avatar.MuiAvatar-root { border-radius: 2px; }
 
@@ -298,8 +338,6 @@ body:has(.seller-portal--polestar) :is(.listing-sheet-paper, .marketing-dashboar
 body:has(.seller-portal--polestar) .design-panel-paper .MuiFormControlLabel-label { color: var(--ps-ink); }
 body:has(.seller-portal--polestar) .design-panel-paper .MuiRadio-root { color: var(--ps-muted); }
 body:has(.seller-portal--polestar) .design-panel-paper .MuiRadio-root.Mui-checked { color: var(--ps-ink); }
-body:has(.seller-portal--polestar) :is(.listing-sheet-paper, .marketing-dashboard-paper) img,
-body:has(.seller-portal--polestar) .marketing-material-preview { filter: grayscale(1); }
 body:has(.seller-portal--polestar) .marketing-dashboard-paper .MuiRating-root { color: var(--ps-ink); }
 body:has(.seller-portal--polestar) .marketing-dashboard-paper .MuiRating-iconEmpty { color: var(--ps-rule); }
 body:has(.seller-portal--polestar) .marketing-dashboard-hero::after {
@@ -332,14 +370,19 @@ body:has(.seller-portal--polestar) .marketing-material-preview[data-design='vide
     margin: 0;
     padding: 32px;
   }
-  .seller-portal--polestar .listing-overview--card .listing-address.MuiTypography-root { font-size: clamp(2.4rem, 6vw, 3.5rem); }
+  .seller-portal--polestar .listing-overview--card .listing-address.MuiTypography-root { font-size: clamp(2.2rem, 5.3vw, 3.2rem); }
 }
 
 @media (max-width: 620px) {
   .seller-portal--polestar .portal-main.MuiContainer-root { padding-inline: 12px; }
   .seller-portal--polestar .listing-overview--card .listing-photo { height: 240px; }
   .seller-portal--polestar .listing-overview--card .listing-summary { padding: 28px 24px; }
-  .seller-portal--polestar .listing-overview--card .listing-address.MuiTypography-root { font-size: 2.2rem; }
+  .seller-portal--polestar .listing-overview--card .listing-address.MuiTypography-root { font-size: 2rem; }
+  .seller-portal--polestar .listing-feature-footer { align-items: stretch; }
+  .seller-portal--polestar .listing-feature-footer .partner-brand-lockup {
+    align-self: flex-end;
+    margin-top: 4px;
+  }
   .seller-portal--polestar .priority-grid .portal-section.MuiPaper-root { padding: 28px 24px; }
   .seller-portal--polestar .marketing-snapshot.MuiPaper-root,
   .seller-portal--polestar .advertising-snapshot.MuiPaper-root {

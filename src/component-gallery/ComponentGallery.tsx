@@ -642,6 +642,12 @@ function PortalPatternsSection() {
               <ListingOverview transaction={sample} onSeeListing={() => setListingPreviewOpen(true)} variant="light" />
             </Box>
           </PortalPatternSample>
+          <PortalPatternSample title="Bottom-aligned light listing header">
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>The team and brokerage lockup sits at the top of the copy column. Listing status, address, and agent details have a 32px inset from the photo’s edges. The agent uses the same call and email icon buttons as the footer. Compare this with the standard Light split option in the seller design panel.</Typography>
+            <Box sx={{ overflow: 'hidden', borderRadius: 2, '& .listing-overview--light-bottom.MuiPaper-root': { width: '100%', marginLeft: 0 } }}>
+              <ListingOverview transaction={sample} onSeeListing={() => setListingPreviewOpen(true)} variant="light-bottom" />
+            </Box>
+          </PortalPatternSample>
           <PortalPatternSample title="Icon badge">
             <Stack direction="row" spacing={3} sx={{ alignItems: 'center' }}>
               <Stack spacing={1} sx={{ alignItems: 'center' }}>
@@ -767,7 +773,8 @@ function PortalPatternsSection() {
             <TeamNoteCard note={sample.notes[0]} />
           </PortalPatternSample>
           <PortalPatternSample title="Document row">
-            <TransactionRowList><DocumentRow document={sample.documents[0]} onPreview={setPreviewDocument} /></TransactionRowList>
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Use the same 24px vertical spacing and three-line rhythm as activity rows: title, document details, then attribution. Top-align the icon badge with the content and use an outlined Preview button. The first and last rows sit flush with the list edges.</Typography>
+            <TransactionRowList>{sample.documents.slice(0, 2).map((document) => <DocumentRow key={document.id} document={document} onPreview={setPreviewDocument} />)}</TransactionRowList>
           </PortalPatternSample>
           <PortalPatternSample title="Detail grid and section">
             <PortalSection title="Transaction details">
@@ -859,7 +866,7 @@ export function ComponentGallery() {
                 <AnnotationMarker audience="business" title="Business note" note="Use for operational context." popoverSide="left" />
               </Box>
               <Typography variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
-                Add a note with a target selector, audience, title, and text. Markers default to blue with a new-feature icon; use the optional tone or icon props when a later annotation needs its own treatment. Missing targets are skipped.
+                Add a note with a target selector, audience, title, and text. Markers default to blue with a new-feature icon; use the optional tone or icon props when a later annotation needs its own treatment. Longer notes flip above the marker when needed and can scroll in shorter windows. The seller marketing variants each have their own selector, so only the visible version shows its note. Missing targets are skipped.
               </Typography>
             </Section>
           </Box>

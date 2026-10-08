@@ -138,10 +138,11 @@ export function DocumentRow({ document, onPreview }: { document: TransactionDocu
       <PortalIconBadge><InsertDriveFileOutlined /></PortalIconBadge>
       <Box className="portal-document-copy">
         <Typography variant="titleXS">{document.name}</Typography>
-        <Typography variant="labelS" color="text.secondary">{document.category} · Updated {document.updatedAt} · Added by {document.postedBy}</Typography>
+        <Typography variant="bodySStandard" color="text.secondary">{document.category} · Updated {document.updatedAt}</Typography>
+        <Typography variant="labelS" className="portal-document-attribution">Added by {document.postedBy}</Typography>
       </Box>
       <Chip label={document.status} size="small" variant="outlined" className="portal-document-status" />
-      <Button variant="text" onClick={() => onPreview(document)} className="portal-document-action">Preview</Button>
+      <Button variant="outlined" onClick={() => onPreview(document)} className="portal-document-action">Preview</Button>
     </Stack>
   )
 }

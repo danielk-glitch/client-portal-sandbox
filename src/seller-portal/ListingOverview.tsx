@@ -3,25 +3,28 @@ import HomeOutlined from '@mui/icons-material/HomeOutlined'
 import ImageOutlined from '@mui/icons-material/ImageOutlined'
 import ArrowOutwardOutlined from '@mui/icons-material/ArrowOutwardOutlined'
 import { PortalOutlineTag } from '../components/PortalOutlineTag'
-import { PartnerBrandLockup } from '../transaction-portal/components'
+import { PartnerBrandLockup, PersonContactActions } from '../transaction-portal/components'
 import type { SellerTransaction } from './sellerTransaction'
 import './seller-portal.css'
 
-export type ListingOverviewVariant = 'card' | 'full' | 'light'
+export type ListingOverviewVariant = 'card' | 'full' | 'light' | 'light-bottom'
 
 type ListingOverviewProps = {
   transaction: SellerTransaction
   onSeeListing: () => void
   variant?: ListingOverviewVariant
+  polestarLayout?: boolean
 }
 
-export function ListingOverview({ transaction, onSeeListing, variant = 'card' }: ListingOverviewProps) {
+export function ListingOverview({ transaction, onSeeListing, variant = 'card', polestarLayout = false }: ListingOverviewProps) {
   const { listing } = transaction
   const leadAgent = transaction.team.find((member) => member.id === transaction.teamBrand.leadAgentId)
   const address = `${listing.address}, ${listing.city}, ${listing.state} ${listing.postalCode}`
+  const showPolestarCardLayout = polestarLayout && variant === 'card'
+  const isLightVariant = variant === 'light' || variant === 'light-bottom'
 
   return (
-    <Paper component="section" aria-label="Listing overview" className={`listing-overview listing-overview--${variant}`}>
+    <Paper component="section" aria-label="Listing overview" className={`listing-overview listing-overview--${variant}${variant === 'light-bottom' ? ' listing-overview--light' : ''}`}>
       <Box className="listing-photo">
         {listing.photoUrl ? (
           <Box component="img" src={listing.photoUrl} alt={`Listing at ${address}`} className="listing-image" />
@@ -32,16 +35,21 @@ export function ListingOverview({ transaction, onSeeListing, variant = 'card' }:
             <Typography variant="labelS" color="text.secondary">Sample image to be added</Typography>
           </Stack>
         )}
-        {variant === 'light' && (
+        {(isLightVariant || showPolestarCardLayout) && (
           <Button onClick={onSeeListing} variant="contained" className="listing-detail-link listing-detail-link--image">
             See Listing
           </Button>
         )}
       </Box>
       <Box className="listing-summary">
+        {variant === 'light-bottom' && (
+          <Box className="listing-light-brand">
+            <PartnerBrandLockup brand={transaction.teamBrand} />
+          </Box>
+        )}
         <Box className="listing-summary-header">
           <Typography variant="labelS" className="eyebrow">Seller transaction</Typography>
-          {(variant === 'card' || (variant === 'full' && !leadAgent)) && <PartnerBrandLockup brand={transaction.teamBrand} />}
+          {((variant === 'card' && !showPolestarCardLayout) || (variant === 'full' && !leadAgent)) && <PartnerBrandLockup brand={transaction.teamBrand} />}
         </Box>
         <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', flexWrap: 'wrap' }} className="listing-statuses">
           <Chip label={listing.status} size="small" icon={<HomeOutlined />} className="status-chip" />
@@ -62,9 +70,9 @@ export function ListingOverview({ transaction, onSeeListing, variant = 'card' }:
             See Listing
           </Button>
         )}
-        {variant === 'light' && leadAgent && (
+        {isLightVariant && leadAgent && (
           <Box className="listing-light-agent">
-            <ListingAgentDetails agent={leadAgent} />
+            <ListingAgentDetails agent={leadAgent} inline={variant === 'light-bottom'} />
           </Box>
         )}
         {variant === 'card' && <Box className="listing-feature-footer">
@@ -79,9 +87,13 @@ export function ListingOverview({ transaction, onSeeListing, variant = 'card' }:
               </Box>
             </Stack>
           )}
-          <Button onClick={onSeeListing} variant="contained" className="listing-detail-link">
-            See Listing
-          </Button>
+          {showPolestarCardLayout ? (
+            <PartnerBrandLockup brand={transaction.teamBrand} />
+          ) : (
+            <Button onClick={onSeeListing} variant="contained" className="listing-detail-link">
+              See Listing
+            </Button>
+          )}
         </Box>}
       </Box>
       {leadAgent && variant === 'full' && (
@@ -93,9 +105,9 @@ export function ListingOverview({ transaction, onSeeListing, variant = 'card' }:
   )
 }
 
-function ListingAgentDetails({ agent }: { agent: SellerTransaction['team'][number] }) {
+function ListingAgentDetails({ agent, inline = false }: { agent: SellerTransaction['team'][number]; inline?: boolean }) {
   return (
-    <Box className="listing-agent-feature-info">
+    <Box className={`listing-agent-feature-info${inline ? ' listing-agent-feature-info--inline' : ''}`}>
       <Stack direction="row" spacing={1.75} sx={{ alignItems: 'center', minWidth: 0 }}>
         <Avatar src={agent.photoUrl} alt={agent.name} className="listing-agent-feature-avatar">
           {agent.initials}
@@ -105,7 +117,7 @@ function ListingAgentDetails({ agent }: { agent: SellerTransaction['team'][numbe
           <Typography variant="titleS" className="listing-agent-feature-name">{agent.name}</Typography>
         </Box>
       </Stack>
-      {(agent.phone || agent.email) && (
+      {inline ? <PersonContactActions person={agent} /> : (agent.phone || agent.email) && (
         <Box className="listing-agent-feature-contacts">
           {agent.phone && (
             <Box className="listing-agent-feature-contact">

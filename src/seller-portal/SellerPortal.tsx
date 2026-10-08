@@ -82,10 +82,11 @@ export const portalTabs: Array<{ id: PortalTab; label: string }> = [
 
 export function SellerPortal({ transaction = sampleSellerTransaction, marketingSnapshot, initialListingOpen = false, basePath = '/seller', visualTheme }: SellerPortalProps) {
   const portalRef = useRef<HTMLDivElement>(null)
+  const defaultMarketingLayout = visualTheme === 'polestar' && marketingSnapshot?.insights ? 'views' : 'materials'
   const [headerVariant, setHeaderVariant] = useState<ListingOverviewVariant>(() => {
     if (visualTheme === 'polestar') return 'card'
     const requestedHeader = new URLSearchParams(window.location.search).get('header')
-    if (requestedHeader === 'card' || requestedHeader === 'full' || requestedHeader === 'light') return requestedHeader
+    if (requestedHeader === 'card' || requestedHeader === 'full' || requestedHeader === 'light' || requestedHeader === 'light-bottom') return requestedHeader
     return 'light'
   })
   const [designPanelAnchor, setDesignPanelAnchor] = useState<HTMLElement | null>(null)
@@ -93,9 +94,10 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
     const requestedLayout = new URLSearchParams(window.location.search).get('feedback')
     return marketingFeedbackLayouts.find((layout) => layout.id === requestedLayout)?.id ?? 'editorial'
   })
-  const [marketingLayout, setMarketingLayout] = useState<'materials' | 'views'>(() =>
-    new URLSearchParams(window.location.search).get('marketingLayout') === 'views' ? 'views' : 'materials',
-  )
+  const [marketingLayout, setMarketingLayout] = useState<'materials' | 'views'>(() => {
+    const requestedLayout = new URLSearchParams(window.location.search).get('marketingLayout')
+    return requestedLayout === 'views' || requestedLayout === 'materials' ? requestedLayout : defaultMarketingLayout
+  })
   const [activeTab, setActiveTab] = useState<PortalTab>(() => {
     const requestedTab = new URLSearchParams(window.location.search).get('section')
     if (requestedTab === 'timeline') return 'activity'
@@ -212,7 +214,7 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
   function selectMarketingLayout(value: 'materials' | 'views') {
     setMarketingLayout(value)
     const url = new URL(window.location.href)
-    if (value === 'materials') url.searchParams.delete('marketingLayout')
+    if (value === defaultMarketingLayout) url.searchParams.delete('marketingLayout')
     else url.searchParams.set('marketingLayout', value)
     window.history.replaceState(null, '', url)
   }
@@ -257,7 +259,7 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
       </Box>
 
       <Container maxWidth="xl" className="portal-main">
-        <ListingOverview transaction={transaction} onSeeListing={openListing} variant={headerVariant} />
+        <ListingOverview transaction={transaction} onSeeListing={openListing} variant={headerVariant} polestarLayout={visualTheme === 'polestar'} />
 
         <Box className="priority-grid" aria-label="Current transaction activity">
           <PortalSection
@@ -372,6 +374,7 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
                 <FormControlLabel value="card" control={<Radio />} label="Card" />
                 <FormControlLabel value="full" control={<Radio />} label="Full width · Dark" />
                 <FormControlLabel value="light" control={<Radio />} label="Full width · Light split" />
+                <FormControlLabel value="light-bottom" control={<Radio />} label="Light split · Bottom aligned" />
               </RadioGroup>
             </Box>
           )}

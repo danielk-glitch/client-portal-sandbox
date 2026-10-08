@@ -183,7 +183,7 @@ export function AnnotationLayer({ annotations, className = '' }: { annotations: 
                 icon={annotation.icon}
                 tone={annotation.tone}
                 popoverSide={annotation.x > window.innerWidth - 340 ? 'left' : 'right'}
-                popoverVertical={annotation.y > window.innerHeight - 260 ? 'above' : 'below'}
+                popoverVertical={annotation.y > window.innerHeight - 420 ? 'above' : 'below'}
               />
             </div>
           ))}
