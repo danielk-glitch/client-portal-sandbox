@@ -72,13 +72,18 @@
   .portal-footer-content {
     min-height: 0;
     padding-block: 24px;
-    align-items: stretch;
+    align-items: center;
     flex-direction: column;
     gap: 24px;
   }
 
+  .portal-footer-agent {
+    width: fit-content;
+    grid-template-columns: 60px minmax(0, max-content) auto;
+  }
+
   .portal-footer-brand {
-    justify-content: flex-start;
+    justify-content: center;
   }
 }
 
@@ -95,5 +100,10 @@
 
   .portal-footer-agent .portal-person-actions {
     margin-left: 0;
+  }
+
+  .portal-footer-brand .partner-brand-lockup {
+    --partner-team-width: 132px;
+    --partner-brokerage-width: 104px;
   }
 }

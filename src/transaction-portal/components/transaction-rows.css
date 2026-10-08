@@ -135,18 +135,25 @@
 .portal-task-row:first-child { padding-top: 0; }
 .portal-task-row:last-child { padding-bottom: 0; }
 
+.portal-task-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
 .portal-task-description.MuiTypography-root {
   display: block;
   max-width: 70ch;
   margin-top: 5px;
 }
 
-.portal-task-meta { margin-top: 16px; }
+.portal-task-assignee.MuiTypography-root { display: block; margin-top: 16px; }
 
 .portal-task-due.MuiChip-root {
   align-self: flex-start;
-  border-color: var(--color-semantic-stroke-primary-light);
-  color: var(--color-semantic-text-primary);
+  margin-left: auto;
   font-variant-numeric: tabular-nums;
 }
 

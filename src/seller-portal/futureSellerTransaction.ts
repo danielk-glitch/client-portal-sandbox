@@ -148,6 +148,17 @@ export const futureSellerTransaction: SellerTransaction = {
 
 export const futureMarketingSnapshot: MarketingSnapshotData = {
   materials: sampleMarketingMaterials,
+  insights: {
+    totalViews: 8746,
+    dailyViews: [310, 382, 356, 470, 518, 446, 592, 548, 610, 574, 664, 702, 646, 730],
+    uniqueVisitors: 2378,
+    saves: 42,
+    shares: 16,
+    socialReach: 12640,
+    socialEngagements: 418,
+    socialPosts: 6,
+    showings: 14,
+  },
   channels: [
     { label: 'Mailer campaigns', count: 2, unit: 'sent' },
     { label: 'Digital ads', count: 4, unit: 'live' },

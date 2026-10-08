@@ -68,6 +68,7 @@ type PrototypeView = {
 const sellerViews: PrototypeView[] = [
   { label: 'Current Functionality', href: '/seller' },
   { label: 'Future v1', href: '/seller/future-v1' },
+  { label: 'Alternate styling', href: '/seller/future-v1-polestar' },
 ]
 
 const resources = [
@@ -87,6 +88,12 @@ function App() {
   }
   if (currentPath === '/seller/future-v1/listing') {
     return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} basePath="/seller/future-v1" initialListingOpen />
+  }
+  if (currentPath === '/seller/future-v1-polestar') {
+    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} basePath="/seller/future-v1-polestar" visualTheme="polestar" />
+  }
+  if (currentPath === '/seller/future-v1-polestar/listing') {
+    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} basePath="/seller/future-v1-polestar" visualTheme="polestar" initialListingOpen />
   }
   if (currentPath === '/components') return <ComponentGallery />
   if (currentPath === '/buyer') return <BuyerPortalPreview />

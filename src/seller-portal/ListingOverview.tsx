@@ -1,11 +1,13 @@
 import { Avatar, Box, Button, Chip, Paper, Stack, Typography } from '@mui/material'
 import HomeOutlined from '@mui/icons-material/HomeOutlined'
 import ImageOutlined from '@mui/icons-material/ImageOutlined'
+import ArrowOutwardOutlined from '@mui/icons-material/ArrowOutwardOutlined'
+import { PortalOutlineTag } from '../components/PortalOutlineTag'
 import { PartnerBrandLockup } from '../transaction-portal/components'
 import type { SellerTransaction } from './sellerTransaction'
 import './seller-portal.css'
 
-export type ListingOverviewVariant = 'card' | 'full'
+export type ListingOverviewVariant = 'card' | 'full' | 'light'
 
 type ListingOverviewProps = {
   transaction: SellerTransaction
@@ -30,26 +32,26 @@ export function ListingOverview({ transaction, onSeeListing, variant = 'card' }:
             <Typography variant="labelS" color="text.secondary">Sample image to be added</Typography>
           </Stack>
         )}
+        {variant === 'light' && (
+          <Button onClick={onSeeListing} variant="contained" className="listing-detail-link listing-detail-link--image">
+            See Listing
+          </Button>
+        )}
       </Box>
       <Box className="listing-summary">
         <Box className="listing-summary-header">
           <Typography variant="labelS" className="eyebrow">Seller transaction</Typography>
-          {(variant === 'card' || !leadAgent) && <PartnerBrandLockup brand={transaction.teamBrand} />}
+          {(variant === 'card' || (variant === 'full' && !leadAgent)) && <PartnerBrandLockup brand={transaction.teamBrand} />}
         </Box>
         <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', flexWrap: 'wrap' }} className="listing-statuses">
           <Chip label={listing.status} size="small" icon={<HomeOutlined />} className="status-chip" />
-          <Chip
-            label={listing.published ? 'Published' : 'Not published'}
-            size="small"
-            variant="outlined"
-            className="published-chip"
-          />
+          <PortalOutlineTag label={listing.published ? 'Published' : 'Not published'} className="published-chip" />
         </Stack>
-        <Typography variant={variant === 'full' ? 'displayS' : 'titleL'} component="h1" className="listing-address">
+        <Typography variant={variant === 'card' ? 'titleL' : 'displayS'} component="h1" className="listing-address">
           {listing.address}
         </Typography>
         <Typography
-          variant={variant === 'full' ? 'bodyMStandard' : 'bodySStandard'}
+          variant={variant === 'card' ? 'bodySStandard' : 'bodyMStandard'}
           color="text.secondary"
           className="listing-location"
         >
@@ -59,6 +61,11 @@ export function ListingOverview({ transaction, onSeeListing, variant = 'card' }:
           <Button onClick={onSeeListing} variant="contained" className="listing-detail-link listing-detail-link--full">
             See Listing
           </Button>
+        )}
+        {variant === 'light' && leadAgent && (
+          <Box className="listing-light-agent">
+            <ListingAgentDetails agent={leadAgent} />
+          </Box>
         )}
         {variant === 'card' && <Box className="listing-feature-footer">
           {leadAgent && variant === 'card' && (
@@ -79,39 +86,48 @@ export function ListingOverview({ transaction, onSeeListing, variant = 'card' }:
       </Box>
       {leadAgent && variant === 'full' && (
         <Box className="listing-agent-feature">
-          <Box className="listing-agent-feature-info">
-            <Stack direction="row" spacing={1.75} sx={{ alignItems: 'center', minWidth: 0 }}>
-              <Avatar src={leadAgent.photoUrl} alt={leadAgent.name} className="listing-agent-feature-avatar">
-                {leadAgent.initials}
-              </Avatar>
-              <Box sx={{ minWidth: 0 }}>
-                <Typography variant="labelS" className="listing-agent-feature-label">Your listing agent</Typography>
-                <Typography variant="titleS" className="listing-agent-feature-name">{leadAgent.name}</Typography>
-              </Box>
-            </Stack>
-            {(leadAgent.phone || leadAgent.email) && (
-              <Box className="listing-agent-feature-contacts">
-                {leadAgent.phone && (
-                  <Box component="a" href={`tel:${leadAgent.phone}`} className="listing-agent-feature-contact">
-                    <Typography variant="labelS">Phone</Typography>
-                    <Typography variant="bodySStandard">{formatPhoneNumber(leadAgent.phone)}</Typography>
-                  </Box>
-                )}
-                {leadAgent.email && (
-                  <Box component="a" href={`mailto:${leadAgent.email}`} className="listing-agent-feature-contact">
-                    <Typography variant="labelS">Email</Typography>
-                    <Typography variant="bodySStandard">{leadAgent.email}</Typography>
-                  </Box>
-                )}
-              </Box>
-            )}
-          </Box>
-          <Box className="listing-agent-feature-brand">
-            <PartnerBrandLockup brand={transaction.teamBrand} />
-          </Box>
+          <ListingAgentDetails agent={leadAgent} />
         </Box>
       )}
     </Paper>
+  )
+}
+
+function ListingAgentDetails({ agent }: { agent: SellerTransaction['team'][number] }) {
+  return (
+    <Box className="listing-agent-feature-info">
+      <Stack direction="row" spacing={1.75} sx={{ alignItems: 'center', minWidth: 0 }}>
+        <Avatar src={agent.photoUrl} alt={agent.name} className="listing-agent-feature-avatar">
+          {agent.initials}
+        </Avatar>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="labelS" className="listing-agent-feature-label">Your listing agent</Typography>
+          <Typography variant="titleS" className="listing-agent-feature-name">{agent.name}</Typography>
+        </Box>
+      </Stack>
+      {(agent.phone || agent.email) && (
+        <Box className="listing-agent-feature-contacts">
+          {agent.phone && (
+            <Box className="listing-agent-feature-contact">
+              <Typography variant="labelS">Phone</Typography>
+              <Box className="listing-agent-feature-contact-value-row">
+                <Typography component="a" href={`tel:${agent.phone}`} variant="bodySStandard" className="listing-agent-feature-contact-link listing-agent-feature-contact-value">{formatPhoneNumber(agent.phone)}</Typography>
+                <ArrowOutwardOutlined aria-hidden="true" className="listing-agent-feature-contact-arrow" />
+              </Box>
+            </Box>
+          )}
+          {agent.email && (
+            <Box className="listing-agent-feature-contact">
+              <Typography variant="labelS">Email</Typography>
+              <Box className="listing-agent-feature-contact-value-row">
+                <Typography component="a" href={`mailto:${agent.email}`} variant="bodySStandard" className="listing-agent-feature-contact-link listing-agent-feature-contact-value">{agent.email}</Typography>
+                <ArrowOutwardOutlined aria-hidden="true" className="listing-agent-feature-contact-arrow" />
+              </Box>
+            </Box>
+          )}
+        </Box>
+      )}
+    </Box>
   )
 }
 

@@ -6,6 +6,7 @@ import Favorite from '@mui/icons-material/Favorite'
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder'
 import InsertDriveFileOutlined from '@mui/icons-material/InsertDriveFileOutlined'
 import PhoneOutlined from '@mui/icons-material/PhoneOutlined'
+import { PortalOutlineTag } from '../../components/PortalOutlineTag'
 import type {
   AdvertisingEvent,
   ShowingFeedback,
@@ -88,12 +89,12 @@ export function DateEventRow({ date, title, description, children }: Pick<Upcomi
 export function TaskRow({ task }: { task: TransactionTask }) {
   return (
     <Box component="li" className="portal-task-row">
-      <Typography variant="titleXS">{task.name}</Typography>
+      <Box className="portal-task-heading">
+        <Typography variant="titleXS">{task.name}</Typography>
+        <PortalOutlineTag label={`Due ${task.dueDate}`} className="portal-task-due" />
+      </Box>
       <Typography variant="bodySStandard" color="text.secondary" className="portal-task-description">{task.description}</Typography>
-      <Stack direction={{ xs: 'column', sm: 'row' }} sx={{ justifyContent: 'space-between', alignItems: { sm: 'center' }, gap: 1.5 }} className="portal-task-meta">
-        <Typography variant="labelS" color="text.secondary">Assigned to {task.assignee}</Typography>
-        <Chip label={`Due ${task.dueDate}`} size="small" variant="outlined" className="portal-task-due" />
-      </Stack>
+      <Typography variant="labelS" color="text.secondary" className="portal-task-assignee">Assigned to {task.assignee}</Typography>
     </Box>
   )
 }

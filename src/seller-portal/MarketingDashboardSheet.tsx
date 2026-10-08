@@ -141,6 +141,20 @@ export function MarketingDashboardSheet({ open, onClose, initialSection, transac
                 <Typography variant="bodyMStandard" color="text.secondary">A look at the work your team has put behind your listing.</Typography>
               </Box>
             </Box>
+            {data.insights && (
+              <Box className="marketing-dashboard-insights" aria-label="Listing performance">
+                <Box className="marketing-dashboard-insights-primary">
+                  <Typography variant="labelM">Total listing views</Typography>
+                  <Typography variant="displayL" component="p">{data.insights.totalViews.toLocaleString('en-US')}</Typography>
+                  <Typography variant="bodySStandard">Across listing sites</Typography>
+                </Box>
+                <Box className="marketing-dashboard-insights-secondary">
+                  <Box><Typography variant="metricM" component="p">{data.insights.uniqueVisitors.toLocaleString('en-US')}</Typography><Typography variant="bodySStandard">Unique visitors</Typography></Box>
+                  <Box><Typography variant="metricM" component="p">{data.insights.saves.toLocaleString('en-US')}</Typography><Typography variant="bodySStandard">Saves</Typography></Box>
+                  <Box><Typography variant="metricM" component="p">{data.insights.socialReach.toLocaleString('en-US')}</Typography><Typography variant="bodySStandard">People reached on social</Typography></Box>
+                </Box>
+              </Box>
+            )}
             <Box className="marketing-dashboard-metrics">
               {data.channels.map((channel) => (
                 <Box key={channel.label} className="marketing-dashboard-metric">
@@ -156,7 +170,7 @@ export function MarketingDashboardSheet({ open, onClose, initialSection, transac
               <Box>
                 <Box className="marketing-dashboard-category-title">
                   <Typography component="h2" variant="titleM" id="marketing-dashboard-materials-title">Marketing materials</Typography>
-                  <Typography variant="labelM" color="text.secondary" aria-label={`${materials.length} materials`}>{materials.length}</Typography>
+                  <Typography variant="labelM" className="marketing-dashboard-count" aria-label={`${materials.length} materials`}>{materials.length}</Typography>
                 </Box>
                 <Typography variant="bodyMStandard" color="text.secondary">The creative your team has produced for your home.</Typography>
               </Box>
@@ -170,7 +184,7 @@ export function MarketingDashboardSheet({ open, onClose, initialSection, transac
                   <Box className="marketing-dashboard-category-heading">
                     <Box className="marketing-dashboard-category-title">
                       <Typography component="h3" variant="titleS">{category}</Typography>
-                      <Typography variant="labelM" color="text.secondary">{categoryMaterials.length}</Typography>
+                      <Typography variant="labelM" className="marketing-dashboard-count">{categoryMaterials.length}</Typography>
                     </Box>
                     {isCarousel && (
                       <Box className="marketing-dashboard-carousel-controls">
@@ -207,7 +221,7 @@ export function MarketingDashboardSheet({ open, onClose, initialSection, transac
             <Box component="section" id="marketing-dashboard-feedback" className="marketing-dashboard-section marketing-dashboard-history-section" aria-labelledby="marketing-dashboard-feedback-title">
               <Box className="marketing-dashboard-section-intro">
                 <Typography component="h2" variant="titleM" id="marketing-dashboard-feedback-title">Showing feedback</Typography>
-                <Typography variant="labelM" color="text.secondary">{transaction.feedback.length} responses</Typography>
+                <Typography variant="labelM" className="marketing-dashboard-count">{transaction.feedback.length} responses</Typography>
               </Box>
               <TransactionRowList>
                 {transaction.feedback.map((item) => <ShowingFeedbackRow key={item.id} feedback={item} />)}
@@ -216,7 +230,7 @@ export function MarketingDashboardSheet({ open, onClose, initialSection, transac
             <Box component="section" id="marketing-dashboard-activity" className="marketing-dashboard-section marketing-dashboard-history-section" aria-labelledby="marketing-dashboard-activity-title">
               <Box className="marketing-dashboard-section-intro">
                 <Typography component="h2" variant="titleM" id="marketing-dashboard-activity-title">Advertising updates</Typography>
-                <Typography variant="labelM" color="text.secondary">{transaction.advertising.length} updates</Typography>
+                <Typography variant="labelM" className="marketing-dashboard-count">{transaction.advertising.length} updates</Typography>
               </Box>
               <TransactionRowList>
                 {transaction.advertising.map((event) => <AdvertisingRow key={event.id} event={event} compact />)}

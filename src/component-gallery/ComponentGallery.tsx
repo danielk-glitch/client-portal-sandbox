@@ -8,6 +8,8 @@ import {
   IconButton,
   Paper,
   Stack,
+  Tab,
+  Tabs,
   Typography,
   useTheme,
 } from '@mui/material'
@@ -17,6 +19,7 @@ import ArrowBackOutlined from '@mui/icons-material/ArrowBackOutlined'
 import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined'
 import PhoneOutlined from '@mui/icons-material/PhoneOutlined'
 import { CardActionButton } from '../components/CardActionButton'
+import { PortalOutlineTag } from '../components/PortalOutlineTag'
 import { AnnotationLayer, AnnotationMarker } from '../components/AnnotationLayer'
 import { PlaceModal, placeModalWidths, type PlaceModalSize } from '../components/PlaceModal'
 import { SegmentedSwitch, type SegmentedSwitchOption } from '../components/SegmentedSwitch'
@@ -24,7 +27,9 @@ import { typographyTokens } from '../design-tokens'
 import { primaryButtonHoverShadow } from '../theme'
 import { ListingDetailsSheet } from '../seller-portal/ListingDetailsSheet'
 import { ListingOverview } from '../seller-portal/ListingOverview'
+import { portalTabs, type PortalTab } from '../seller-portal/SellerPortal'
 import { MarketingSnapshot } from '../seller-portal/MarketingSnapshot'
+import { AdvertisingSnapshot } from '../seller-portal/AdvertisingSnapshot'
 import { marketingFeedbackLayouts, type MarketingFeedbackLayout } from '../seller-portal/marketingFeedbackLayouts'
 import { MarketingDashboardSheet, type MarketingDashboardSection } from '../seller-portal/MarketingDashboardSheet'
 import { futureMarketingSnapshot, futureSellerTransaction } from '../seller-portal/futureSellerTransaction'
@@ -257,14 +262,15 @@ function ChipSection() {
       id="chip"
       number="05"
       title="Chip"
-      description="Compact status and filter labels use the PLACE small-label typography across MUI chip variants."
-      source="Theme: MuiChip · src/theme.ts"
+      description="Compact status and filter labels use the PLACE small-label typography across MUI chip variants. Published and task due dates share the PortalOutlineTag component, including height, padding, color, and border."
+      source="Theme: MuiChip · PortalOutlineTag"
     >
       <Typography component="h3" variant="titleXS" sx={{ mb: 2 }}>Variants</Typography>
       <SpecimenList>
         <Specimen label="Filled"><Chip label="In progress" /></Specimen>
         <Specimen label="Outlined"><Chip label="In progress" variant="outlined" /></Specimen>
         <Specimen label="Small"><Chip label="In progress" size="small" /></Specimen>
+        <Specimen label="Portal outlined"><Stack direction="row" spacing={1}><PortalOutlineTag label="Published" /><PortalOutlineTag label="Due 10/08/2026" /></Stack></Specimen>
       </SpecimenList>
       <Typography component="h3" variant="titleXS" sx={{ mt: 5, mb: 1 }}>States</Typography>
       <Typography variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
@@ -598,7 +604,8 @@ function PortalPatternSample({ title, children }: { title: string; children: Rea
 
 function PortalPatternsSection() {
   const [peopleTab, setPeopleTab] = useState<PeopleTab>('team')
-  const [feedbackLayout, setFeedbackLayout] = useState<MarketingFeedbackLayout>('current')
+  const [sellerTab, setSellerTab] = useState<PortalTab>('activity')
+  const [feedbackLayout, setFeedbackLayout] = useState<MarketingFeedbackLayout>('editorial')
   const [marketingDashboardSection, setMarketingDashboardSection] = useState<MarketingDashboardSection | null>(null)
   const [previewDocument, setPreviewDocument] = useState<TransactionDocument | null>(null)
   const [listingPreviewOpen, setListingPreviewOpen] = useState(false)
@@ -619,8 +626,8 @@ function PortalPatternsSection() {
             On the seller page, the listing header and main blocks fade upward by 8px as they first enter view. Paired cards follow 55ms apart. The entrance plays once, stays off tab changes, and is removed for reduced motion.
           </Typography>
           <PortalPatternSample title="Full-width listing header">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>The full-width variant anchors the address and listing action at the lower left, with the agent, contact links, and partner logos in a separate card at the far right. The compact variant keeps its agent row and logos in the header. Both share the same photo fade and status chips.</Typography>
-            <Box sx={{ overflow: 'hidden', borderRadius: 2, '& .listing-overview--full.MuiPaper-root': { width: '100%', minHeight: 450, marginLeft: 0 }, '& .listing-overview--full .listing-summary': { marginLeft: 24 } }}>
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>The taller dark header fades the house photo behind the address and listing action, with the agent card at the far right. The compact card keeps its agent row and logos inside the header.</Typography>
+            <Box sx={{ overflow: 'hidden', borderRadius: 2, '& .listing-overview--full.MuiPaper-root': { width: '100%', marginLeft: 0 }, '& .listing-overview--full .listing-summary': { marginLeft: 24 } }}>
               <ListingOverview
                 transaction={sample}
                 onSeeListing={() => setListingPreviewOpen(true)}
@@ -628,6 +635,12 @@ function PortalPatternsSection() {
               />
             </Box>
             <ListingDetailsSheet open={listingPreviewOpen} onClose={() => setListingPreviewOpen(false)} transaction={sample} />
+          </PortalPatternSample>
+          <PortalPatternSample title="Light split listing header">
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>This is the seller page default. The house photo sits beside the listing information with rounded corners. The listing action sits 16px from the photo edges on small screens. At stacked widths, the copy uses a 32px side inset to align with the cards below. The status chip uses extra space before its icon for optical balance. Agent details appear below a divider in the copy column; phone and email stay side by side until narrow mobile widths. Only the values are links, and they darken and reveal an up-right arrow on hover or keyboard focus. Partner logos stay out of this header.</Typography>
+            <Box sx={{ overflow: 'hidden', borderRadius: 2, '& .listing-overview--light.MuiPaper-root': { width: '100%', marginLeft: 0 } }}>
+              <ListingOverview transaction={sample} onSeeListing={() => setListingPreviewOpen(true)} variant="light" />
+            </Box>
           </PortalPatternSample>
           <PortalPatternSample title="Icon badge">
             <Stack direction="row" spacing={3} sx={{ alignItems: 'center' }}>
@@ -647,10 +660,20 @@ function PortalPatternsSection() {
           </PortalPatternSample>
           <PortalPatternSample title="People section and rows">
             <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
-              Your Team and Viewers each fill half the tab bar. Reduced top padding balances the tab label with the space below the last row. Tabs change the visible panel and support keyboard navigation.
+              Your Team and Viewers each fill half the tab bar. Both lists begin 30px below the tabs, with no extra viewer description. On the seller page, People and transaction sections sit 40px apart. Tabs change the visible panel and support keyboard navigation.
             </Typography>
             <Box sx={{ maxWidth: 460 }}>
               <PeopleSection team={sample.team.slice(0, 3)} viewers={sample.viewers} value={peopleTab} onChange={setPeopleTab} />
+            </Box>
+          </PortalPatternSample>
+          <PortalPatternSample title="Seller section tabs">
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
+              Activity, Tasks, Notes, and Documents make up the seller page tab row. Listing details live in See Listing.
+            </Typography>
+            <Box component="nav" aria-label="Transaction sections" className="portal-section-nav">
+              <Tabs value={sellerTab} onChange={(_, value: PortalTab) => setSellerTab(value)} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile aria-label="Transaction information">
+                {portalTabs.map((tab) => <Tab key={tab.id} value={tab.id} label={tab.label} />)}
+              </Tabs>
             </Box>
           </PortalPatternSample>
           <PortalPatternSample title="Team and brokerage logos">
@@ -659,6 +682,7 @@ function PortalPatternsSection() {
             </Box>
           </PortalPatternSample>
           <PortalPatternSample title="Portal footer">
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>At stacked widths, center the agent group and partner branding as separate rows.</Typography>
             <PortalFooter agent={sample.team.find((member) => member.id === sample.teamBrand.leadAgentId)} brand={sample.teamBrand} />
           </PortalPatternSample>
           <PortalPatternSample title="Activity and upcoming dates cards">
@@ -680,7 +704,7 @@ function PortalPatternsSection() {
           </PortalPatternSample>
           <PortalPatternSample title="Listing marketing snapshot">
             <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
-              Channel labels use the body scale and a clear gap between metric columns. Compare the current showing feedback card with three layout directions: an open editorial quote, a side rail, and a framed note. Each keeps the same feedback and carousel controls. The See all action opens the marketing dashboard at showing feedback. In the dashboard, the total sits beside Marketing materials, matching the category counts.
+              Channel labels use the medium body size on desktop and the small body size on tablet and mobile. On mobile, each channel places its label 18px above the count, with the unit aligned to the count baseline. The dashboard action stays beside the heading until narrow phone widths. Editorial showing feedback is the default; Current, Side rail, and Note remain available in the design panel. Its divider matches the metric separators: left of feedback on desktop, above it with more space when stacked. Each layout puts the hearts above the quote, the source and date below it, and Showing feedback beside the carousel controls. The main dashboard action opens the full marketing view.
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }} aria-label="Showing feedback layouts">
               {marketingFeedbackLayouts.map((layout) => (
@@ -689,8 +713,16 @@ function PortalPatternsSection() {
                 </Button>
               ))}
             </Box>
-            <MarketingSnapshot data={futureMarketingSnapshot} feedback={sample.feedback} feedbackLayout={feedbackLayout} onOpenDashboard={() => setMarketingDashboardSection('overview')} onViewFeedback={() => setMarketingDashboardSection('feedback')} />
+            <MarketingSnapshot data={futureMarketingSnapshot} feedback={sample.feedback} feedbackLayout={feedbackLayout} onOpenDashboard={() => setMarketingDashboardSection('overview')} />
             <MarketingDashboardSheet open={marketingDashboardSection !== null} onClose={() => setMarketingDashboardSection(null)} initialSection={marketingDashboardSection ?? 'overview'} transaction={futureSellerTransaction} data={futureMarketingSnapshot} />
+          </PortalPatternSample>
+          <PortalPatternSample title="Listing views snapshot">
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
+              An alternate seller view led by total listing views and a quiet 14-day trend. Unique visitors, saves, and shares support the main number; social reach and showing feedback stay visible at a lower level. Sample figures are illustrative. Select Listing views in the seller design panel to see it in context.
+            </Typography>
+            {futureMarketingSnapshot.insights && (
+              <AdvertisingSnapshot data={futureMarketingSnapshot.insights} feedback={sample.feedback} onOpenDashboard={() => setMarketingDashboardSection('overview')} />
+            )}
           </PortalPatternSample>
           <PortalPatternSample title="Date event rows">
             <Box sx={{ maxWidth: 600 }}>
@@ -704,7 +736,7 @@ function PortalPatternsSection() {
           </PortalPatternSample>
           <PortalPatternSample title="Activity event rows">
             <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
-              Align the date and time with the row title; keep the actor below the description.
+              Align the date and time with the row title, using the small label size without added letter spacing; keep the actor below the description.
             </Typography>
             <Box component="ol" className="activity-event-list" sx={{ maxWidth: 760 }}>
               {sample.timeline.slice(0, 2).map(event => <ActivityEventRow key={event.id} event={event} />)}
@@ -712,13 +744,14 @@ function PortalPatternsSection() {
           </PortalPatternSample>
           <PortalPatternSample title="Paginated activity history">
             <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
-              List tabs show up to 10 rows per page, then reveal page controls and a visible range count. This future seller sample has 21 activity updates across three pages; the Recent activity card stays limited to three.
+              Tab content uses the same horizontal inset as its tab labels. List tabs show up to 10 rows per page, then reveal page controls and a visible range count. This future seller sample has 21 activity updates across three pages; the Recent activity card stays limited to three.
             </Typography>
             <Box sx={{ maxWidth: 760, border: 1, borderColor: 'divider', borderRadius: 2 }}>
               <ActivityPanel events={futureSellerTransaction.timeline} />
             </Box>
           </PortalPatternSample>
           <PortalPatternSample title="Task row">
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Place the due-date tag with the task title. When space is tight, it wraps within that heading row before the description.</Typography>
             <TransactionRowList><TaskRow task={sample.tasks[0]} /></TransactionRowList>
           </PortalPatternSample>
           <PortalPatternSample title="Advertising row">

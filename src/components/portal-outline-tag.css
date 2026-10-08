@@ -1,0 +1,9 @@
+.portal-outline-tag.MuiChip-root {
+  height: 30px;
+  color: var(--color-primitive-neutral-800);
+  border-color: var(--color-primitive-neutral-300);
+}
+
+.portal-outline-tag .MuiChip-label {
+  padding-inline: 16px;
+}

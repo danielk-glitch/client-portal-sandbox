@@ -1,5 +1,5 @@
 /* design-build · self-critique: Clarity5 Warmth4 Restraint5 Craft4 Variety4 SlopFree5 */
-import { Box, Paper, Stack, Tab, Tabs, Typography } from '@mui/material'
+import { Box, Paper, Stack, Tab, Tabs } from '@mui/material'
 import type { TeamMember, TransactionViewer } from '../types'
 import { PersonContactActions, PersonRow } from './TransactionRows'
 import './people-section.css'
@@ -26,7 +26,6 @@ export function PeopleSection({ team, viewers, value, onChange }: {
       </Box>
 
       <Box role="tabpanel" id="people-panel-viewers" aria-labelledby="people-tab-viewers" hidden={value !== 'viewers'} className="people-panel viewers-panel">
-        <Typography variant="labelS" color="text.secondary">Clients with access to this transaction</Typography>
         <Stack spacing={1.5} className="viewers-list">
           {viewers.map((viewer) => <PersonRow key={viewer.id} person={viewer} variant="viewer" />)}
         </Stack>

@@ -48,6 +48,7 @@
   max-width: 140px;
   text-align: right;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
 }
 
 @media (max-width: 760px) {

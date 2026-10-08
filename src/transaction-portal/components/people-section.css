@@ -1,6 +1,6 @@
 .people-section.MuiPaper-root {
   min-width: 0;
-  padding: 8px 32px 32px;
+  padding: 12px 32px 32px;
   border-radius: 14px;
   background: var(--color-semantic-surface-primary-darkest);
   scroll-margin-top: 24px;
@@ -48,14 +48,13 @@
 .team-list {
   display: grid;
   gap: 24px;
-  margin-top: 22px;
+  margin-top: 30px;
 }
 
-.viewers-panel > .MuiTypography-root { display: block; margin-top: 20px; }
-.viewers-list.MuiStack-root { margin-top: 18px; }
+.viewers-list.MuiStack-root { margin-top: 30px; }
 
 @media (max-width: 400px) {
   .people-section.MuiPaper-root {
-    padding: 0 24px 24px;
+    padding: 4px 24px 24px;
   }
 }

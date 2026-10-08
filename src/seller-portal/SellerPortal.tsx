@@ -38,6 +38,7 @@ import {
 import { ListingDetailsSheet } from './ListingDetailsSheet'
 import { ListingOverview, type ListingOverviewVariant } from './ListingOverview'
 import { MarketingSnapshot, type MarketingSnapshotData } from './MarketingSnapshot'
+import { AdvertisingSnapshot } from './AdvertisingSnapshot'
 import { marketingFeedbackLayouts, type MarketingFeedbackLayout } from './marketingFeedbackLayouts'
 import { MarketingDashboardSheet, type MarketingDashboardSection } from './MarketingDashboardSheet'
 import {
@@ -45,7 +46,6 @@ import {
   ActivityPanel,
   DateEventList,
   DateEventRow,
-  DetailGrid,
   DocumentRow,
   PeopleSection,
   PaginatedTabList,
@@ -61,41 +61,47 @@ import { CardActionButton } from '../components/CardActionButton'
 import { AnnotationLayer } from '../components/AnnotationLayer'
 import { sellerAnnotations } from './sellerAnnotations'
 import './seller-portal.css'
+import './seller-polestar.css'
 
 type SellerPortalProps = {
   transaction?: SellerTransaction
   marketingSnapshot?: MarketingSnapshotData
   initialListingOpen?: boolean
   basePath?: string
+  visualTheme?: 'polestar'
 }
 
-export type PortalTab = 'activity' | 'tasks' | 'notes' | 'details' | 'documents'
+export type PortalTab = 'activity' | 'tasks' | 'notes' | 'documents'
 
 export const portalTabs: Array<{ id: PortalTab; label: string }> = [
   { id: 'activity', label: 'Activity' },
   { id: 'tasks', label: 'Tasks' },
   { id: 'notes', label: 'Notes' },
-  { id: 'details', label: 'Details' },
   { id: 'documents', label: 'Documents' },
 ]
 
-export function SellerPortal({ transaction = sampleSellerTransaction, marketingSnapshot, initialListingOpen = false, basePath = '/seller' }: SellerPortalProps) {
+export function SellerPortal({ transaction = sampleSellerTransaction, marketingSnapshot, initialListingOpen = false, basePath = '/seller', visualTheme }: SellerPortalProps) {
   const portalRef = useRef<HTMLDivElement>(null)
   const [headerVariant, setHeaderVariant] = useState<ListingOverviewVariant>(() => {
+    if (visualTheme === 'polestar') return 'card'
     const requestedHeader = new URLSearchParams(window.location.search).get('header')
-    if (requestedHeader === 'card' || requestedHeader === 'full') return requestedHeader
-    return 'full'
+    if (requestedHeader === 'card' || requestedHeader === 'full' || requestedHeader === 'light') return requestedHeader
+    return 'light'
   })
   const [designPanelAnchor, setDesignPanelAnchor] = useState<HTMLElement | null>(null)
   const [feedbackLayout, setFeedbackLayout] = useState<MarketingFeedbackLayout>(() => {
     const requestedLayout = new URLSearchParams(window.location.search).get('feedback')
-    return marketingFeedbackLayouts.find((layout) => layout.id === requestedLayout)?.id ?? 'current'
+    return marketingFeedbackLayouts.find((layout) => layout.id === requestedLayout)?.id ?? 'editorial'
   })
+  const [marketingLayout, setMarketingLayout] = useState<'materials' | 'views'>(() =>
+    new URLSearchParams(window.location.search).get('marketingLayout') === 'views' ? 'views' : 'materials',
+  )
   const [activeTab, setActiveTab] = useState<PortalTab>(() => {
     const requestedTab = new URLSearchParams(window.location.search).get('section')
     if (requestedTab === 'timeline') return 'activity'
     return portalTabs.find((tab) => tab.id === requestedTab)?.id ?? 'activity'
   })
+  const visibleTab = portalTabs.find((tab) => tab.id === activeTab)?.id ?? 'activity'
   const [activePeopleTab, setActivePeopleTab] = useState<PeopleTab>(() =>
     new URLSearchParams(window.location.search).get('people') === 'viewers' ? 'viewers' : 'team',
   )
@@ -190,16 +196,24 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
   function selectHeaderVariant(value: ListingOverviewVariant) {
     setHeaderVariant(value)
     const url = new URL(window.location.href)
-    if (value === 'card') url.searchParams.set('header', 'card')
-    else url.searchParams.delete('header')
+    if (value === 'light') url.searchParams.delete('header')
+    else url.searchParams.set('header', value)
     window.history.replaceState(null, '', url)
   }
 
   function selectFeedbackLayout(value: MarketingFeedbackLayout) {
     setFeedbackLayout(value)
     const url = new URL(window.location.href)
-    if (value === 'current') url.searchParams.delete('feedback')
+    if (value === 'editorial') url.searchParams.delete('feedback')
     else url.searchParams.set('feedback', value)
+    window.history.replaceState(null, '', url)
+  }
+
+  function selectMarketingLayout(value: 'materials' | 'views') {
+    setMarketingLayout(value)
+    const url = new URL(window.location.href)
+    if (value === 'materials') url.searchParams.delete('marketingLayout')
+    else url.searchParams.set('marketingLayout', value)
     window.history.replaceState(null, '', url)
   }
 
@@ -221,7 +235,7 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
   }
 
   return (
-    <Box className="seller-portal" ref={portalRef}>
+    <Box className={`seller-portal${visualTheme === 'polestar' ? ' seller-portal--polestar' : ''}`} ref={portalRef}>
       <Box component="header" className="portal-topbar">
         <Container maxWidth="xl" className="portal-topbar-inner">
           <Box component="a" href="/" className="portal-brand-link" aria-label="PLACE client portal home">
@@ -256,13 +270,18 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
           <UpcomingDatesPanel dates={transaction.upcomingDates} onSeeAll={() => setDatesDrawerOpen(true)} />
         </Box>
 
-        {marketingSnapshot && (
+        {marketingSnapshot && marketingLayout === 'views' && marketingSnapshot.insights ? (
+          <AdvertisingSnapshot
+            data={marketingSnapshot.insights}
+            feedback={transaction.feedback}
+            onOpenDashboard={() => setMarketingDashboardSection('overview')}
+          />
+        ) : marketingSnapshot && (
           <MarketingSnapshot
             data={marketingSnapshot}
             feedback={transaction.feedback}
             feedbackLayout={feedbackLayout}
             onOpenDashboard={() => setMarketingDashboardSection('overview')}
-            onViewFeedback={() => setMarketingDashboardSection('feedback')}
           />
         )}
 
@@ -272,7 +291,7 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
           <Box id="transaction-information" className="transaction-sections">
             <Box component="nav" aria-label="Transaction sections" className="portal-section-nav">
               <Tabs
-                value={activeTab}
+                value={visibleTab}
                 onChange={(_, value: PortalTab) => selectTab(value)}
                 variant="scrollable"
                 scrollButtons="auto"
@@ -293,15 +312,14 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
 
             <Box
               role="tabpanel"
-              id={`seller-panel-${activeTab}`}
-              aria-labelledby={`seller-tab-${activeTab}`}
+              id={`seller-panel-${visibleTab}`}
+              aria-labelledby={`seller-tab-${visibleTab}`}
               className="portal-panel"
             >
-              {activeTab === 'activity' && <ActivityPanel events={transaction.timeline} />}
-              {activeTab === 'tasks' && <TasksPanel tasks={transaction.tasks} />}
-              {activeTab === 'notes' && <NotesPanel notes={transaction.notes} />}
-              {activeTab === 'details' && <DetailsPanel transaction={transaction} />}
-              {activeTab === 'documents' && (
+              {visibleTab === 'activity' && <ActivityPanel events={transaction.timeline} />}
+              {visibleTab === 'tasks' && <TasksPanel tasks={transaction.tasks} />}
+              {visibleTab === 'notes' && <NotesPanel notes={transaction.notes} />}
+              {visibleTab === 'documents' && (
                 <DocumentsPanel documents={transaction.documents} onOpen={setSelectedDocument} />
               )}
             </Box>
@@ -332,7 +350,7 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
         open={Boolean(designPanelAnchor)}
         anchorEl={designPanelAnchor}
         onClose={() => setDesignPanelAnchor(null)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: -12, horizontal: 'right' }}
         transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         disableScrollLock
         slotProps={{ paper: { className: 'design-panel-paper', role: 'dialog', 'aria-label': 'Design panel' } }}
@@ -347,14 +365,26 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
           </IconButton>
         </Box>
         <Box className="design-panel-content">
-          <Box className="design-panel-option-section">
-            <Typography component="h3" variant="titleXS" id="header-layout-label">Header layout</Typography>
-            <RadioGroup aria-labelledby="header-layout-label" value={headerVariant} onChange={(event) => selectHeaderVariant(event.target.value as ListingOverviewVariant)}>
-              <FormControlLabel value="card" control={<Radio />} label="Card" />
-              <FormControlLabel value="full" control={<Radio />} label="Full width" />
-            </RadioGroup>
-          </Box>
+          {visualTheme !== 'polestar' && (
+            <Box className="design-panel-option-section">
+              <Typography component="h3" variant="titleXS" id="header-layout-label">Header layout</Typography>
+              <RadioGroup aria-labelledby="header-layout-label" value={headerVariant} onChange={(event) => selectHeaderVariant(event.target.value as ListingOverviewVariant)}>
+                <FormControlLabel value="card" control={<Radio />} label="Card" />
+                <FormControlLabel value="full" control={<Radio />} label="Full width · Dark" />
+                <FormControlLabel value="light" control={<Radio />} label="Full width · Light split" />
+              </RadioGroup>
+            </Box>
+          )}
           {marketingSnapshot && (
+            <Box className="design-panel-option-section">
+              <Typography component="h3" variant="titleXS" id="marketing-layout-label">Marketing block</Typography>
+              <RadioGroup aria-labelledby="marketing-layout-label" value={marketingLayout} onChange={(event) => selectMarketingLayout(event.target.value as 'materials' | 'views')}>
+                <FormControlLabel value="materials" control={<Radio />} label="Marketing activity" />
+                <FormControlLabel value="views" control={<Radio />} label="Listing views" disabled={!marketingSnapshot.insights} />
+              </RadioGroup>
+            </Box>
+          )}
+          {marketingSnapshot && marketingLayout === 'materials' && (
             <Box className="design-panel-option-section">
               <Typography component="h3" variant="titleXS" id="feedback-layout-label">Showing feedback layout</Typography>
               <RadioGroup aria-labelledby="feedback-layout-label" value={feedbackLayout} onChange={(event) => selectFeedbackLayout(event.target.value as MarketingFeedbackLayout)}>
@@ -527,42 +557,6 @@ function NotesPanel({ notes }: { notes: TeamNote[] }) {
   )
 }
 
-function DetailsPanel({ transaction }: { transaction: SellerTransaction }) {
-  const { details, listing } = transaction
-  return (
-    <Box className="details-grid">
-      <PortalSection title="Transaction details">
-        <DetailGrid rows={[
-          { label: 'Publish state', value: listing.published ? 'Published' : 'Not published' },
-          { label: 'Status', value: listing.status },
-          { label: 'Property type', value: details.propertyType },
-          { label: 'Date listed', value: details.dateListed },
-          { label: 'Expiration', value: listing.expiration },
-          { label: 'MLS number', value: listing.mlsNumber },
-          { label: 'Listing price', value: formatCurrency(listing.price) },
-          { label: 'Days on market', value: `${listing.daysOnMarket} days` },
-          { label: 'Last updated', value: listing.lastUpdated },
-        ]} />
-      </PortalSection>
-      <PortalSection title="Location details">
-        <DetailGrid rows={details.location} />
-      </PortalSection>
-      <PortalSection title="Property details">
-        <DetailGrid rows={details.property} />
-      </PortalSection>
-      <PortalSection title="Marketing details">
-        <Box>
-          <Typography variant="labelS" color="text.secondary">Listing description</Typography>
-          <Typography variant="bodySStandard" className="marketing-copy">{details.listingDescription}</Typography>
-        </Box>
-      </PortalSection>
-      <PortalSection title="Custom dates">
-        <DetailGrid rows={details.customDates} />
-      </PortalSection>
-    </Box>
-  )
-}
-
 function DocumentsPanel({ documents, onOpen }: { documents: TransactionDocument[]; onOpen: (document: TransactionDocument) => void }) {
   return (
     <Box component="section" aria-label="Transaction documents" className="portal-tab-content">
@@ -575,12 +569,4 @@ function DocumentsPanel({ documents, onOpen }: { documents: TransactionDocument[
       </PaginatedTabList>
     </Box>
   )
-}
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(value)
 }
