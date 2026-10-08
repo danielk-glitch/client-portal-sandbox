@@ -1,6 +1,7 @@
 /* design-build · self-critique: Clarity5 Warmth4 Restraint5 Craft4 Variety3 SlopFree5 */
 import { useState } from 'react'
 import {
+  Avatar,
   Box,
   Button,
   Chip,
@@ -18,6 +19,7 @@ import type { ReactNode } from 'react'
 import ArrowBackOutlined from '@mui/icons-material/ArrowBackOutlined'
 import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined'
 import PhoneOutlined from '@mui/icons-material/PhoneOutlined'
+import { brandAssets } from '../assets/brand'
 import { CardActionButton } from '../components/CardActionButton'
 import { PortalOutlineTag } from '../components/PortalOutlineTag'
 import { AnnotationLayer, AnnotationMarker } from '../components/AnnotationLayer'
@@ -625,6 +627,27 @@ function PortalPatternsSection() {
           <Typography variant="bodySStandard" color="text.secondary">
             On the seller page, the listing header and main blocks fade upward by 8px as they first enter view. Paired cards follow 55ms apart. The entrance plays once, stays off tab changes, and is removed for reduced motion.
           </Typography>
+          <PortalPatternSample title="Portal top bar">
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Use the supplied PLACE wordmark beside Client portal. The top bar shares the page content’s 1480px max width and side padding so the logo and account align with the sections below. On narrow screens, show the wordmark without the subtitle so both sides have room.</Typography>
+            <Box component="header" className="portal-topbar">
+              <Container maxWidth="xl" className="portal-topbar-inner">
+                <Box component="a" href="/" className="portal-brand-link" aria-label="PLACE client portal home">
+                  <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+                    <Box component="img" src={brandAssets.place.wordmarkDefault} alt="" className="place-wordmark" />
+                    <Box className="topbar-divider" />
+                    <Typography variant="bodySStandard" color="text.secondary" className="portal-brand-label">Client portal</Typography>
+                  </Stack>
+                </Box>
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                  <Avatar className="account-avatar">TB</Avatar>
+                  <Box className="account-name">
+                    <Typography variant="labelM">Tim Bennett</Typography>
+                    <Typography variant="labelS" color="text.secondary">Seller</Typography>
+                  </Box>
+                </Stack>
+              </Container>
+            </Box>
+          </PortalPatternSample>
           <PortalPatternSample title="Full-width listing header">
             <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>The taller dark header fades the house photo behind the address and listing action, with the agent card at the far right. The compact card keeps its agent row and logos inside the header.</Typography>
             <Box sx={{ overflow: 'hidden', borderRadius: 2, '& .listing-overview--full.MuiPaper-root': { width: '100%', marginLeft: 0 }, '& .listing-overview--full .listing-summary': { marginLeft: 24 } }}>

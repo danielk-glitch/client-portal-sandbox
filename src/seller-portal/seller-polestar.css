@@ -64,19 +64,9 @@ body:has(.seller-portal--polestar),
   max-width: 1600px;
 }
 
-.seller-portal--polestar .place-wordmark.MuiTypography-root {
-  color: var(--ps-ink);
-  font-family: 'Geist', 'Avenir Next', sans-serif;
-  font-weight: 500;
-  letter-spacing: -0.06em;
-}
+.seller-portal--polestar .place-wordmark { filter: invert(1); }
 
 .seller-portal--polestar .topbar-divider { background: var(--ps-rule); }
-.seller-portal--polestar .preview-chip.MuiChip-root {
-  border-radius: 2px;
-  border-color: var(--ps-rule);
-  color: var(--ps-muted);
-}
 .seller-portal--polestar .account-avatar.MuiAvatar-root {
   border-radius: 2px;
   background: var(--ps-paper-3);
@@ -254,20 +244,6 @@ body:has(.seller-portal--polestar),
   border-color: var(--ps-rule);
 }
 
-@media (min-width: 901px) {
-  .seller-portal--polestar .advertising-snapshot-secondary {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .seller-portal--polestar .advertising-snapshot-showings {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-}
-
 .seller-portal--polestar .transaction-lower-grid {
   grid-template-columns: minmax(290px, 0.9fr) minmax(0, 2.1fr);
   gap: 48px;
@@ -374,6 +350,7 @@ body:has(.seller-portal--polestar) .marketing-material-preview[data-design='vide
 }
 
 @media (max-width: 620px) {
+  .seller-portal--polestar .portal-topbar-inner.MuiContainer-root { padding-inline: 12px; }
   .seller-portal--polestar .portal-main.MuiContainer-root { padding-inline: 12px; }
   .seller-portal--polestar .listing-overview--card .listing-photo { height: 240px; }
   .seller-portal--polestar .listing-overview--card .listing-summary { padding: 28px 24px; }

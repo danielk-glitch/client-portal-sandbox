@@ -10,7 +10,9 @@
   background: var(--color-semantic-surface-primary);
 }
 
-.portal-topbar-inner {
+.portal-topbar-inner.MuiContainer-root {
+  max-width: 1480px;
+  padding-inline: 24px;
   min-height: 68px;
   display: flex;
   align-items: center;
@@ -37,22 +39,16 @@
   outline-offset: 3px;
 }
 
-.place-wordmark.MuiTypography-root {
-  font-size: 1.12rem;
-  font-weight: 500;
-  letter-spacing: -0.045em;
-  color: var(--color-semantic-text-dark);
+.place-wordmark {
+  width: auto;
+  height: 20px;
+  display: block;
 }
 
 .topbar-divider {
   width: 1px;
   height: 20px;
   background: var(--color-semantic-stroke-primary-light);
-}
-
-.preview-chip.MuiChip-root {
-  border-color: var(--color-semantic-stroke-primary-light);
-  color: var(--color-semantic-text-primary);
 }
 
 .account-avatar.MuiAvatar-root {
@@ -442,10 +438,6 @@
     padding-inline: 18px;
   }
 
-  .preview-chip.MuiChip-root {
-    display: none;
-  }
-
   .portal-main.MuiContainer-root {
     padding: 20px 18px 40px;
   }
@@ -495,6 +487,13 @@
     padding-top: 14px;
   }
 
+}
+
+@media (max-width: 600px) {
+  .portal-brand-link .topbar-divider,
+  .portal-brand-label.MuiTypography-root {
+    display: none;
+  }
 }
 
 @media (max-width: 420px) {

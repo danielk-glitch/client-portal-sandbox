@@ -4,7 +4,6 @@ import {
   Avatar,
   Box,
   Button,
-  Chip,
   Container,
   Dialog,
   DialogActions,
@@ -26,6 +25,7 @@ import CloseOutlined from '@mui/icons-material/CloseOutlined'
 import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined'
 import InsertDriveFileOutlined from '@mui/icons-material/InsertDriveFileOutlined'
 import TuneOutlined from '@mui/icons-material/TuneOutlined'
+import { brandAssets } from '../assets/brand'
 import {
   sampleSellerTransaction,
   type SellerTransaction,
@@ -82,12 +82,12 @@ export const portalTabs: Array<{ id: PortalTab; label: string }> = [
 
 export function SellerPortal({ transaction = sampleSellerTransaction, marketingSnapshot, initialListingOpen = false, basePath = '/seller', visualTheme }: SellerPortalProps) {
   const portalRef = useRef<HTMLDivElement>(null)
-  const defaultMarketingLayout = visualTheme === 'polestar' && marketingSnapshot?.insights ? 'views' : 'materials'
+  const defaultMarketingLayout = marketingSnapshot?.insights ? 'views' : 'materials'
   const [headerVariant, setHeaderVariant] = useState<ListingOverviewVariant>(() => {
     if (visualTheme === 'polestar') return 'card'
     const requestedHeader = new URLSearchParams(window.location.search).get('header')
     if (requestedHeader === 'card' || requestedHeader === 'full' || requestedHeader === 'light' || requestedHeader === 'light-bottom') return requestedHeader
-    return 'light'
+    return 'light-bottom'
   })
   const [designPanelAnchor, setDesignPanelAnchor] = useState<HTMLElement | null>(null)
   const [feedbackLayout, setFeedbackLayout] = useState<MarketingFeedbackLayout>(() => {
@@ -198,7 +198,7 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
   function selectHeaderVariant(value: ListingOverviewVariant) {
     setHeaderVariant(value)
     const url = new URL(window.location.href)
-    if (value === 'light') url.searchParams.delete('header')
+    if (value === 'light-bottom') url.searchParams.delete('header')
     else url.searchParams.set('header', value)
     window.history.replaceState(null, '', url)
   }
@@ -242,13 +242,12 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
         <Container maxWidth="xl" className="portal-topbar-inner">
           <Box component="a" href="/" className="portal-brand-link" aria-label="PLACE client portal home">
             <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-              <Typography className="place-wordmark">PLACE</Typography>
+              <Box component="img" src={brandAssets.place.wordmarkDefault} alt="" className="place-wordmark" />
               <Box className="topbar-divider" />
-              <Typography variant="bodySStandard" color="text.secondary">Client portal</Typography>
+              <Typography variant="bodySStandard" color="text.secondary" className="portal-brand-label">Client portal</Typography>
             </Stack>
           </Box>
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-            <Chip label="Design preview" size="small" variant="outlined" className="preview-chip" />
             <Avatar className="account-avatar">TB</Avatar>
             <Box className="account-name">
               <Typography variant="labelM">Tim Bennett</Typography>
