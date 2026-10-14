@@ -33,6 +33,8 @@ export function ClientPortalPreview({ buyerPortal }: { buyerPortal: ReactNode })
   const params = new URLSearchParams(window.location.search)
   const buyer = params.get('type') === 'buyer'
   const embedded = params.get('embed') === '1'
+  // Embedded as the team page's thumbnail: no scrollbars, so the page reads as a clean snapshot.
+  if (embedded) { document.documentElement.style.overflow = 'hidden'; document.body.style.overflow = 'hidden' }
   const resources = state.resources.filter(resource => resource.published && state.visible.includes(resource.id)).map(clientResource)
   return <Box className="client-preview-page">
     {!embedded && <ClientPreviewBanner clientLabel={buyer ? 'Buyer portal' : 'Tim & Alex Bennett’s seller portal'} />}

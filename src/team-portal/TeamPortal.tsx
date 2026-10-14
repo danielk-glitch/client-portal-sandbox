@@ -104,6 +104,9 @@ export function TeamPortal() {
 function PreviewCard({ state }: { state: TeamState }) {
   const frame = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(0.4)
+  const version = JSON.stringify([state.visible, state.dates])
+  const [loadedVersion, setLoadedVersion] = useState<string | null>(null)
+  const loaded = loadedVersion === version
   useEffect(() => {
     const element = frame.current
     if (!element || typeof ResizeObserver === 'undefined') return
@@ -111,9 +114,16 @@ function PreviewCard({ state }: { state: TeamState }) {
     observer.observe(element)
     return () => observer.disconnect()
   }, [])
-  return <a className="team-preview-card" href="/team/preview" target="_blank" rel="noopener noreferrer" aria-label="Open Tim and Alex’s client view in a new tab">
-    <Box ref={frame} className="team-preview-frame" aria-hidden="true">
-      <iframe key={JSON.stringify([state.visible, state.dates])} src="/team/preview?embed=1" title="Client view snapshot" tabIndex={-1} style={{ transform: `scale(${scale})` }} />
+  // The portal fades its content in after load, so wait for that before revealing the snapshot.
+  const onLoad = () => window.setTimeout(() => setLoadedVersion(version), 700)
+  return <a className="team-preview-card" href="/team/preview" target="_blank" rel="noopener noreferrer" aria-label="Open Tim and Alex’s client view in a new tab" aria-busy={!loaded}>
+    <Box ref={frame} className={`team-preview-frame${loaded ? ' is-loaded' : ''}`} aria-hidden="true">
+      <iframe key={version} src="/team/preview?embed=1" title="Client view snapshot" tabIndex={-1} scrolling="no" onLoad={onLoad} style={{ transform: `scale(${scale})` }} />
+      <Box className="team-preview-skeleton">
+        <Box className="sk-bar" />
+        <Box className="sk-hero"><Box className="sk-copy"><Box className="sk-line short" /><Box className="sk-line title" /><Box className="sk-line" /><Box className="sk-line mid" /></Box><Box className="sk-image" /></Box>
+        <Box className="sk-cards"><Box className="sk-card" /><Box className="sk-card" /></Box>
+      </Box>
     </Box>
     <Box className="team-preview-hover" aria-hidden="true"><Typography variant="labelM">Open client view</Typography><OpenInNewOutlined fontSize="small" /></Box>
   </a>

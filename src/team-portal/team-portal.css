@@ -165,3 +165,20 @@
 .team-row-title { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .team-source-tag.brivity { color: var(--color-semantic-text-primary); }
 .team-plain-section .team-plain-heading { padding-bottom: 24px; }
+/* thumbnail loading: a quiet skeleton of the portal layout until the live render is ready */
+.team-preview-frame iframe { opacity: 0; transition: opacity 240ms ease-out; }
+.team-preview-frame.is-loaded iframe { opacity: 1; }
+.team-preview-skeleton { position: absolute; inset: 0; display: grid; grid-template-rows: 7% 1fr 22%; gap: 5%; padding: 0 0 4%; background: var(--color-semantic-surface-primary); transition: opacity 240ms ease-out; }
+.team-preview-frame.is-loaded .team-preview-skeleton { opacity: 0; }
+.team-preview-skeleton .sk-bar { border-bottom: 1px solid var(--color-semantic-stroke-primary-lightest); }
+.team-preview-skeleton .sk-hero { display: grid; grid-template-columns: 1fr 1fr; gap: 6%; padding: 0 3%; }
+.team-preview-skeleton .sk-copy { display: grid; align-content: center; gap: 10px; }
+.team-preview-skeleton .sk-line, .team-preview-skeleton .sk-image, .team-preview-skeleton .sk-card { background: var(--color-semantic-surface-secondary); border-radius: 6px; animation: team-skeleton-pulse 1.4s ease-in-out infinite; }
+.team-preview-skeleton .sk-line { height: 8px; width: 70%; }
+.team-preview-skeleton .sk-line.short { width: 30%; }
+.team-preview-skeleton .sk-line.title { height: 16px; width: 85%; }
+.team-preview-skeleton .sk-line.mid { width: 50%; }
+.team-preview-skeleton .sk-image { border-radius: 10px; }
+.team-preview-skeleton .sk-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 3%; padding: 0 2%; }
+.team-preview-skeleton .sk-card { border-radius: 10px; }
+@keyframes team-skeleton-pulse { 50% { opacity: 0.55; } }

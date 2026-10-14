@@ -47,52 +47,80 @@
 /* The dark band is desktop-only for now; small screens fall back to the divider. */
 .seller-timeline--stacked.seller-timeline--dark .timeline-stage { border-top: 1px solid var(--color-semantic-stroke-primary-light); }
 
-/* ---------- Transition B: dark band that fades into the content ---------- */
+/* ---------- Transition B: slate band behind the tracker and its list ---------- */
 
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stage {
+.seller-timeline--dark:not(.seller-timeline--stacked) {
+  --tl-band: var(--color-primitive-gray-700);
   --tl-ink: var(--color-semantic-surface-primary);
-  --tl-on-ink: var(--color-semantic-surface-reverse-primary);
-  --tl-surface: var(--color-semantic-surface-reverse-primary);
-  --tl-track: color-mix(in srgb, var(--color-semantic-surface-primary) 20%, transparent);
-  --tl-ring: color-mix(in srgb, var(--color-semantic-surface-primary) 40%, transparent);
+  --tl-on-ink: var(--tl-band);
+  --tl-surface: var(--tl-band);
+  --tl-track: color-mix(in srgb, var(--color-semantic-surface-primary) 22%, transparent);
+  --tl-ring: color-mix(in srgb, var(--color-semantic-surface-primary) 45%, transparent);
   --tl-ring-strong: var(--color-semantic-surface-primary);
   --tl-text-strong: var(--color-semantic-text-on-color-primary);
-  --tl-text: var(--color-semantic-text-on-color-light);
-  --tl-text-muted: color-mix(in srgb, var(--color-semantic-text-on-color-primary) 55%, transparent);
+  --tl-text: color-mix(in srgb, var(--color-semantic-text-on-color-primary) 82%, transparent);
+  --tl-text-muted: color-mix(in srgb, var(--color-semantic-text-on-color-primary) 68%, transparent);
+  --tl-hairline: color-mix(in srgb, var(--color-semantic-surface-primary) 14%, transparent);
   --tl-glint: var(--color-semantic-surface-primary);
   --tl-halo: color-mix(in srgb, var(--color-semantic-surface-primary) 14%, transparent);
   --tl-glow: color-mix(in srgb, var(--color-semantic-surface-primary) 12%, transparent);
-  --tl-shadow: oklch(0 0 0 / 0.5);
+  --tl-shadow: oklch(0 0 0 / 0.4);
+  isolation: isolate;
+  padding-bottom: 64px;
   color: var(--tl-text-strong);
-  padding-top: 56px;
-  padding-bottom: 24px;
 }
 
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stage::before {
+/* Leave room for the next block to rise onto the band. */
+.seller-timeline--dark:not(.seller-timeline--stacked):has(+ .advertising-snapshot, + .marketing-snapshot) { padding-bottom: 136px; }
+
+.seller-timeline--dark:not(.seller-timeline--stacked)::before {
   position: absolute;
-  z-index: -3;
-  top: 0;
-  bottom: -120px;
-  left: calc(50% - 50vw);
+  z-index: -1;
+  inset: 0 auto 0 calc(50% - 50vw);
   width: 100vw;
   content: '';
-  background: linear-gradient(
-    180deg,
-    var(--color-semantic-surface-reverse-primary) 0%,
-    var(--color-semantic-surface-reverse-primary) calc(100% - 200px),
-    color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 70%, transparent) calc(100% - 140px),
-    color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 25%, transparent) calc(100% - 70px),
-    transparent 100%
-  );
+  background: var(--tl-band);
   pointer-events: none;
 }
 
-.seller-timeline--dark { isolation: isolate; }
-.seller-timeline--dark .timeline-panel { margin-top: 96px; }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stage { padding-top: 56px; }
+.seller-timeline--dark:not(.seller-timeline--stacked) .seller-timeline-eyebrow.MuiTypography-root { color: color-mix(in srgb, var(--color-semantic-text-on-color-primary) 90%, transparent); }
+
+/* The listing performance card overlaps the bottom of the band. */
+.seller-timeline--dark:not(.seller-timeline--stacked) + .advertising-snapshot.MuiPaper-root,
+.seller-timeline--dark:not(.seller-timeline--stacked) + .marketing-snapshot.MuiPaper-root {
+  position: relative;
+  z-index: 1;
+  margin-top: -88px;
+  border-color: transparent;
+  box-shadow: var(--elevation-hero);
+}
 
 /* In dark, the progress fill is a soft white so a pure white glint still reads on top of it. */
-.seller-timeline--dark .timeline-rail-fill { background: color-mix(in srgb, var(--color-semantic-surface-primary) 72%, transparent); }
-.seller-timeline--dark .timeline-glint { filter: drop-shadow(0 0 4px color-mix(in srgb, var(--color-semantic-surface-primary) 70%, transparent)); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-rail-fill { background: color-mix(in srgb, var(--color-semantic-surface-primary) 72%, transparent); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-glint { filter: drop-shadow(0 0 4px color-mix(in srgb, var(--color-semantic-surface-primary) 70%, transparent)); }
+
+/* List rows on the band. */
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item-copy .MuiTypography-root { color: var(--tl-text); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item-copy .MuiTypography-titleXS { color: var(--tl-text-strong); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item.is-done .timeline-item-copy .MuiTypography-titleXS { color: var(--tl-text); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item-meta.MuiTypography-root,
+.seller-timeline--dark:not(.seller-timeline--stacked) .milestone-group-title.MuiTypography-root,
+.seller-timeline--dark:not(.seller-timeline--stacked) .milestone-locked-note { color: var(--tl-text-muted); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .milestone-done { border-top-color: var(--tl-hairline); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .portal-date-row-main:hover::after { background: color-mix(in srgb, var(--color-semantic-surface-primary) 7%, transparent); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .portal-date-row-main:focus-visible { outline-color: var(--tl-ring-strong); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stamp.portal-date-stamp { color: var(--tl-text-strong); background: color-mix(in srgb, var(--color-semantic-surface-primary) 10%, transparent); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stamp.portal-date-stamp .MuiTypography-root:first-child { color: var(--tl-text); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stamp.is-done { color: var(--tl-text); background: color-mix(in srgb, var(--color-semantic-surface-primary) 5%, transparent); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stamp.is-next { background: transparent; box-shadow: inset 0 0 0 2px var(--tl-ink); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .portal-date-row-main:hover .timeline-stamp:not(.is-next) { background: color-mix(in srgb, var(--color-semantic-surface-primary) 16%, transparent); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stamp-badge { color: var(--tl-text-strong); background: var(--tl-band); box-shadow: 0 0 0 2px var(--tl-band), inset 0 0 0 1px var(--tl-ring); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stamp-badge--done { color: var(--tl-band); background: var(--tl-ink); box-shadow: 0 0 0 2px var(--tl-band); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-next-tag { color: var(--tl-band); background: var(--tl-ink); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .portal-date-resource.MuiChip-root { color: var(--tl-text); border-color: color-mix(in srgb, var(--color-semantic-surface-primary) 26%, transparent); background: transparent; }
+.seller-timeline--dark:not(.seller-timeline--stacked) .portal-date-resource.MuiChip-root:hover { color: var(--tl-text-strong); background: color-mix(in srgb, var(--color-semantic-surface-primary) 10%, transparent); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .portal-date-resource.MuiChip-root:focus-visible { outline-color: var(--tl-ring-strong); }
 
 /* ---------- Tracker ---------- */
 
@@ -359,6 +387,7 @@
 .milestone-items { display: grid; gap: 28px; }
 
 .milestone-locked-note {
+  margin-left: 28px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -369,7 +398,7 @@
 
 .milestone-group-title.MuiTypography-root {
   display: block;
-  margin-bottom: 20px;
+  margin: 0 0 4px 28px;
   color: var(--color-semantic-text-light);
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -383,14 +412,17 @@
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 32px;
+  gap: 8px;
 }
 
-.timeline-item.portal-date-row { padding: 0; align-items: center; }
+/* Generous padding inside each item; the hover fill spans the full padded row. */
+.timeline-item.portal-date-row { padding: 24px 28px; gap: 24px; align-items: center; }
+.timeline-item .portal-date-row-main.MuiButtonBase-root { column-gap: 24px; }
+.timeline-item .portal-date-row-main::after { inset: -24px -28px; border-radius: 18px; }
+.timeline-item-copy.portal-date-copy { gap: 4px; }
 
 .timeline-item .portal-date-row-main.MuiButtonBase-root { align-items: center; }
 
-.timeline-item-copy.portal-date-copy { gap: 2px; }
 
 .timeline-item-title {
   display: flex;
@@ -532,7 +564,9 @@
   animation: timeline-panel-in 260ms var(--timeline-ease);
 }
 
-.timeline-stack-body .timeline-item-list { gap: 24px; }
+.timeline-stack-body .timeline-item-list { gap: 4px; }
+.timeline-stack-body .timeline-item.portal-date-row { padding: 18px 12px; gap: 16px 18px; }
+.timeline-stack-body .timeline-item .portal-date-row-main::after { inset: -18px -12px; border-radius: 14px; }
 
 .timeline-chevron {
   width: 20px;
