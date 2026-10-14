@@ -730,3 +730,48 @@
 
 .seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .timeline-stamp--icon { color: var(--tl-text); }
 .seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .portal-date-row-main:hover .timeline-stamp--icon { color: var(--tl-text-strong); }
+
+/* ---------- Collapsible details: collapsed shows only the tracker ---------- */
+
+.timeline-collapse.MuiButtonBase-root {
+  min-height: 36px;
+  margin: 4px auto 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px 6px 16px;
+  border-radius: 999px;
+  color: var(--tl-text-muted);
+  box-shadow: inset 0 0 0 1px var(--tl-track);
+  transition: color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.timeline-collapse:hover { color: var(--tl-text-strong); box-shadow: inset 0 0 0 1px var(--tl-ring); }
+.timeline-collapse:focus-visible { outline: 2px solid var(--tl-ring-strong); outline-offset: 2px; }
+.timeline-collapse .timeline-chevron { color: inherit; rotate: 180deg; }
+.timeline-collapse.is-collapsed .timeline-chevron { rotate: 0deg; }
+
+.timeline-panel-shell {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows 480ms var(--timeline-ease), opacity 320ms ease;
+}
+
+.timeline-panel-shell.is-collapsed {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 420ms var(--timeline-ease), opacity 200ms ease;
+}
+
+/* Clip only while moving or closed, so row focus rings and hover fills are never cut off when open. */
+.timeline-panel-clip { min-height: 0; }
+.timeline-panel-shell.is-collapsed .timeline-panel-clip { overflow: hidden; }
+
+/* Collapsed: a little breathing room under the toggle. The dark band keeps its bottom padding for the card overhang. */
+.seller-timeline--divider:has(.timeline-panel-shell.is-collapsed) { padding-bottom: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .timeline-panel-shell,
+  .timeline-panel-shell.is-collapsed { transition: none; }
+}

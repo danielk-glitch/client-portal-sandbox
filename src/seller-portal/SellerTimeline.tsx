@@ -100,6 +100,8 @@ function TrackerTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: 
   /** Where the selection visually rests. Trails selectedId while the glint travels. */
   const [arrivedIndex, setArrivedIndex] = useState(initialIndex)
   const [glint, setGlint] = useState<{ from: number; to: number; key: number } | null>(null)
+  /** Collapsed shows only the tracker; picking a milestone opens it again. */
+  const [collapsed, setCollapsed] = useState(false)
   const glintTimer = useRef<number | undefined>(undefined)
   const glintCount = useRef(0)
   if (prevCurrent !== currentId) {
@@ -122,6 +124,7 @@ function TrackerTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: 
 
   function select(index: number) {
     setSelectedId(milestones[index].id)
+    setCollapsed(false)
     window.clearTimeout(glintTimer.current)
     const from = glint ? glint.to : arrivedIndex
     const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
@@ -195,10 +198,24 @@ function TrackerTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: 
             )
           })}
         </Box>
+        <ButtonBase
+          className={`timeline-collapse${collapsed ? ' is-collapsed' : ''}`}
+          onClick={() => setCollapsed(!collapsed)}
+          aria-expanded={!collapsed}
+          aria-controls={`${baseId}-panel-shell`}
+          disableRipple
+        >
+          <Typography variant="labelM" component="span">{collapsed ? 'Show details' : 'Hide details'}</Typography>
+          <ExpandMoreRounded className="timeline-chevron" aria-hidden="true" />
+        </ButtonBase>
       </Box>
 
-      <Box role="tabpanel" id={`${baseId}-panel`} aria-labelledby={`${baseId}-tab-${selected.id}`} className="timeline-panel" key={selected.id}>
-        <MilestoneItems milestone={selected} previous={milestones[selectedIndex - 1]} nextStepId={data.nextStepId} onOpenStep={onOpenStep} {...handlers} />
+      <Box id={`${baseId}-panel-shell`} className={`timeline-panel-shell${collapsed ? ' is-collapsed' : ''}`} inert={collapsed}>
+        <Box className="timeline-panel-clip">
+          <Box role="tabpanel" id={`${baseId}-panel`} aria-labelledby={`${baseId}-tab-${selected.id}`} className="timeline-panel" key={selected.id}>
+            <MilestoneItems milestone={selected} previous={milestones[selectedIndex - 1]} nextStepId={data.nextStepId} onOpenStep={onOpenStep} {...handlers} />
+          </Box>
+        </Box>
       </Box>
     </>
   )
@@ -336,9 +353,6 @@ function ItemStamp({ kind, date, done }: { kind: TimelineItemKind; date?: string
           <Typography variant="metricM" component="span">{formatDate(date, { day: '2-digit' })}</Typography>
         </>
       ) : <Box component="span" className="timeline-stamp-icon" aria-hidden="true">{type.icon}</Box>}
-      {done && (
-        <Box component="span" className="timeline-stamp-badge timeline-stamp-badge--done" aria-hidden="true"><CheckRounded /></Box>
-      )}
     </Box>
   )
 }
