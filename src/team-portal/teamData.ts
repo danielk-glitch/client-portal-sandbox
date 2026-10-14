@@ -10,15 +10,21 @@ export type TeamResource = {
   archived: boolean
   linked: number
 }
+export type TransactionKind = 'buyer' | 'seller'
+export type DefaultSelection = { visible: string[]; updatedBy: string; updatedOn: string }
+export type TeamRole = 'admin' | 'member'
 export type TeamState = {
   resources: TeamResource[]
   visible: string[]
-  defaults: { buyer: string[] | null; seller: string[] | null }
-  role: 'admin' | 'member'
+  defaults: Record<TransactionKind, DefaultSelection | null>
+  role: TeamRole
 }
 export const initialTeamState: TeamState = {
   role: 'admin',
-  defaults: { buyer: null, seller: null },
+  defaults: {
+    seller: { visible: ['disclosures', 'closing', 'team-welcome', 'team-moving'], updatedBy: 'Avery Coleman', updatedOn: 'Sep 30, 2026' },
+    buyer: null,
+  },
   visible: ['appraisal', 'disclosures', 'closing', 'team-welcome'],
   resources: [
     ...sellerResources.map(resource => ({
@@ -41,13 +47,13 @@ export const initialTeamState: TeamState = {
   ],
 }
 
-export const teamStateKey = 'place-team-exploration-v1'
+export const teamStateKey = 'place-team-exploration-v2'
 export function loadTeamState(): TeamState {
   const saved = localStorage.getItem(teamStateKey)
   if (!saved) return initialTeamState
   try {
     const state = JSON.parse(saved) as TeamState
-    if (Array.isArray(state.resources) && Array.isArray(state.visible) && state.defaults && ['admin', 'member'].includes(state.role)) return state
+    if (Array.isArray(state.resources) && Array.isArray(state.visible) && state.defaults && 'seller' in state.defaults && ['admin', 'member'].includes(state.role)) return state
   } catch {
     localStorage.removeItem(teamStateKey)
   }
@@ -56,10 +62,36 @@ export function loadTeamState(): TeamState {
 export const titleOf = (resource: TeamResource) => (resource.draft ?? resource.published)?.title ?? 'Untitled resource'
 export const statusOf = (resource: TeamResource) => resource.archived ? 'Archived' : resource.published ? resource.draft ? 'Unpublished changes' : 'Published' : 'Draft'
 
+/** Number of transactions where this resource is live. Sample data: `linked` counts other transactions. */
+export const liveCount = (resource: TeamResource, state: TeamState) => resource.linked + (state.visible.includes(resource.id) && resource.linked === 0 ? 1 : 0)
+
+/** Resources a default can include: published and not archived. */
+export const selectableResources = (state: TeamState) => state.resources.filter(resource => resource.published && !resource.archived)
+
+/** Ids that differ between a transaction's visible set and a saved default. */
+export function defaultDifferences(state: TeamState, selection: DefaultSelection | null) {
+  const ids = selectableResources(state).map(resource => resource.id)
+  const current = new Set(state.visible.filter(id => ids.includes(id)))
+  const saved = new Set((selection?.visible ?? []).filter(id => ids.includes(id)))
+  return { shown: [...current].filter(id => !saved.has(id)), hidden: [...saved].filter(id => !current.has(id)) }
+}
+
+/** Review the member experience with `?as=member`. Sample only, not permission enforcement. */
+export function roleFromUrl(fallback: TeamRole): TeamRole {
+  const requested = new URLSearchParams(window.location.search).get('as')
+  return requested === 'member' || requested === 'admin' ? requested : fallback
+}
+export const teamPeople = {
+  admin: { name: 'Avery Coleman', role: 'Admin', photoId: 'agent' },
+  member: { name: 'Morgan Ellis', role: 'Transaction coordinator', photoId: 'transaction' },
+} as const
+
 export const teamViews = [
   { label: 'Transaction overview', href: '/team' },
   { label: 'Client preview', href: '/team/preview' },
   { label: 'Transaction resources', href: '/team/resources' },
   { label: 'Team resource library', href: '/team/library' },
+  { label: 'Team defaults', href: '/team/defaults' },
+  { label: 'Member view of the library', href: '/team/library?as=member' },
   { label: 'Flow map', href: '/team/flow-map.html' },
 ]

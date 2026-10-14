@@ -1,6 +1,6 @@
 # team experience exploration
 
-product prototypes use browser-local sample data. the sandbox index links to four team pages and the internal flow map.
+product prototypes use browser-local sample data. the sandbox index links to the team pages, a member view, and the internal flow map.
 
 ## product pages
 
@@ -9,7 +9,8 @@ product prototypes use browser-local sample data. the sandbox index links to fou
 | `/team` | transaction client experience overview and portal preview |
 | `/team/preview` | actual latest seller portal with a read-only preview banner |
 | `/team/resources` | transaction visibility and saving selections as defaults |
-| `/team/library` | shared team materials, search, draft previews, and admin archiving |
+| `/team/library` | shared team materials. admins create, edit, archive, and delete; members browse published resources |
+| `/team/defaults` | buyer and seller defaults. admins edit or remove them; members view them |
 | `/team/editor?id=team-welcome` | rich-text authoring, draft preview, saving, and publishing confirmation; accessed through the library |
 
 publishing happens in a dialog within the editor, not a separate page. brivity entry, permissions, and resource state documentation have no dedicated screens. the brivity entry point will be defined separately.
@@ -22,16 +23,19 @@ seller preview renders `SellerPortal` with the same future transaction and marke
 
 ## sample behavior
 
-- the sample account is an admin. browser-local role state remains supported, without a product-facing role switcher.
-- only admins can publish or archive. publishing updates the shared resource in every linked transaction while preserving visibility.
-- drafts stay private to the team; published content continues appearing until the next publication.
-- use as default saves the current selection for future transactions. existing selections stay intact.
-- sample changes persist under `place-team-exploration-v1`; this is not authentication or production permission enforcement.
+- the sample account is an admin (Avery Coleman). add `?as=member` to any team url to switch to the member view (Morgan Ellis, tc); `?as=admin` switches back. the choice persists.
+- admins alone create, edit, publish, archive, and delete library resources, and save defaults. anyone on the transaction can change visibility.
+- publishing updates every transaction where the resource is live and preserves visibility.
+- deleting a published resource shows how many transactions it is live in, offers archive instead, and removes it from every transaction and default.
+- archived resources stay in the transactions where they are live (still a proposal) and are skipped when a default is applied.
+- transaction resources compare the current selection with the seller default, mark changed rows, and offer reset. admins can update the default from there.
+- with no saved default, new transactions start with brivity basics visible and team resources hidden (a prototype assumption).
+- sample changes persist under `place-team-exploration-v2`; this is not authentication or production permission enforcement.
 
 ## internal documentation canvas
 
 `/team/flow-map.html` is a dark, scrollable transaction timeline with brivity, team, and client lanes. drag the background to pan; select fixed cards for details; open their page buttons; use zoom, fit, or stage shortcuts. arrow keys pan a focused canvas, +/- zoom, and 0 fits. touch users can scroll naturally. the buyer journey is illustrative. card positions are dictated by the flow and cannot be rearranged.
 
-## proposals kept separate from decisions
+## decisions and proposals
 
-members can create/edit drafts and manage transaction visibility. admins save team-wide buyer/seller defaults. archived content remains in existing portals. these are prototype proposals; only admin publishing/archiving is confirmed. the working decisions record lives at `/Users/daniel/Desktop/PLACE Consumer/Client Portal/team-experience-decisions.md`.
+permissions and default rules were confirmed october 14, 2026. still open: what archiving does to linked transactions, and what new transactions start with when no default exists. the working decisions record lives at `/Users/daniel/Desktop/PLACE Consumer/Client Portal/team-experience-decisions.md`.
