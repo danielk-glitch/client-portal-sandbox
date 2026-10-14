@@ -149,5 +149,49 @@ export const theme = createTheme({
         outlined: { borderColor: color('stroke-primary-light') },
       },
     },
+    // PLACE menu: used by overflow (···) menus and Select dropdowns.
+    MuiMenu: {
+      defaultProps: { elevation: 0 },
+      styleOverrides: {
+        paper: {
+          marginTop: 4,
+          minWidth: 200,
+          borderRadius: 12,
+          border: `1px solid ${color('stroke-primary-light')}`,
+          boxShadow: 'var(--elevation-document)',
+          backgroundColor: color('surface-primary'),
+        },
+        list: { padding: 6 },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          ...type.labelM,
+          minHeight: 40,
+          gap: 4,
+          padding: '8px 12px',
+          borderRadius: 8,
+          color: color('text-dark'),
+          transition: 'background-color 120ms ease-out',
+          '&:hover, &.Mui-focusVisible': { backgroundColor: color('surface-primary-dark') },
+          '&.Mui-selected, &.Mui-selected:hover': { backgroundColor: color('surface-secondary') },
+          '& + &': { marginTop: 2 },
+          // Destructive actions (delete, remove access) use the error text color and always open a confirmation.
+          '&.is-destructive': { color: color('text-error') },
+          '&.is-destructive .MuiListItemIcon-root': { color: color('text-error') },
+        },
+      },
+    },
+    MuiListItemIcon: {
+      styleOverrides: {
+        root: { minWidth: 28, color: color('text-primary'), '& .MuiSvgIcon-root': { fontSize: 18 } },
+      },
+    },
+    MuiListItemText: {
+      styleOverrides: {
+        primary: type.labelM,
+      },
+    },
   },
 })

@@ -1,8 +1,6 @@
 import { useState } from 'react'
-import { Avatar, Box, Button, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tab, Tabs, TextField, Typography } from '@mui/material'
+import { Avatar, Box, Button, Stack, Tab, Tabs, TextField, Typography } from '@mui/material'
 import AddOutlined from '@mui/icons-material/AddOutlined'
-import MoreHorizOutlined from '@mui/icons-material/MoreHorizOutlined'
-import PersonOffOutlined from '@mui/icons-material/PersonOffOutlined'
 import { toast } from 'sonner'
 import { PlaceModal } from '../components/PlaceModal'
 import { EmailPreview } from '../email-templates/EmailPreview'
@@ -25,10 +23,11 @@ export function inviteTemplate(name: string) {
   return { ...template, subject: template.subject.replace('John', first), intro: template.intro.replace('Hi John', `Hi ${first}`) }
 }
 
+const shortDate = (date?: string) => date?.replace(/, \d{4}$/, '') ?? ''
 function detail(person: ClientPerson, invite: ClientInvite) {
-  if (invite.status === 'active') return `Joined ${invite.updatedOn}`
-  if (invite.status === 'invited') return `Invite sent ${invite.updatedOn}`
-  if (invite.status === 'removed') return `Access removed ${invite.updatedOn}`
+  if (invite.status === 'active') return `Joined ${shortDate(invite.updatedOn)}`
+  if (invite.status === 'invited') return `Invite sent ${shortDate(invite.updatedOn)}`
+  if (invite.status === 'removed') return `Access removed ${shortDate(invite.updatedOn)}`
   return person.source === 'Brivity' ? `${person.role} in Brivity` : person.role
 }
 
@@ -38,7 +37,6 @@ export function ClientAccess({ state, setState }: { state: TeamState; setState: 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [note, setNote] = useState('')
-  const [menu, setMenu] = useState<{ anchor: HTMLElement; person: ClientPerson } | null>(null)
   const [removing, setRemoving] = useState<ClientPerson | null>(null)
   const inviteOf = (person: ClientPerson): ClientInvite => state.invites[person.id] ?? { status: 'not-invited' }
   const [tab, setTab] = useState<'team' | 'viewers'>('viewers')
@@ -93,15 +91,12 @@ export function ClientAccess({ state, setState }: { state: TeamState; setState: 
           <Box className="team-access-copy"><Typography variant="titleXS">{person.name}</Typography><Typography variant="bodySStandard" color="text.secondary">{detail(person, invite)}</Typography></Box>
           {isAdmin && <Box className="team-access-actions">
             {invite.status === 'removed' && <Button size="small" variant="outlined" onClick={() => open(person)} aria-label={`Invite ${person.name}`}>Invite again</Button>}
-            {invite.status === 'invited' && <Button size="small" variant="outlined" onClick={() => open(person)}>Resend</Button>}
-            {['invited', 'active'].includes(invite.status) && <IconButton size="small" aria-label={`More access options for ${person.name}`} aria-haspopup="menu" onClick={event => setMenu({ anchor: event.currentTarget, person })}><MoreHorizOutlined fontSize="small" /></IconButton>}
+            {invite.status === 'invited' && <Button size="small" onClick={() => open(person)}>Resend</Button>}
+            {['invited', 'active'].includes(invite.status) && <Button size="small" className="team-remove-access" onClick={() => setRemoving(person)} aria-label={`Remove access for ${person.name}`}>Remove</Button>}
           </Box>}
         </Box>
       })}</Box>
     </Box>}
-    <Menu anchorEl={menu?.anchor} open={!!menu} onClose={() => setMenu(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} transformOrigin={{ vertical: 'top', horizontal: 'right' }}>
-      <MenuItem onClick={() => { setRemoving(menu!.person); setMenu(null) }} sx={{ color: 'error.main' }}><ListItemIcon sx={{ color: 'inherit' }}><PersonOffOutlined fontSize="small" /></ListItemIcon><ListItemText>Remove access</ListItemText></MenuItem>
-    </Menu>
     <PlaceModal open={!!dialog} onClose={() => setDialog(null)} size="l" title={target ? `${resending ? 'Resend invite to' : 'Invite'} ${target.name}` : 'Invite someone to this portal'} description="Nothing is sent until you choose Send." actions={<><Button onClick={() => setDialog(null)}>Cancel</Button><Button variant="contained" onClick={send}>{resending ? 'Resend invite' : 'Send invite'}</Button></>}>
       {dialog && <Stack spacing={3} sx={{ pt: 1 }}>
         {target
@@ -111,7 +106,7 @@ export function ClientAccess({ state, setState }: { state: TeamState; setState: 
         <Box><Typography variant="labelM" sx={{ mb: 1.5, display: 'block' }}>Email preview</Typography><Box className="team-email-preview"><Typography variant="bodySStandard" color="text.secondary" className="team-email-subject">Subject: {inviteTemplate(recipient).subject}</Typography><EmailPreview template={inviteTemplate(recipient)} personalNote={note} /></Box></Box>
       </Stack>}
     </PlaceModal>
-    <PlaceModal open={!!removing} onClose={() => setRemoving(null)} title={removing ? `Remove ${firstName(removing.name)}’s portal access?` : ''} actions={<><Button onClick={() => setRemoving(null)}>Cancel</Button><Button variant="contained" color="error" onClick={remove}>Remove access</Button></>}>
+    <PlaceModal open={!!removing} onClose={() => setRemoving(null)} title={removing ? `Remove ${removing.name}’s portal access?` : ''} description="This takes effect right away." actions={<><Button onClick={() => setRemoving(null)}>Cancel</Button><Button variant="contained" color="error" onClick={remove}>Remove access</Button></>}>
       <Typography variant="bodyMStandard">{removing && `${firstName(removing.name)} won’t be able to open the portal for this transaction. Nothing is sent to them. You can invite them again later.`}</Typography>
     </PlaceModal>
   </PortalSection>

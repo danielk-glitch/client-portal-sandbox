@@ -184,3 +184,6 @@
 @keyframes team-skeleton-pulse { 50% { opacity: 0.55; } }
 .team-access-tabs { margin: -8px 0 16px; border-bottom: 1px solid var(--color-semantic-stroke-primary-lightest); }
 .team-access-footnote.MuiTypography-root { display: block; margin-top: 16px; }
+.team-remove-access.MuiButton-root { color: var(--color-semantic-text-primary); }
+.team-remove-access.MuiButton-root:hover { color: var(--color-semantic-text-error); }
+.team-access-actions .MuiButton-root { min-width: 0; padding-inline: 10px; }

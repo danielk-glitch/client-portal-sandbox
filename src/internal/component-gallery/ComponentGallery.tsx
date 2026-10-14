@@ -10,7 +10,15 @@ import {
   Button,
   Chip,
   Container,
+  FormControl,
+  IconButton,
+  InputLabel,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Paper,
+  Select,
   Stack,
   Tab,
   Tabs,
@@ -21,6 +29,10 @@ import type { ReactNode } from 'react'
 import ArrowOutwardOutlined from '@mui/icons-material/ArrowOutwardOutlined'
 import ContentCopyOutlined from '@mui/icons-material/ContentCopyOutlined'
 import CloseOutlined from '@mui/icons-material/CloseOutlined'
+import MoreHorizOutlined from '@mui/icons-material/MoreHorizOutlined'
+import EditOutlined from '@mui/icons-material/EditOutlined'
+import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined'
+import DeleteOutlineOutlined from '@mui/icons-material/DeleteOutlineOutlined'
 import { PlaceSheet } from '../../components/PlaceSheet'
 import ArrowBackOutlined from '@mui/icons-material/ArrowBackOutlined'
 import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined'
@@ -82,6 +94,7 @@ const sections = [
   { id: 'modal', name: 'Modal' },
   { id: 'sheet', name: 'Sheet' },
   { id: 'toast', name: 'Toast' },
+  { id: 'menu', name: 'Menu' },
   { id: 'listing-sheet', name: 'Listing sheet' },
   { id: 'portal-patterns', name: 'Portal patterns' },
   { id: 'email-blocks', name: 'Email blocks' },
@@ -445,6 +458,26 @@ function SheetSection() {
   )
 }
 
+function MenuSection() {
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null)
+  const [status, setStatus] = useState('All resources')
+  return (
+    <Section id="menu" number="17" title="Menu" description="The PLACE menu styles every overflow (···) menu and Select dropdown: rounded 12px surface, light stroke, document shadow, labelM items with an 8px hover fill. Destructive items add the is-destructive class and always open a confirmation dialog." source="MuiMenu, MuiMenuItem, MuiListItemIcon · src/theme.ts">
+      <SpecimenList>
+        <Specimen label="Overflow menu"><IconButton aria-label="More actions" aria-haspopup="menu" onClick={event => setAnchor(event.currentTarget)}><MoreHorizOutlined /></IconButton>
+          <Menu anchorEl={anchor} open={!!anchor} onClose={() => setAnchor(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} transformOrigin={{ vertical: 'top', horizontal: 'right' }}>
+            <MenuItem onClick={() => setAnchor(null)}><ListItemIcon><EditOutlined /></ListItemIcon><ListItemText>Edit</ListItemText></MenuItem>
+            <MenuItem onClick={() => setAnchor(null)}><ListItemIcon><ArchiveOutlined /></ListItemIcon><ListItemText>Archive</ListItemText></MenuItem>
+            <MenuItem className="is-destructive" onClick={() => setAnchor(null)}><ListItemIcon><DeleteOutlineOutlined /></ListItemIcon><ListItemText>Delete</ListItemText></MenuItem>
+          </Menu>
+        </Specimen>
+        <Specimen label="Select dropdown"><FormControl size="small" sx={{ minWidth: 200 }}><InputLabel id="gallery-menu-select">Show</InputLabel><Select labelId="gallery-menu-select" label="Show" value={status} onChange={event => setStatus(event.target.value)}>{['All resources', 'Published', 'Drafts', 'Archived'].map(value => <MenuItem key={value} value={value}>{value}</MenuItem>)}</Select></FormControl></Specimen>
+      </SpecimenList>
+      <Typography variant="bodySStandard" color="text.secondary" sx={{ mt: 2 }}>Use a menu only for two or more actions. A single action, like removing someone’s portal access, should be a visible button instead.</Typography>
+    </Section>
+  )
+}
+
 function ToastSection() {
   return (
     <Section id="toast" number="10" title="Toast" description="One shared Sonner toaster appears at the top center with a dark neutral background and light text." source="PlaceToaster · src/components/PlaceToaster.tsx">
@@ -779,7 +812,7 @@ function PortalPatternsSection() {
             </Box>
           </PortalPatternSample>
           <PortalPatternSample title="Milestone timeline (exploration)">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Timeline Exploration replaces upcoming dates and recent activity with four sale milestones, under a centered uppercase “Transaction timeline” eyebrow. Two transitions from the hero: a hairline divider (default) or a dark band that sits behind both the tracker and its list, with the listing performance card rising to overlap its bottom edge; switch them in the design panel. Rows carry 24px by 28px of padding, and the hover fill spans the whole padded row. The full-bleed rail fades out at both edges and fills through finished milestones, partway into the current one. Hover lifts the dot and reveals its date. On select, a white glint runs along the rail to the new milestone; when it lands, a glow blooms behind the dot, the dot enlarges, and an underline draws in. The current stage carries a “Now” pill and a slow pulse. Below, one list holds four item types, each with one icon: Action (you do it), Date (scheduled by your team or the buyer’s side), Document (to review or sign), and Resource (a guide to read). Rows reuse the dates pattern: thumbnail, title, summary, owner, and a resource chip on the right. Only Date items get the date thumbnail. Documents and resources show their icon in the same circle. Actions show a check circle the seller can tick: it fills with a spring pop, the title strikes through, then the item settles into Done and the milestone progress updates. Unchecking moves it back. Actions in future milestones are disabled. Clicking a row opens a modal with type, timing, owner, status, and the one relevant action. Done items move to a Done group with a check badge. Future milestones lock documents. Below 900px, milestones stack along a vertical rail.</Typography>
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Timeline Exploration replaces upcoming dates and recent activity with four sale milestones, under a centered uppercase “Transaction timeline” eyebrow. Two transitions from the hero: a hairline divider (default) or a dark band that sits behind both the tracker and its list, with the listing performance card rising to overlap its bottom edge; switch them in the design panel. Rows carry 24px by 28px of padding, and the hover fill spans the whole padded row. The full-bleed rail fades out at both edges and fills through finished milestones, partway into the current one. Hover lifts the dot and reveals its date. On select, a white glint runs along the rail to the new milestone; when it lands, a glow blooms behind the dot, the dot enlarges, and an underline draws in. The current stage carries a “Now” pill and a slow pulse. Below, one list holds four item types, each with one icon: Action (you do it), Date (scheduled by your team or the buyer’s side), Document (to review or sign), and Resource (a guide to read). Rows reuse the dates pattern: thumbnail, title, summary, owner, and a resource chip on the right. Only Date items get the date thumbnail. Documents and resources show their icon on its own, with no fill. Date thumbnails have no fill and a hairline stroke, so all four types carry roughly equal weight. Actions show a check circle the seller can tick: it fills with a spring pop, the title strikes through, then the item settles into Done and the milestone progress updates. Unchecking moves it back. Actions in future milestones are disabled. Clicking a row opens a modal with type, timing, owner, status, and the one relevant action. Done items move to a Done group with a check badge. Future milestones lock documents. Below 900px, milestones stack along a vertical rail.</Typography>
             <SellerTimeline layout="tracker" data={underContractTimeline} resources={timelineResources} documents={sample.documents} team={sample.team} onOpenResource={setResourcePreview} onOpenDocument={() => undefined} />
             <Typography variant="labelS" color="text.secondary" sx={{ mt: 4, mb: 1, display: 'block' }}>Stacked layout · mobile</Typography>
             <Box sx={{ maxWidth: 420 }}>
@@ -935,6 +968,7 @@ export function ComponentGallery() {
             <ModalSection />
             <SheetSection />
             <ToastSection />
+            <MenuSection />
             <ListingSheetSection />
             <PortalPatternsSection />
             <Section id="team-resources" number="16" title="Transaction resource visibility" description="A resource’s publication state lives in the library. Its visibility is chosen separately for each transaction." source="Team workspace · uses the shared Switch, Typography, and semantic surface tokens.">

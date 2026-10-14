@@ -691,3 +691,42 @@
   .timeline-check svg { transition: none; }
   .timeline-check.is-checked { animation: none; }
 }
+
+/* ---------- Thumbnail weight: no fills; dates get a hairline, icons stand alone ---------- */
+
+.timeline-item .timeline-stamp.portal-date-stamp,
+.timeline-item .timeline-stamp.portal-date-stamp.is-done,
+.timeline-item .portal-date-row-main:hover .timeline-stamp.portal-date-stamp {
+  background: transparent;
+  box-shadow: none;
+}
+
+.timeline-item .timeline-stamp.portal-date-stamp:not(.timeline-stamp--icon) {
+  box-shadow: inset 0 0 0 1px var(--color-semantic-stroke-primary-light);
+}
+
+.timeline-item .portal-date-row-main:hover .timeline-stamp.portal-date-stamp:not(.timeline-stamp--icon) {
+  box-shadow: inset 0 0 0 1px var(--color-semantic-stroke-primary);
+}
+
+.timeline-item .timeline-stamp--icon { color: var(--color-semantic-text-primary); }
+.timeline-item .timeline-stamp-icon svg { width: 28px; height: 28px; }
+.timeline-item .portal-date-row-main:hover .timeline-stamp--icon { color: var(--color-semantic-text-dark); }
+
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .timeline-stamp.portal-date-stamp,
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .timeline-stamp.portal-date-stamp.is-done,
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .portal-date-row-main:hover .timeline-stamp.portal-date-stamp {
+  background: transparent;
+  box-shadow: none;
+}
+
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .timeline-stamp.portal-date-stamp:not(.timeline-stamp--icon) {
+  box-shadow: inset 0 0 0 1px var(--tl-track);
+}
+
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .portal-date-row-main:hover .timeline-stamp.portal-date-stamp:not(.timeline-stamp--icon) {
+  box-shadow: inset 0 0 0 1px var(--tl-ring);
+}
+
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .timeline-stamp--icon { color: var(--tl-text); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .portal-date-row-main:hover .timeline-stamp--icon { color: var(--tl-text-strong); }

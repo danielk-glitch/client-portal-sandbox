@@ -129,7 +129,7 @@ describe('Client invites', () => {
   it('resends an invite with a personal note, and nothing is sent before Send', async () => {
     renderAt('/team')
     expect(screen.getByRole('tab', { name: 'Viewers · 2' })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getByText('Invite sent Oct 12, 2026')).toBeInTheDocument()
+    expect(screen.getByText('Invite sent Oct 12')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Resend' }))
     fireEvent.change(screen.getByRole('textbox', { name: 'Personal note (optional)' }), { target: { value: 'Excited to get started!' } })
     expect(loadTeamState().invites['co-seller'].note).toBeUndefined()
@@ -147,8 +147,9 @@ describe('Client invites', () => {
 
   it('lets admins remove access after confirming', async () => {
     renderAt('/team')
-    fireEvent.click(screen.getByRole('button', { name: 'More access options for Tim Bennett' }))
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Remove access' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Remove access for Tim Bennett' }))
+    expect(loadTeamState().invites.seller.status).toBe('active')
+    expect(screen.getByRole('dialog', { name: /Remove Tim Bennett’s portal access/ })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Remove access' }))
     expect(loadTeamState().invites.seller.status).toBe('removed')
     expect(await screen.findByRole('button', { name: 'Invite Tim Bennett' })).toHaveTextContent('Invite again')
