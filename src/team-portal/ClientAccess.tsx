@@ -91,8 +91,8 @@ export function ClientAccess({ state, setState }: { state: TeamState; setState: 
           <Box className="team-access-copy"><Typography variant="titleXS">{person.name}</Typography><Typography variant="bodySStandard" color="text.secondary">{detail(person, invite)}</Typography></Box>
           {isAdmin && <Box className="team-access-actions">
             {invite.status === 'removed' && <Button size="small" variant="outlined" onClick={() => open(person)} aria-label={`Invite ${person.name}`}>Invite again</Button>}
-            {invite.status === 'invited' && <Button size="small" onClick={() => open(person)}>Resend</Button>}
-            {['invited', 'active'].includes(invite.status) && <Button size="small" className="team-remove-access" onClick={() => setRemoving(person)} aria-label={`Remove access for ${person.name}`}>Remove</Button>}
+            {invite.status === 'invited' && <Button size="small" variant="outlined" onClick={() => open(person)}>Resend</Button>}
+            {invite.status === 'active' && <Button size="small" className="team-remove-access" onClick={() => setRemoving(person)} aria-label={`Remove access for ${person.name}`}>Remove</Button>}
           </Box>}
         </Box>
       })}</Box>

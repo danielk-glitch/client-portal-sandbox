@@ -764,9 +764,8 @@
   transition: grid-template-rows 420ms var(--timeline-ease), opacity 200ms ease;
 }
 
-/* Clip only while moving or closed, so row focus rings and hover fills are never cut off when open. */
-.timeline-panel-clip { min-height: 0; }
-.timeline-panel-shell.is-collapsed .timeline-panel-clip { overflow: hidden; }
+/* The list sits well inside the clip, so row hover fills and focus rings are never cut off. */
+.timeline-panel-clip { min-height: 0; overflow: hidden; padding-bottom: 4px; }
 
 /* Collapsed: a little breathing room under the toggle. The dark band keeps its bottom padding for the card overhang. */
 .seller-timeline--divider:has(.timeline-panel-shell.is-collapsed) { padding-bottom: 8px; }

@@ -81,6 +81,19 @@ describe('SellerTimeline', () => {
     expect(documentRow.textContent).not.toMatch(/OCT/i)
   })
 
+  it('collapses to just the tracker, and reopens when a milestone is picked', () => {
+    renderTimeline('tracker')
+    const toggle = screen.getByRole('button', { name: 'Hide details' })
+    fireEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(toggle).toHaveTextContent('Show details')
+    const shell = document.getElementById(toggle.getAttribute('aria-controls')!)!
+    expect(shell).toHaveAttribute('inert')
+    fireEvent.click(screen.getByRole('tab', { name: /Closing/ }))
+    expect(shell).not.toHaveAttribute('inert')
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  })
+
   it('moves between milestones with arrow keys', () => {
     renderTimeline('tracker')
     fireEvent.keyDown(screen.getByRole('tab', { name: /Under contract/ }), { key: 'ArrowLeft' })
