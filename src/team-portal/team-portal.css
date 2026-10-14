@@ -153,3 +153,11 @@
 .team-date-warning.MuiTypography-root { color: var(--color-semantic-text-caution); }
 .team-date-fields { display: grid; grid-template-columns: minmax(0,1fr) 200px; gap: 16px; }
 @media(max-width:600px) { .team-date-fields { grid-template-columns: 1fr; } .team-date-badge { width: 44px; height: 44px; } }
+.team-preview-card { box-shadow: var(--elevation-document); }
+.team-manage-tabs { margin-top: -8px; border-bottom: 1px solid var(--color-semantic-stroke-primary-light); }
+.team-plain-section .team-plain-heading { border-bottom: 0; padding-bottom: 8px; margin-bottom: 0; }
+.team-tab-panel { padding-top: 24px; }
+.team-tab-intro.MuiTypography-root { display: block; margin-bottom: 8px; }
+.team-resource-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.team-row-title { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.team-source-tag.brivity { color: var(--color-semantic-text-primary); }

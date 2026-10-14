@@ -37,8 +37,8 @@ export function DatesSection({ state, setState }: { state: TeamState; setState: 
     setEditing(null)
   }
 
-  return <Box component="section" className="team-plain-section" aria-labelledby="dates-heading">
-    <Box className="team-plain-heading"><Box><Typography component="h2" variant="titleM" id="dates-heading">Manage upcoming dates</Typography><Typography variant="bodySStandard" color="text.secondary">What each date means for Tim and Alex, and the resource that goes with it.</Typography></Box></Box>
+  return <Box>
+    <Typography variant="bodySStandard" color="text.secondary" className="team-tab-intro">What each date means for Tim and Alex, and the resource that goes with it.</Typography>
     <Box component="ul" className="team-resource-list">{dates.map(date => {
       const resourceId = date.guidance?.resourceId
       const hidden = !!resourceId && !state.visible.includes(resourceId)

@@ -1,7 +1,7 @@
 /* design-build · self-critique: Clarity5 Warmth4 Restraint5 Craft4 Variety4 SlopFree5 */
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Avatar, Box, Button, Chip, FormControl, IconButton, InputLabel, ListItemIcon, ListItemText, Menu, MenuItem, Select, Stack, Switch, TextField, Typography } from '@mui/material'
+import { Avatar, Box, Button, Chip, FormControl, IconButton, InputLabel, ListItemIcon, ListItemText, Menu, MenuItem, Select, Stack, Switch, Tab, Tabs, TextField, Typography } from '@mui/material'
 import ArrowForwardOutlined from '@mui/icons-material/ArrowForwardOutlined'
 import ArrowBackOutlined from '@mui/icons-material/ArrowBackOutlined'
 import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined'
@@ -23,6 +23,7 @@ import { toast } from 'sonner'
 import { PlaceModal } from '../components/PlaceModal'
 import { SegmentedSwitch } from '../components/SegmentedSwitch'
 import { PortalSection } from '../transaction-portal/components'
+import { PortalOutlineTag } from '../components/PortalOutlineTag'
 import { brandAssets } from '../assets/brand'
 import { sampleSellerTransaction as transaction } from '../seller-portal/sellerTransaction'
 import { cleanResourceHtml, defaultDifferences, liveCount, loadTeamState, roleFromUrl, selectableResources, statusOf, teamPeople, teamStateKey, titleOf } from './teamData'
@@ -129,6 +130,8 @@ function TransactionPage({ state, setState }: { state: TeamState; setState: SetS
   const toSave = selectableResources(state).filter(resource => state.visible.includes(resource.id)).map(resource => resource.id)
   const saveChanges = defaultDifferences({ ...state, visible: toSave }, selection)
   const attached = new Set(state.dates.map(date => date.guidance?.resourceId).filter(Boolean))
+  const [tab, setTab] = useState<'dates' | 'resources'>(() => window.location.pathname.startsWith('/team/resources') ? 'resources' : 'dates')
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'Brivity' | 'Team'>('all')
   useEffect(() => { if (window.location.pathname.startsWith('/team/resources')) document.getElementById('resources')?.scrollIntoView?.() }, [])
   function toggle(resource: TeamResource) {
     const showing = state.visible.includes(resource.id)
@@ -154,25 +157,31 @@ function TransactionPage({ state, setState }: { state: TeamState; setState: SetS
       <PortalSection prominent title="What Tim and Alex see" subtitle="Their seller portal right now. Opens in a new tab."><PreviewCard state={state} /></PortalSection>
       <ClientAccess state={state} setState={setState} />
     </Box>
-    <DatesSection state={state} setState={setState} />
-    <Box component="section" id="resources" className="team-plain-section" aria-labelledby="resources-heading">
+    <Box component="section" id="resources" className="team-plain-section" aria-labelledby="manage-heading">
       <Box className="team-plain-heading">
-        <Box><Typography component="h2" variant="titleM" id="resources-heading">Manage client resources</Typography><Typography variant="bodySStandard" color="text.secondary">{plural(visibleCount, 'resource')} visible to clients · changes apply right away</Typography></Box>
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-          {isAdmin && <Button size="small" onClick={() => setSaveOpen(true)} disabled={!!selection && saveChanges.shown.length + saveChanges.hidden.length === 0}>Save as seller default</Button>}
-          <Button component="a" href="/team/library" size="small" variant="outlined" endIcon={<ArrowForwardOutlined />}>Resource library</Button>
-        </Stack>
+        <Typography component="h2" variant="titleM" id="manage-heading">Manage what clients see</Typography>
       </Box>
-      {(['Brivity', 'Team'] as const).map(source => <Box key={source} className="team-resource-group">
-        <Typography component="h3" variant="labelS" color="text.secondary" className="team-access-group">{source === 'Brivity' ? 'Transaction basics · from Brivity' : 'From your team library'}</Typography>
-        <Box component="ul" className="team-resource-list">{available.filter(resource => resource.source === source).map(resource => {
+      <Tabs value={tab} onChange={(_, value) => setTab(value)} aria-label="Client content" className="team-manage-tabs">
+        <Tab value="dates" label="Upcoming dates" id="manage-tab-dates" aria-controls="manage-panel-dates" />
+        <Tab value="resources" label={`Resources · ${visibleCount} visible`} id="manage-tab-resources" aria-controls="manage-panel-resources" />
+      </Tabs>
+      {tab === 'dates' && <Box role="tabpanel" id="manage-panel-dates" aria-labelledby="manage-tab-dates" className="team-tab-panel"><DatesSection state={state} setState={setState} /></Box>}
+      {tab === 'resources' && <Box role="tabpanel" id="manage-panel-resources" aria-labelledby="manage-tab-resources" className="team-tab-panel">
+        <Box className="team-resource-toolbar">
+          <SegmentedSwitch size="s" aria-label="Filter resources" value={sourceFilter} onChange={setSourceFilter} options={[{ value: 'all', label: 'All' }, { value: 'Brivity', label: 'From Brivity' }, { value: 'Team', label: 'From your team' }]} />
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            {isAdmin && <Button size="small" onClick={() => setSaveOpen(true)} disabled={!!selection && saveChanges.shown.length + saveChanges.hidden.length === 0}>Save as seller default</Button>}
+            <Button component="a" href="/team/library" size="small" variant="outlined" endIcon={<ArrowForwardOutlined />}>Resource library</Button>
+          </Stack>
+        </Box>
+        <Box component="ul" className="team-resource-list">{available.filter(resource => sourceFilter === 'all' || resource.source === sourceFilter).map(resource => {
           const showing = state.visible.includes(resource.id)
           return <Box component="li" className={`team-row${showing ? '' : ' is-hidden'}`} key={resource.id}>
-            <Box className="team-row-copy"><Typography variant="titleXS">{resource.published?.title}</Typography><Typography variant="bodySStandard" color="text.secondary">{resource.published?.summary}</Typography>{(attached.has(resource.id) || resource.archived) && <Box className="team-row-meta">{attached.has(resource.id) && <Typography variant="labelS" color="text.secondary">Attached to a date</Typography>}{resource.archived && <Typography variant="labelS" color="text.secondary">Archived</Typography>}</Box>}</Box>
+            <Box className="team-row-copy"><Box className="team-row-title"><Typography variant="titleXS">{resource.published?.title}</Typography><PortalOutlineTag label={resource.source === 'Brivity' ? 'Brivity' : 'Your team'} className={`team-source-tag ${resource.source === 'Brivity' ? 'brivity' : 'team'}`} /></Box><Typography variant="bodySStandard" color="text.secondary">{resource.published?.summary}</Typography>{(attached.has(resource.id) || resource.archived) && <Box className="team-row-meta">{attached.has(resource.id) && <Typography variant="labelS" color="text.secondary">Attached to a date</Typography>}{resource.archived && <Typography variant="labelS" color="text.secondary">Archived</Typography>}</Box>}</Box>
             <Box className="team-row-actions"><Typography variant="labelS" color={showing ? 'text.primary' : 'text.secondary'} className="team-visibility-label">{showing ? 'Visible' : 'Hidden'}</Typography><IconButton aria-label={`Preview ${resource.published?.title}`} onClick={() => setGuide(resource.published)}><VisibilityOutlined fontSize="small" /></IconButton><Switch checked={showing} onChange={() => toggle(resource)} slotProps={{ input: { 'aria-label': `Show ${resource.published?.title} to clients` } }} color="primary" /></Box>
           </Box>
         })}</Box>
-      </Box>)}
+      </Box>}
     </Box>
     <PlaceModal open={saveOpen} onClose={() => setSaveOpen(false)} title={selection ? 'Update the seller default?' : 'Save as the seller default?'} description="New seller transactions will start with this selection. Existing transactions keep their current choices." actions={<><Button onClick={() => setSaveOpen(false)}>Cancel</Button><Button variant="contained" onClick={saveDefault}>{selection ? 'Update default' : 'Save default'}</Button></>}>
       <Stack spacing={3}>{selection ? <><Typography variant="bodyMStandard">Changes from the current default, saved {selection.updatedOn} by {selection.updatedBy}:</Typography><ChangeSummary shown={saveChanges.shown} hidden={saveChanges.hidden} state={state} /></> : <><Typography variant="bodyMStandard">{plural(toSave.length, 'resource')} will start visible:</Typography><ResourceNameList ids={toSave} state={state} /></>}</Stack>

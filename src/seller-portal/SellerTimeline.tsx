@@ -173,7 +173,7 @@ function TrackerTimeline({ data, currentId, ...handlers }: Handlers & { data: Se
 
 /** Glint travel time grows gently with distance. */
 function glintDuration(from: number, to: number) {
-  return 240 + Math.abs(to - from) * 120
+  return 320 + Math.abs(to - from) * 160
 }
 
 /* ---------- Mobile: vertical rail ---------- */

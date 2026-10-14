@@ -167,4 +167,13 @@ describe('Client invites', () => {
     expect(loadTeamState().invites[person!.id].status).toBe('invited')
     expect(await screen.findByText('Jamie Bennett')).toBeInTheDocument()
   })
+
+  it('defaults to dates, then filters resources by source', () => {
+    renderAt('/team')
+    expect(screen.getByRole('tab', { name: 'Upcoming dates' })).toHaveAttribute('aria-selected', 'true')
+    fireEvent.click(screen.getByRole('tab', { name: /Resources/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'From your team' }))
+    expect(screen.getByText('A smoother move')).toBeInTheDocument()
+    expect(screen.queryByText('Getting ready for closing day')).not.toBeInTheDocument()
+  })
 })

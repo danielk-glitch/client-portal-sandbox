@@ -89,9 +89,9 @@
 .timeline-glint {
   position: absolute;
   z-index: 0;
-  top: calc(var(--rail-y) - 1px);
-  width: 112px;
-  height: 2px;
+  top: calc(var(--rail-y) - 1.5px);
+  width: 160px;
+  height: 3px;
   translate: -50% 0;
   border-radius: 2px;
   background: linear-gradient(90deg, transparent, var(--color-semantic-surface-primary) 50%, transparent);
