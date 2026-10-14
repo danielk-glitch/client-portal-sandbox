@@ -3,6 +3,8 @@ import { sellerResources } from './sellerResources'
 
 export type MilestoneId = 'pre-listing' | 'active-listing' | 'under-contract' | 'closing'
 export type TimelineStatus = 'complete' | 'current' | 'upcoming'
+/** Each type gets one icon. Resources come from milestone.resourceIds. */
+export type TimelineItemKind = 'action' | 'date' | 'document' | 'resource'
 
 export type SellerTimelineStep = {
   id: string
@@ -15,6 +17,8 @@ export type SellerTimelineStep = {
   /** "you" for the seller, otherwise a team member or outside party name. */
   owner: 'you' | string
   status: TimelineStatus
+  /** Defaults: document when a document is attached, action when owned by you, otherwise date. */
+  kind?: Exclude<TimelineItemKind, 'resource'>
   detail?: string
   resourceId?: string
   documentId?: string
@@ -129,7 +133,7 @@ export const underContractTimeline: SellerTimelineData = {
         { id: 'pl-consultation', title: 'Listing consultation', summary: 'You met with Avery to talk through your goals, timing, and price.', date: '2026-08-18', owner: 'Avery Coleman', status: 'complete' },
         { id: 'pl-agreement', title: 'Listing agreement signed', summary: 'Your listing terms and marketing plan are on file.', date: '2026-08-20', owner: 'you', status: 'complete', documentId: 'doc-1' },
         { id: 'pl-details', title: 'Property details shared', summary: 'You shared the facts, updates, and history your team needed for the listing.', date: '2026-08-22', owner: 'you', status: 'complete' },
-        { id: 'pl-pricing', title: 'Listing price set', summary: 'You and Avery agreed on a starting price based on recent nearby sales.', date: '2026-08-24', owner: 'Avery Coleman', status: 'complete', resourceId: 'pricing' },
+        { id: 'pl-pricing', title: 'Listing price set', summary: 'You and Avery agreed on a starting price based on recent nearby sales.', date: '2026-08-24', owner: 'Avery Coleman', status: 'complete' },
         { id: 'pl-photos', title: 'Professional photography', summary: 'Photos, video, and a floor plan were captured at your home.', date: '2026-08-26', owner: 'Robin Hayes', status: 'complete', resourceId: 'listing-preparation' },
         { id: 'pl-plan', title: 'Launch plan approved', summary: 'You approved the photos, description, and launch date.', date: '2026-08-30', owner: 'you', status: 'complete' },
       ],
@@ -146,7 +150,7 @@ export const underContractTimeline: SellerTimelineData = {
         { id: 'al-live', title: 'Listing published', summary: 'Your home went live on the MLS and major home search sites.', date: '2026-09-01', owner: 'Robin Hayes', status: 'complete' },
         { id: 'al-marketing', title: 'Marketing campaign launched', summary: 'Social posts, digital ads, and mailers started reaching buyers.', date: '2026-09-03', owner: 'Kendall Ortiz', status: 'complete', opensMarketing: true },
         { id: 'al-open-house', title: 'Open house', summary: 'Visitors toured the home during the weekend open house.', date: '2026-09-06', owner: 'Avery Coleman', status: 'complete' },
-        { id: 'al-showings', title: 'Showings and buyer feedback', summary: '14 showings, with feedback shared after each visit.', date: '2026-09-10', owner: 'Avery Coleman', status: 'complete', documentId: 'doc-4', resourceId: 'showings' },
+        { id: 'al-showings', title: 'Showings and buyer feedback', summary: '14 showings, with feedback shared after each visit.', date: '2026-09-10', owner: 'Avery Coleman', status: 'complete', documentId: 'doc-4' },
         { id: 'al-offer', title: 'Offer accepted', summary: 'You accepted an offer after reviewing terms with Avery.', date: '2026-10-02', owner: 'you', status: 'complete', resourceId: 'reviewing-offers' },
       ],
     },
@@ -159,12 +163,12 @@ export const underContractTimeline: SellerTimelineData = {
       summary: 'The buyer completes inspections and financing while deadlines in your contract play out.',
       resourceIds: ['contingencies', 'disclosures', 'inspection', 'appraisal', 'earnest-money'],
       steps: [
-        { id: 'uc-agreement', title: 'Purchase agreement signed', summary: 'Your accepted offer is now a signed contract with the buyer.', date: '2026-10-02', owner: 'you', status: 'complete', resourceId: 'contingencies' },
+        { id: 'uc-agreement', title: 'Purchase agreement signed', summary: 'Your accepted offer is now a signed contract with the buyer.', date: '2026-10-02', owner: 'you', status: 'complete' },
         { id: 'uc-deposit', title: 'Earnest money received', summary: 'The buyer’s deposit is being held by escrow.', date: '2026-10-05', owner: 'Morgan Ellis', status: 'complete', resourceId: 'earnest-money', detail: 'This deposit is applied to the buyer’s purchase at closing. You don’t need to do anything with it.' },
         { id: 'uc-disclosures', title: 'Review and sign Form 17', summary: 'Confirm what you know about the home’s condition and history.', date: '2026-10-08', dateLabel: 'Due', owner: 'you', status: 'current', documentId: 'doc-2', resourceId: 'disclosures', detail: 'Read each question carefully and answer based on what you know. Ask Avery about anything unclear before you sign.' },
         { id: 'uc-inspection', title: 'Buyer’s home inspection', summary: 'The buyer’s inspector will look at the home’s condition.', date: '2026-10-10', dateLabel: 'Scheduled', owner: 'Buyer’s agent', status: 'upcoming', resourceId: 'inspection', detail: 'Plan to be away for about three hours. The buyer may request repairs or a credit afterward.' },
         { id: 'uc-appraisal', title: 'Appraisal', summary: 'The lender’s appraiser will estimate the home’s value.', date: '2026-10-14', dateLabel: 'Scheduled', owner: 'Morgan Ellis', status: 'upcoming', resourceId: 'appraisal', detail: 'Keep the side gate unlocked that morning and the driveway clear. Morgan will confirm the arrival window.' },
-        { id: 'uc-contingencies', title: 'Contingencies cleared', summary: 'The buyer’s inspection and financing conditions are resolved.', date: '2026-10-24', dateLabel: 'Expected', owner: 'Avery Coleman', status: 'upcoming', resourceId: 'contingencies' },
+        { id: 'uc-contingencies', title: 'Contingencies cleared', summary: 'The buyer’s inspection and financing conditions are resolved.', date: '2026-10-24', dateLabel: 'Expected', owner: 'Avery Coleman', status: 'upcoming' },
       ],
     },
     {

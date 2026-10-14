@@ -22,7 +22,6 @@ import OpenInNewOutlined from '@mui/icons-material/OpenInNewOutlined'
 import { toast } from 'sonner'
 import { PlaceModal } from '../components/PlaceModal'
 import { SegmentedSwitch } from '../components/SegmentedSwitch'
-import { PortalSection } from '../transaction-portal/components'
 import { PortalOutlineTag } from '../components/PortalOutlineTag'
 import { brandAssets } from '../assets/brand'
 import { sampleSellerTransaction as transaction } from '../seller-portal/sellerTransaction'
@@ -129,7 +128,7 @@ function TransactionPage({ state, setState }: { state: TeamState; setState: SetS
   const visibleCount = state.visible.filter(id => state.resources.some(resource => resource.id === id && resource.published)).length
   const toSave = selectableResources(state).filter(resource => state.visible.includes(resource.id)).map(resource => resource.id)
   const saveChanges = defaultDifferences({ ...state, visible: toSave }, selection)
-  const attached = new Set(state.dates.map(date => date.guidance?.resourceId).filter(Boolean))
+  const attached = new Set(state.dates.flatMap(date => date.guidance?.resourceIds ?? []))
   const [tab, setTab] = useState<'dates' | 'resources'>(() => window.location.pathname.startsWith('/team/resources') ? 'resources' : 'dates')
   const [sourceFilter, setSourceFilter] = useState<'all' | 'Brivity' | 'Team'>('all')
   useEffect(() => { if (window.location.pathname.startsWith('/team/resources')) document.getElementById('resources')?.scrollIntoView?.() }, [])
@@ -154,7 +153,7 @@ function TransactionPage({ state, setState }: { state: TeamState; setState: SetS
       </Box>
     </Box>
     <Box className="team-split team-txn-top">
-      <PortalSection prominent title="What Tim and Alex see" subtitle="Their seller portal right now. Opens in a new tab."><PreviewCard state={state} /></PortalSection>
+      <Box component="section" className="team-preview-section" aria-labelledby="preview-heading"><Box className="team-preview-heading"><Typography component="h2" variant="titleS" id="preview-heading">What Tim and Alex see</Typography><Typography variant="bodySStandard" color="text.secondary">Their seller portal right now. Opens in a new tab.</Typography></Box><PreviewCard state={state} /></Box>
       <ClientAccess state={state} setState={setState} />
     </Box>
     <Box component="section" id="resources" className="team-plain-section" aria-labelledby="manage-heading">

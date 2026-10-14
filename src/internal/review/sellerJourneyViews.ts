@@ -54,7 +54,7 @@ export function createBeforeListingTransaction(source: SellerTransaction): Selle
       { id: 'prep-consultation', title: 'Listing consultation completed', description: 'You met with your agent to discuss your selling goals and next steps.', occurredAt: '08/18/2026 · 10:30 AM', actor: agent?.name ?? source.teamBrand.name, type: 'note' },
     ],
     upcomingDates: [
-      { id: 'prep-photography', date: '2026-08-26', title: 'Photography appointment', description: '10:00 AM at your home. Your photographer will capture the interior and outdoor spaces.', guidance: source.resources ? { explanation: 'Professional photos help buyers get a clear first impression of your home.', preparation: 'Clear counters and personal items, and confirm access instructions with your team.', resourceId: 'listing-preparation' } : undefined },
+      { id: 'prep-photography', date: '2026-08-26', title: 'Photography appointment', description: '10:00 AM at your home. Your photographer will capture the interior and outdoor spaces.', guidance: source.resources ? { explanation: 'Professional photos help buyers get a clear first impression of your home.', preparation: 'Clear counters and personal items, and confirm access instructions with your team.', resourceIds: ['listing-preparation'] } : undefined },
       { id: 'prep-review', date: '2026-08-28', title: 'Draft listing review', description: 'Your agent will share the photos and description for your review before publishing.' },
       { id: 'prep-launch', date: '2026-09-01', title: 'Planned listing launch', description: 'Your target date to go live, pending your final review. Your agent will confirm.' },
     ],

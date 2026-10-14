@@ -1,15 +1,18 @@
-import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
-import { Avatar, Box, Button, ButtonBase, Typography, useMediaQuery } from '@mui/material'
+import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react'
+import { Avatar, Box, Button, ButtonBase, Chip, Typography, useMediaQuery } from '@mui/material'
 import CheckRounded from '@mui/icons-material/CheckRounded'
 import ExpandMoreRounded from '@mui/icons-material/ExpandMoreRounded'
 import LockOutlined from '@mui/icons-material/LockOutlined'
 import MenuBookOutlined from '@mui/icons-material/MenuBookOutlined'
-import InsertDriveFileOutlined from '@mui/icons-material/InsertDriveFileOutlined'
-import InsightsOutlined from '@mui/icons-material/InsightsOutlined'
-import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded'
+import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined'
+import EventOutlined from '@mui/icons-material/EventOutlined'
+import TaskAltOutlined from '@mui/icons-material/TaskAltOutlined'
+import { PlaceModal } from '../components/PlaceModal'
 import type { TeamMember, TransactionDocument, TransactionResource } from '../transaction-portal/types'
-import type { MilestoneId, SellerMilestone, SellerTimelineData, SellerTimelineStep, TimelineStatus } from './sellerTimelineData'
+import type { MilestoneId, SellerMilestone, SellerTimelineData, SellerTimelineStep, TimelineItemKind, TimelineStatus } from './sellerTimelineData'
 import './seller-timeline.css'
+
+export type TimelineTransition = 'divider' | 'dark'
 
 type SellerTimelineProps = {
   data: SellerTimelineData
@@ -19,6 +22,8 @@ type SellerTimelineProps = {
   onOpenResource: (resource: TransactionResource) => void
   onOpenDocument: (document: TransactionDocument) => void
   onOpenMarketing?: () => void
+  /** How the section separates from the hero above. */
+  transition?: TimelineTransition
   /** Forces a layout. Used by the component gallery. */
   layout?: 'auto' | 'tracker' | 'stacked'
 }
@@ -26,6 +31,19 @@ type SellerTimelineProps = {
 type Handlers = Pick<SellerTimelineProps, 'resources' | 'documents' | 'team' | 'onOpenResource' | 'onOpenDocument' | 'onOpenMarketing'>
 
 const statusCopy: Record<TimelineStatus, string> = { complete: 'Complete', current: 'Current stage', upcoming: 'Upcoming' }
+
+const timelineItemKinds: Record<TimelineItemKind, { label: string; icon: ReactNode }> = {
+  action: { label: 'Action', icon: <TaskAltOutlined /> },
+  date: { label: 'Date', icon: <EventOutlined /> },
+  document: { label: 'Document', icon: <DescriptionOutlined /> },
+  resource: { label: 'Resource', icon: <MenuBookOutlined /> },
+}
+
+function stepKind(step: SellerTimelineStep): Exclude<TimelineItemKind, 'resource'> {
+  if (step.kind) return step.kind
+  if (step.documentId || step.pendingDocument) return 'document'
+  return step.owner === 'you' ? 'action' : 'date'
+}
 
 function formatDate(iso: string, options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }) {
   return new Intl.DateTimeFormat('en-US', { ...options, timeZone: 'UTC' }).format(new Date(`${iso}T12:00:00Z`))
@@ -42,31 +60,28 @@ function nodeCaption(milestone: SellerMilestone) {
   return milestone.startDate ? `From ${formatDate(milestone.startDate)}` : 'Not started'
 }
 
-function milestoneDates(milestone: SellerMilestone) {
-  if (milestone.status === 'upcoming') return milestone.startDate ? `From ${formatDate(milestone.startDate)}` : ''
-  if (milestone.startDate && milestone.endDate) return `${formatDate(milestone.startDate)} – ${formatDate(milestone.endDate)}`
-  return ''
-}
-
-export function SellerTimeline({ data, layout = 'auto', ...handlers }: SellerTimelineProps) {
+export function SellerTimeline({ data, layout = 'auto', transition = 'divider', ...handlers }: SellerTimelineProps) {
   const prefersStacked = useMediaQuery('(max-width: 899.95px)', { noSsr: true })
   const stacked = layout === 'stacked' || (layout === 'auto' && prefersStacked)
   const current = data.milestones.find((milestone) => milestone.status === 'current') ?? data.milestones[0]
   const titleId = useId()
+  const [openStep, setOpenStep] = useState<{ step: SellerTimelineStep; milestone: SellerMilestone } | null>(null)
 
   return (
-    <Box component="section" aria-labelledby={titleId} className={`seller-timeline${stacked ? ' seller-timeline--stacked' : ''}`}>
-      <Typography component="h2" id={titleId} variant="labelS" className="seller-timeline-eyebrow">Transaction timeline</Typography>
+    <Box component="section" aria-labelledby={titleId} className={`seller-timeline seller-timeline--${transition}${stacked ? ' seller-timeline--stacked' : ''}`}>
       {stacked
-        ? <StackedTimeline data={data} currentId={current.id} {...handlers} />
-        : <TrackerTimeline data={data} currentId={current.id} {...handlers} />}
+        ? <StackedTimeline data={data} currentId={current.id} titleId={titleId} onOpenStep={(step, milestone) => setOpenStep({ step, milestone })} {...handlers} />
+        : <TrackerTimeline data={data} currentId={current.id} titleId={titleId} onOpenStep={(step, milestone) => setOpenStep({ step, milestone })} {...handlers} />}
+      <StepModal item={openStep} onClose={() => setOpenStep(null)} {...handlers} />
     </Box>
   )
 }
 
-/* ---------- Desktop: full-bleed tracker + milestone panel ---------- */
+type OpenStep = (step: SellerTimelineStep, milestone: SellerMilestone) => void
 
-function TrackerTimeline({ data, currentId, ...handlers }: Handlers & { data: SellerTimelineData; currentId: MilestoneId }) {
+/* ---------- Desktop: full-bleed tracker + milestone list ---------- */
+
+function TrackerTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: Handlers & { data: SellerTimelineData; currentId: MilestoneId; titleId: string; onOpenStep: OpenStep }) {
   const [selectedId, setSelectedId] = useState<MilestoneId>(currentId)
   const [prevCurrent, setPrevCurrent] = useState(currentId)
   const initialIndex = Math.max(0, data.milestones.findIndex((milestone) => milestone.id === currentId))
@@ -74,6 +89,7 @@ function TrackerTimeline({ data, currentId, ...handlers }: Handlers & { data: Se
   const [arrivedIndex, setArrivedIndex] = useState(initialIndex)
   const [glint, setGlint] = useState<{ from: number; to: number; key: number } | null>(null)
   const glintTimer = useRef<number | undefined>(undefined)
+  const glintCount = useRef(0)
   if (prevCurrent !== currentId) {
     setPrevCurrent(currentId)
     setSelectedId(currentId)
@@ -103,7 +119,8 @@ function TrackerTimeline({ data, currentId, ...handlers }: Handlers & { data: Se
     }
     const duration = glintDuration(from, index)
     setArrivedIndex(-1)
-    setGlint({ from, to: index, key: Date.now() })
+    glintCount.current += 1
+    setGlint({ from, to: index, key: glintCount.current })
     glintTimer.current = window.setTimeout(() => {
       setGlint(null)
       setArrivedIndex(index)
@@ -127,45 +144,48 @@ function TrackerTimeline({ data, currentId, ...handlers }: Handlers & { data: Se
 
   return (
     <>
-      <Box role="tablist" aria-label="Sale milestones" className="timeline-tracker" onKeyDown={onKeyDown} style={trackerStyle}>
-        <Box className="timeline-rail" aria-hidden="true" />
-        <Box className="timeline-rail-fill" aria-hidden="true" />
-        {glint && (
-          <Box
-            key={glint.key}
-            className="timeline-glint"
-            aria-hidden="true"
-            style={{ '--glint-from': glint.from, '--glint-to': glint.to, '--glint-duration': `${glintDuration(glint.from, glint.to)}ms` } as CSSProperties}
-          />
-        )}
-        {arrivedIndex >= 0 && <Box key={`bloom-${arrivedIndex}`} className="timeline-spotlight" aria-hidden="true" style={{ '--timeline-selected': arrivedIndex } as CSSProperties} />}
-        {milestones.map((milestone, index) => {
-          const isSelected = milestone.id === selectedId
-          return (
-            <ButtonBase
-              key={milestone.id}
-              ref={(node: HTMLButtonElement | null) => { tabRefs.current[index] = node }}
-              role="tab"
-              id={`${baseId}-tab-${milestone.id}`}
-              aria-controls={`${baseId}-panel`}
-              aria-selected={isSelected}
-              aria-description={statusCopy[milestone.status]}
-              tabIndex={isSelected ? 0 : -1}
-              onClick={() => select(index)}
-              className={`timeline-node timeline-node--${milestone.status}${isSelected ? ' is-selected' : ''}${index === arrivedIndex ? ' is-arrived' : ''}`}
-              disableRipple
-            >
-              <Box component="span" className="timeline-now" aria-hidden={milestone.status !== 'current'}>{milestone.status === 'current' ? 'Now' : ''}</Box>
-              <MilestoneMarker status={milestone.status} index={index} />
-              <Typography variant="labelM" component="span" className="timeline-node-label">{milestone.label}</Typography>
-              <Typography variant="labelS" component="span" className="timeline-node-caption">{nodeCaption(milestone)}</Typography>
-            </ButtonBase>
-          )
-        })}
+      <Box className="timeline-stage">
+        <Typography component="h2" id={titleId} variant="labelS" className="seller-timeline-eyebrow">Transaction timeline</Typography>
+        <Box role="tablist" aria-label="Sale milestones" className="timeline-tracker" onKeyDown={onKeyDown} style={trackerStyle}>
+          <Box className="timeline-rail" aria-hidden="true" />
+          <Box className="timeline-rail-fill" aria-hidden="true" />
+          {glint && (
+            <Box
+              key={glint.key}
+              className="timeline-glint"
+              aria-hidden="true"
+              style={{ '--glint-from': glint.from, '--glint-to': glint.to, '--glint-duration': `${glintDuration(glint.from, glint.to)}ms` } as CSSProperties}
+            />
+          )}
+          {arrivedIndex >= 0 && <Box key={`bloom-${arrivedIndex}`} className="timeline-spotlight" aria-hidden="true" style={{ '--timeline-selected': arrivedIndex } as CSSProperties} />}
+          {milestones.map((milestone, index) => {
+            const isSelected = milestone.id === selectedId
+            return (
+              <ButtonBase
+                key={milestone.id}
+                ref={(node: HTMLButtonElement | null) => { tabRefs.current[index] = node }}
+                role="tab"
+                id={`${baseId}-tab-${milestone.id}`}
+                aria-controls={`${baseId}-panel`}
+                aria-selected={isSelected}
+                aria-description={statusCopy[milestone.status]}
+                tabIndex={isSelected ? 0 : -1}
+                onClick={() => select(index)}
+                className={`timeline-node timeline-node--${milestone.status}${isSelected ? ' is-selected' : ''}${index === arrivedIndex ? ' is-arrived' : ''}`}
+                disableRipple
+              >
+                <Box component="span" className="timeline-now" aria-hidden={milestone.status !== 'current'}>{milestone.status === 'current' ? 'Now' : ''}</Box>
+                <MilestoneMarker status={milestone.status} index={index} />
+                <Typography variant="labelM" component="span" className="timeline-node-label">{milestone.label}</Typography>
+                <Typography variant="labelS" component="span" className="timeline-node-caption">{nodeCaption(milestone)}</Typography>
+              </ButtonBase>
+            )
+          })}
+        </Box>
       </Box>
 
       <Box role="tabpanel" id={`${baseId}-panel`} aria-labelledby={`${baseId}-tab-${selected.id}`} className="timeline-panel" key={selected.id}>
-        <MilestoneContent milestone={selected} previous={milestones[selectedIndex - 1]} nextStepId={data.nextStepId} {...handlers} />
+        <MilestoneItems milestone={selected} previous={milestones[selectedIndex - 1]} nextStepId={data.nextStepId} onOpenStep={onOpenStep} {...handlers} />
       </Box>
     </>
   )
@@ -178,39 +198,44 @@ function glintDuration(from: number, to: number) {
 
 /* ---------- Mobile: vertical rail ---------- */
 
-function StackedTimeline({ data, currentId, ...handlers }: Handlers & { data: SellerTimelineData; currentId: MilestoneId }) {
+function StackedTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: Handlers & { data: SellerTimelineData; currentId: MilestoneId; titleId: string; onOpenStep: OpenStep }) {
   const [openId, setOpenId] = useState<MilestoneId | null>(currentId)
   const baseId = useId()
 
   return (
-    <Box component="ol" className="timeline-stack">
-      {data.milestones.map((milestone, index) => {
-        const open = openId === milestone.id
-        return (
-          <Box component="li" key={milestone.id} className={`timeline-stack-item timeline-stack-item--${milestone.status}${open ? ' is-open' : ''}`}>
-            <ButtonBase
-              className="timeline-stack-header"
-              aria-expanded={open}
-              aria-controls={`${baseId}-${milestone.id}`}
-              onClick={() => setOpenId(open ? null : milestone.id)}
-              disableRipple
-            >
-              <MilestoneMarker status={milestone.status} index={index} />
-              <Box component="span" className="timeline-stack-heading">
-                <Typography variant="titleXS" component="span">{milestone.label}</Typography>
-                {milestone.status === 'current' && <Box component="span" className="timeline-now timeline-now--inline">Now</Box>}
-              </Box>
-              <ExpandMoreRounded className="timeline-chevron" aria-hidden="true" />
-            </ButtonBase>
-            {open && (
-              <Box id={`${baseId}-${milestone.id}`} className="timeline-stack-body">
-                <MilestoneContent milestone={milestone} previous={data.milestones[index - 1]} nextStepId={data.nextStepId} compact {...handlers} />
-              </Box>
-            )}
-          </Box>
-        )
-      })}
-    </Box>
+    <>
+      <Box className="timeline-stage">
+        <Typography component="h2" id={titleId} variant="labelS" className="seller-timeline-eyebrow">Transaction timeline</Typography>
+      </Box>
+      <Box component="ol" className="timeline-stack">
+        {data.milestones.map((milestone, index) => {
+          const open = openId === milestone.id
+          return (
+            <Box component="li" key={milestone.id} className={`timeline-stack-item timeline-stack-item--${milestone.status}${open ? ' is-open' : ''}`}>
+              <ButtonBase
+                className="timeline-stack-header"
+                aria-expanded={open}
+                aria-controls={`${baseId}-${milestone.id}`}
+                onClick={() => setOpenId(open ? null : milestone.id)}
+                disableRipple
+              >
+                <MilestoneMarker status={milestone.status} index={index} />
+                <Box component="span" className="timeline-stack-heading">
+                  <Typography variant="titleXS" component="span">{milestone.label}</Typography>
+                  {milestone.status === 'current' && <Box component="span" className="timeline-now timeline-now--inline">Now</Box>}
+                </Box>
+                <ExpandMoreRounded className="timeline-chevron" aria-hidden="true" />
+              </ButtonBase>
+              {open && (
+                <Box id={`${baseId}-${milestone.id}`} className="timeline-stack-body">
+                  <MilestoneItems milestone={milestone} previous={data.milestones[index - 1]} nextStepId={data.nextStepId} onOpenStep={onOpenStep} {...handlers} />
+                </Box>
+              )}
+            </Box>
+          )
+        })}
+      </Box>
+    </>
   )
 }
 
@@ -222,86 +247,54 @@ function MilestoneMarker({ status, index }: { status: TimelineStatus; index: num
   )
 }
 
-/* ---------- Milestone content ---------- */
+/* ---------- Milestone items: one list for actions, dates, documents, and resources ---------- */
 
-function MilestoneContent({ milestone, previous, nextStepId, compact = false, ...handlers }: Handlers & { milestone: SellerMilestone; previous?: SellerMilestone; nextStepId: string; compact?: boolean }) {
-  const { resources, onOpenResource, onOpenMarketing } = handlers
+function byDate(a: SellerTimelineStep, b: SellerTimelineStep) {
+  if (a.date && b.date) return a.date.localeCompare(b.date)
+  return a.date ? -1 : b.date ? 1 : 0
+}
+
+function MilestoneItems({ milestone, previous, nextStepId, onOpenStep, resources, team, onOpenResource, onOpenMarketing }: Handlers & { milestone: SellerMilestone; previous?: SellerMilestone; nextStepId: string; onOpenStep: OpenStep }) {
   const locked = milestone.status === 'upcoming'
-  const guides = milestone.resourceIds.map((id) => resources.find((resource) => resource.id === id)).filter((resource): resource is TransactionResource => Boolean(resource))
+  const linkedResourceIds = new Set(milestone.steps.map((step) => step.resourceId).filter(Boolean))
+  const standaloneGuides = milestone.resourceIds
+    .filter((id) => !linkedResourceIds.has(id))
+    .map((id) => resources.find((resource) => resource.id === id))
+    .filter((resource): resource is TransactionResource => Boolean(resource))
   const showMarketing = Boolean(onOpenMarketing && milestone.steps.some((step) => step.opensMarketing))
-  const openSteps = milestone.steps.filter((step) => step.status !== 'complete')
-  const doneSteps = milestone.steps.filter((step) => step.status === 'complete')
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const dates = milestoneDates(milestone)
+  const openSteps = milestone.steps.filter((step) => step.status !== 'complete').sort(byDate)
+  const doneSteps = milestone.steps.filter((step) => step.status === 'complete').sort(byDate)
 
-  const renderStep = (step: SellerTimelineStep) => (
-    <StepItem
-      key={step.id}
-      step={step}
-      featured={step.id === nextStepId}
-      locked={locked}
-      milestoneLabel={milestone.label}
-      expanded={expandedId === step.id}
-      onToggle={() => setExpandedId(expandedId === step.id ? null : step.id)}
-      {...handlers}
-    />
+  const stepRow = (step: SellerTimelineStep) => (
+    <StepRow key={step.id} step={step} next={step.id === nextStepId && step.status !== 'complete'} resources={resources} team={team} onOpen={() => onOpenStep(step, milestone)} onOpenResource={onOpenResource} />
   )
 
   return (
-    <Box className={`milestone-content${compact ? ' milestone-content--compact' : ''}`}>
-      <Box className="milestone-main">
-        {!compact && (
-          <Box className="milestone-heading">
-            <Typography component="h3" variant="titleS">{milestone.label}</Typography>
-            {dates && <Typography variant="labelS" color="text.secondary" className="milestone-dates">{dates}</Typography>}
-          </Box>
-        )}
+    <Box className="milestone-items">
+      {locked && (
+        <Box className="milestone-locked-note">
+          <LockOutlined aria-hidden="true" />
+          <Typography variant="bodySStandard">Opens after {previous ? previous.label.toLowerCase() : 'earlier steps'}. Guides are ready now.</Typography>
+        </Box>
+      )}
 
-        {locked && (
-          <Box className="milestone-locked-note">
-            <LockOutlined aria-hidden="true" />
-            <Typography variant="bodySStandard">Opens after {previous ? previous.label.toLowerCase() : 'earlier steps'}. Guides are ready now.</Typography>
-          </Box>
-        )}
+      {(openSteps.length > 0 || standaloneGuides.length > 0 || showMarketing) && (
+        <Box component="ul" className="timeline-item-list" aria-label={locked ? `${milestone.label} items` : 'To do'}>
+          {openSteps.map(stepRow)}
+          {showMarketing && onOpenMarketing && (
+            <ResourceRow title="Listing performance" summary="Views, showings, and buyer feedback" meta="Live dashboard" onOpen={onOpenMarketing} />
+          )}
+          {standaloneGuides.map((guide) => (
+            <ResourceRow key={guide.id} title={guide.title} summary={guide.summary} meta={guide.readingTime} onOpen={() => onOpenResource(guide)} />
+          ))}
+        </Box>
+      )}
 
-        {openSteps.length > 0 && (
-          <Box component="ul" className="milestone-steps" aria-label={locked ? `${milestone.label} steps` : 'To do'}>
-            {openSteps.map(renderStep)}
-          </Box>
-        )}
-
-        {doneSteps.length > 0 && (
-          <Box className="milestone-done">
-            {openSteps.length > 0 && <Typography component="h4" variant="labelS" className="milestone-group-title">Done</Typography>}
-            <Box component="ul" className="milestone-steps milestone-steps--done" aria-label="Done">
-              {doneSteps.map(renderStep)}
-            </Box>
-          </Box>
-        )}
-      </Box>
-
-      {(guides.length > 0 || showMarketing) && (
-        <Box component="aside" className="milestone-aside" aria-label={`${milestone.label} resources`}>
-          <Typography component="h4" variant="labelS" className="milestone-group-title">Resources</Typography>
-          <Box component="ul" className="milestone-guide-list">
-            {showMarketing && (
-              <Box component="li">
-                <ButtonBase className="milestone-guide" onClick={onOpenMarketing}>
-                  <InsightsOutlined aria-hidden="true" />
-                  <Typography variant="labelM" component="span" className="milestone-guide-copy">Listing performance</Typography>
-                  <ArrowForwardRounded className="milestone-guide-arrow" aria-hidden="true" />
-                </ButtonBase>
-              </Box>
-            )}
-            {guides.map((guide) => (
-              <Box component="li" key={guide.id}>
-                <ButtonBase className="milestone-guide" onClick={() => onOpenResource(guide)} aria-label={`Read ${guide.title}`}>
-                  <MenuBookOutlined aria-hidden="true" />
-                  <Typography variant="labelM" component="span" className="milestone-guide-copy">{guide.title}</Typography>
-                  <ArrowForwardRounded className="milestone-guide-arrow" aria-hidden="true" />
-                </ButtonBase>
-              </Box>
-            ))}
+      {doneSteps.length > 0 && (
+        <Box className="milestone-done">
+          <Typography component="h3" variant="labelS" className="milestone-group-title">Done</Typography>
+          <Box component="ul" className="timeline-item-list" aria-label="Done">
+            {doneSteps.map(stepRow)}
           </Box>
         </Box>
       )}
@@ -309,70 +302,144 @@ function MilestoneContent({ milestone, previous, nextStepId, compact = false, ..
   )
 }
 
-function StepItem({ step, featured, locked, milestoneLabel, expanded, onToggle, resources, documents, team, onOpenResource, onOpenDocument, onOpenMarketing }: Handlers & {
-  step: SellerTimelineStep
-  featured: boolean
-  locked: boolean
-  milestoneLabel: string
-  expanded: boolean
-  onToggle: () => void
-}) {
-  const detailId = useId()
+function ItemStamp({ kind, date, done, next }: { kind: TimelineItemKind; date?: string; done?: boolean; next?: boolean }) {
+  const type = timelineItemKinds[kind]
+  return (
+    <Box component="span" className={`portal-date-stamp timeline-stamp${date ? '' : ' timeline-stamp--icon'}${done ? ' is-done' : ''}${next ? ' is-next' : ''}`}>
+      {date ? (
+        <>
+          <Typography variant="labelS" component="span">{formatDate(date, { month: 'short' })}</Typography>
+          <Typography variant="metricM" component="span">{formatDate(date, { day: '2-digit' })}</Typography>
+        </>
+      ) : <Box component="span" className="timeline-stamp-icon" aria-hidden="true">{type.icon}</Box>}
+      {(date || done) && (
+        <Box component="span" className={`timeline-stamp-badge${done ? ' timeline-stamp-badge--done' : ''}`} aria-hidden="true">
+          {done ? <CheckRounded /> : type.icon}
+        </Box>
+      )}
+    </Box>
+  )
+}
+
+function StepRow({ step, next, resources, team, onOpen, onOpenResource }: Pick<Handlers, 'resources' | 'team' | 'onOpenResource'> & { step: SellerTimelineStep; next: boolean; onOpen: () => void }) {
+  const kind = stepKind(step)
   const done = step.status === 'complete'
   const isYou = step.owner === 'you'
   const member = team.find((person) => person.name === step.owner)
-  const document = documents.find((item) => item.id === step.documentId)
   const resource = resources.find((item) => item.id === step.resourceId)
-  const marketing = step.opensMarketing && onOpenMarketing
-  const pendingDocument = !document && locked ? step.pendingDocument : undefined
-  const meta = [step.date ? `${step.dateLabel && !done ? `${step.dateLabel} ` : ''}${formatDate(step.date)}` : null, isYou ? 'You' : step.owner].filter(Boolean).join(' · ')
-
-  const actions = (document || pendingDocument || resource || marketing) && (
-    <Box className="step-actions">
-      {document && (locked
-        ? <Box component="span" className="step-action step-action--locked"><LockOutlined aria-hidden="true" />{document.name}</Box>
-        : featured
-          ? <Button variant="contained" color="primary" size="small" startIcon={<InsertDriveFileOutlined />} onClick={() => onOpenDocument(document)}>Review document</Button>
-          : <ButtonBase className="step-action" onClick={() => onOpenDocument(document)}><InsertDriveFileOutlined aria-hidden="true" />{document.name}</ButtonBase>)}
-      {pendingDocument && <Box component="span" className="step-action step-action--locked" title={`Shared in ${milestoneLabel.toLowerCase()}`}><LockOutlined aria-hidden="true" />{pendingDocument}</Box>}
-      {resource && <ButtonBase className="step-action" onClick={() => onOpenResource(resource)} aria-label={`Read ${resource.title}`}><MenuBookOutlined aria-hidden="true" />{resource.shortTitle ?? resource.title}</ButtonBase>}
-      {marketing && <ButtonBase className="step-action" onClick={onOpenMarketing}><InsightsOutlined aria-hidden="true" />Listing performance</ButtonBase>}
-    </Box>
-  )
-
-  if (featured && !done) {
-    return (
-      <Box component="li" className="step-item step-item--featured">
-        <Box component="span" className="step-check" aria-hidden="true" />
-        <Box className="step-body">
-          <Typography variant="labelS" className="step-eyebrow">Next step</Typography>
-          <Typography variant="titleXS" component="span" className="step-title">{step.title}</Typography>
-          <Typography variant="labelS" color="text.secondary" className="step-meta">{meta}</Typography>
-          {step.detail && <Typography variant="bodySStandard" color="text.secondary" className="step-detail-copy">{step.detail}</Typography>}
-          {actions}
-        </Box>
-      </Box>
-    )
-  }
 
   return (
-    <Box component="li" className={`step-item${done ? ' step-item--done' : ''}${expanded ? ' is-expanded' : ''}`}>
-      <ButtonBase className="step-row" onClick={onToggle} aria-expanded={expanded} aria-controls={detailId} disableRipple>
-        <Box component="span" className={`step-check${done ? ' step-check--done' : ''}`} aria-hidden="true">{done && <CheckRounded />}</Box>
-        <Box component="span" className="step-body">
-          <Typography variant="titleXS" component="span" className="step-title">{step.title}</Typography>
-          <Typography variant="labelS" color="text.secondary" component="span" className="step-meta">
-            {!isYou && member?.photoUrl && <Avatar src={member.photoUrl} alt="" className="step-avatar" />}
-            {meta}
+    <Box component="li" className={`portal-date-row timeline-item timeline-item--${kind}${resource ? ' portal-date-row--resource' : ''}${done ? ' is-done' : ''}${next ? ' is-next' : ''}`}>
+      <ButtonBase className="portal-date-row-main" onClick={onOpen} aria-haspopup="dialog" aria-label={`${step.title}. ${timelineItemKinds[kind].label}${done ? ', done' : ''}${next ? ', next step' : ''}`} disableRipple>
+        <ItemStamp kind={kind} date={step.date} done={done} next={next} />
+        <Box component="span" className="portal-date-copy timeline-item-copy">
+          <Box component="span" className="timeline-item-title">
+            <Typography variant="titleXS" component="span">{step.title}</Typography>
+            {next && <Box component="span" className="timeline-next-tag">Next step</Box>}
+          </Box>
+          <Typography variant="bodySStandard" color="text.secondary" component="span">{step.summary}</Typography>
+          <Typography variant="labelS" component="span" className="timeline-item-meta">
+            {!isYou && member?.photoUrl && <Avatar src={member.photoUrl} alt="" className="timeline-item-avatar" />}
+            {isYou ? 'You' : step.owner}
           </Typography>
         </Box>
-        <Box component="span" className="sr-only">{done ? 'Done' : 'Open'}</Box>
-        <ExpandMoreRounded className="timeline-chevron" aria-hidden="true" />
       </ButtonBase>
-      <Box id={detailId} className="step-detail" hidden={!expanded}>
-        <Typography variant="bodySStandard" color="text.secondary">{step.detail ?? step.summary}</Typography>
-        {actions}
-      </Box>
+      {resource && (
+        <Chip
+          component="button"
+          type="button"
+          variant="outlined"
+          icon={<MenuBookOutlined />}
+          label={`Resource: ${resource.shortTitle ?? resource.title}`}
+          title={resource.title}
+          aria-label={`Read ${resource.title}`}
+          onClick={() => onOpenResource(resource)}
+          className="portal-date-resource"
+        />
+      )}
     </Box>
+  )
+}
+
+function ResourceRow({ title, summary, meta, onOpen }: { title: string; summary: string; meta: string; onOpen: () => void }) {
+  return (
+    <Box component="li" className="portal-date-row timeline-item timeline-item--resource">
+      <ButtonBase className="portal-date-row-main" onClick={onOpen} aria-label={`Read ${title}`} disableRipple>
+        <ItemStamp kind="resource" />
+        <Box component="span" className="portal-date-copy timeline-item-copy">
+          <Typography variant="titleXS" component="span">{title}</Typography>
+          <Typography variant="bodySStandard" color="text.secondary" component="span">{summary}</Typography>
+          <Typography variant="labelS" component="span" className="timeline-item-meta">{meta}</Typography>
+        </Box>
+      </ButtonBase>
+    </Box>
+  )
+}
+
+/* ---------- Item detail modal ---------- */
+
+function StepModal({ item, onClose, resources, documents, team, onOpenResource, onOpenDocument, onOpenMarketing }: Handlers & { item: { step: SellerTimelineStep; milestone: SellerMilestone } | null; onClose: () => void }) {
+  // Keep the last item while the dialog animates closed.
+  const [shown, setShown] = useState(item)
+  if (item && item !== shown) setShown(item)
+  const current = item ?? shown
+  if (!current) return null
+  const { step, milestone } = current
+  const kind = stepKind(step)
+  const type = timelineItemKinds[kind]
+  const done = step.status === 'complete'
+  const locked = milestone.status === 'upcoming'
+  const isYou = step.owner === 'you'
+  const member = team.find((person) => person.name === step.owner)
+  const document = documents.find((doc) => doc.id === step.documentId)
+  const resource = resources.find((guide) => guide.id === step.resourceId)
+  const when = step.date ? `${step.dateLabel && !done ? `${step.dateLabel} ` : ''}${formatDate(step.date, { weekday: 'long', month: 'long', day: 'numeric' })}` : 'Date to be confirmed'
+
+  function then(action: () => void) {
+    onClose()
+    action()
+  }
+
+  const actions = (
+    <>
+      {resource && <Button variant="outlined" startIcon={<MenuBookOutlined />} onClick={() => then(() => onOpenResource(resource))}>Read the guide</Button>}
+      {step.opensMarketing && onOpenMarketing && <Button variant="outlined" onClick={() => then(onOpenMarketing)}>Listing performance</Button>}
+      {document && !locked && <Button variant="contained" color="primary" startIcon={<DescriptionOutlined />} onClick={() => then(() => onOpenDocument(document))}>{done ? 'View document' : 'Review document'}</Button>}
+    </>
+  )
+
+  return (
+    <PlaceModal open={Boolean(item)} onClose={onClose} title={step.title} size="s" actions={resource || document || step.opensMarketing ? actions : undefined} className="timeline-step-modal">
+      <Box className="timeline-modal-body">
+        <Box component="dl" className="timeline-modal-facts">
+          <Box className="timeline-modal-fact">
+            <Typography component="dt" variant="labelS">Type</Typography>
+            <Typography component="dd" variant="labelM" className="timeline-modal-type">{type.icon}{type.label}</Typography>
+          </Box>
+          <Box className="timeline-modal-fact">
+            <Typography component="dt" variant="labelS">When</Typography>
+            <Typography component="dd" variant="labelM">{when}</Typography>
+          </Box>
+          <Box className="timeline-modal-fact">
+            <Typography component="dt" variant="labelS">Who</Typography>
+            <Typography component="dd" variant="labelM" className="timeline-modal-owner">
+              {!isYou && member?.photoUrl && <Avatar src={member.photoUrl} alt="" className="timeline-item-avatar" />}
+              {isYou ? 'You' : step.owner}
+            </Typography>
+          </Box>
+          <Box className="timeline-modal-fact">
+            <Typography component="dt" variant="labelS">Status</Typography>
+            <Typography component="dd" variant="labelM">{done ? 'Done' : locked ? `Opens in ${milestone.label.toLowerCase()}` : 'Open'}</Typography>
+          </Box>
+        </Box>
+        <Typography variant="bodyMStandard" color="text.secondary">{step.detail ?? step.summary}</Typography>
+        {locked && (document || step.pendingDocument) && (
+          <Box className="milestone-locked-note">
+            <LockOutlined aria-hidden="true" />
+            <Typography variant="bodySStandard">{document?.name ?? step.pendingDocument} will be shared in {milestone.label.toLowerCase()}.</Typography>
+          </Box>
+        )}
+      </Box>
+    </PlaceModal>
   )
 }

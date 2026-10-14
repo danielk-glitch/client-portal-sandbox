@@ -59,7 +59,7 @@ import { CardActionButton } from '../components/CardActionButton'
 import { ListingPreparation } from './ListingPreparation'
 import { createBeforeListingTransaction, readSellerJourneyView, type SellerJourneyView } from '../internal/review/sellerJourneyViews'
 import { SellerReviewTools } from '../internal/review/SellerReviewTools'
-import { SellerTimeline } from './SellerTimeline'
+import { SellerTimeline, type TimelineTransition } from './SellerTimeline'
 import { beforeListingTimeline, timelineResources, underContractTimeline } from './sellerTimelineData'
 import './seller-portal.css'
 import './seller-polestar.css'
@@ -104,6 +104,9 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
     if (requestedHeader === 'card' || requestedHeader === 'full' || requestedHeader === 'light' || requestedHeader === 'light-bottom') return requestedHeader
     return 'light-bottom'
   })
+  const [timelineTransition, setTimelineTransition] = useState<TimelineTransition>(() =>
+    new URLSearchParams(window.location.search).get('timeline') === 'dark' ? 'dark' : 'divider',
+  )
   const [listingLink, setListingLink] = useState<HeaderListingLink>(() =>
     new URLSearchParams(window.location.search).get('listingLink') === 'idx-mvp' ? 'idx-mvp' : 'first-party',
   )
@@ -253,6 +256,14 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
     window.history.replaceState(null, '', url)
   }
 
+  function selectTimelineTransition(value: TimelineTransition) {
+    setTimelineTransition(value)
+    const url = new URL(window.location.href)
+    if (value === 'divider') url.searchParams.delete('timeline')
+    else url.searchParams.set('timeline', value)
+    window.history.replaceState(null, '', url)
+  }
+
   function selectFeedbackLayout(value: MarketingFeedbackLayout) {
     setFeedbackLayout(value)
     const url = new URL(window.location.href)
@@ -320,6 +331,7 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
         {timelineLayout ? (
           <SellerTimeline
             data={beforeListing ? beforeListingTimeline : underContractTimeline}
+            transition={timelineTransition}
             resources={transaction.resources ?? []}
             documents={transaction.documents}
             team={transaction.team}
@@ -412,6 +424,8 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
         selectMarketingLayout={selectMarketingLayout}
         feedbackLayout={feedbackLayout}
         selectFeedbackLayout={selectFeedbackLayout}
+        timelineTransition={timelineLayout ? timelineTransition : undefined}
+        selectTimelineTransition={selectTimelineTransition}
       />}
 
       <ListingDetailsSheet open={listingOpen} onClose={closeListing} transaction={transaction} />
@@ -521,9 +535,8 @@ function UpcomingDatesList({ dates, resources, onReadGuide }: { dates: UpcomingD
     <DateEventList>
       {[...dates].sort((first, second) => first.date.localeCompare(second.date)).map((item) => {
         const guidance = item.guidance
-        const resource = resources?.find(resource => resource.id === guidance?.resourceId)
-        const readResource = resource ? () => onReadGuide(resource.id) : undefined
-        return <DateEventRow key={item.id} date={item.date} title={item.title} description={item.description} resource={resource} onReadResource={readResource} guidance={guidance} />
+        const attached = (guidance?.resourceIds ?? []).map(id => resources?.find(resource => resource.id === id)).filter((resource): resource is TransactionResource => !!resource)
+        return <DateEventRow key={item.id} date={item.date} title={item.title} description={item.description} resources={attached} onReadResource={resource => onReadGuide(resource.id)} guidance={guidance} />
       })}
     </DateEventList>
   )

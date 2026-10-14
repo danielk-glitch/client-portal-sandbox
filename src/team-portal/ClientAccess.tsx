@@ -72,7 +72,7 @@ export function ClientAccess({ state, setState }: { state: TeamState; setState: 
     setRemoving(null)
   }
 
-  return <PortalSection prominent title="Client access" subtitle={isAdmin ? undefined : 'Admins send invites and manage access.'} action={isAdmin ? <Button size="small" variant="outlined" startIcon={<AddOutlined />} onClick={() => open(null)} aria-label="Invite a client">Invite</Button> : undefined}>
+  return <PortalSection prominent title="Client access" subtitle={isAdmin ? undefined : 'Admins send invites and manage access.'} action={isAdmin ? <Button size="small" variant="contained" startIcon={<AddOutlined />} onClick={() => open(null)} aria-label="Invite a client">Invite</Button> : undefined}>
     <Stack spacing={3}>{groups.map(group => <Box key={group.title}>
       <Typography component="h3" variant="labelS" color="text.secondary" className="team-access-group">{group.title} · {group.people.length}</Typography>
       <Box component="ul" className="team-access-list">{group.people.map(person => {
@@ -81,7 +81,7 @@ export function ClientAccess({ state, setState }: { state: TeamState; setState: 
           <Avatar src={person.photoUrl} alt="" sx={{ width: 40, height: 40 }}>{person.name[0]}</Avatar>
           <Box className="team-access-copy"><Typography variant="titleXS">{person.name}</Typography><Typography variant="bodySStandard" color="text.secondary">{detail(person, invite)}</Typography></Box>
           {isAdmin && <Box className="team-access-actions">
-            {['not-invited', 'removed'].includes(invite.status) && <Button size="small" variant="contained" onClick={() => open(person)} aria-label={`Invite ${person.name}`}>{invite.status === 'removed' ? 'Invite again' : 'Invite'}</Button>}
+            {['not-invited', 'removed'].includes(invite.status) && <Button size="small" variant="outlined" onClick={() => open(person)} aria-label={`Invite ${person.name}`}>{invite.status === 'removed' ? 'Invite again' : 'Invite'}</Button>}
             {invite.status === 'invited' && <Button size="small" onClick={() => open(person)}>Resend</Button>}
             {['invited', 'active'].includes(invite.status) && <IconButton size="small" aria-label={`More access options for ${person.name}`} aria-haspopup="menu" onClick={event => setMenu({ anchor: event.currentTarget, person })}><MoreHorizOutlined fontSize="small" /></IconButton>}
           </Box>}

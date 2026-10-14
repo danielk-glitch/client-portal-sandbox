@@ -10,9 +10,12 @@ import { sellerJourneyViews, type SellerJourneyView } from './sellerJourneyViews
 import { marketingFeedbackLayouts, type MarketingFeedbackLayout } from '../../seller-portal/marketingFeedbackLayouts'
 import type { HeaderListingLink, ListingOverviewVariant } from '../../seller-portal/ListingOverview'
 import type { MarketingSnapshotData } from '../../seller-portal/MarketingSnapshot'
+import type { TimelineTransition } from '../../seller-portal/SellerTimeline'
 import './seller-review-tools.css'
 
 type SellerReviewToolsProps = {
+  timelineTransition?: TimelineTransition
+  selectTimelineTransition?: (value: TimelineTransition) => void
   journeyView: SellerJourneyView
   selectJourneyView: (view: SellerJourneyView) => void
   beforeListing: boolean
@@ -28,7 +31,7 @@ type SellerReviewToolsProps = {
   selectFeedbackLayout: (layout: MarketingFeedbackLayout) => void
 }
 
-export function SellerReviewTools({ journeyView, selectJourneyView, beforeListing, visualTheme, marketingSnapshot, listingLink, selectListingLink, headerVariant, selectHeaderVariant, marketingLayout, selectMarketingLayout, feedbackLayout, selectFeedbackLayout }: SellerReviewToolsProps) {
+export function SellerReviewTools({ timelineTransition, selectTimelineTransition, journeyView, selectJourneyView, beforeListing, visualTheme, marketingSnapshot, listingLink, selectListingLink, headerVariant, selectHeaderVariant, marketingLayout, selectMarketingLayout, feedbackLayout, selectFeedbackLayout }: SellerReviewToolsProps) {
   const [viewMenuAnchor, setViewMenuAnchor] = useState<HTMLElement | null>(null)
   const [designPanelAnchor, setDesignPanelAnchor] = useState<HTMLElement | null>(null)
   return (
@@ -70,6 +73,15 @@ export function SellerReviewTools({ journeyView, selectJourneyView, beforeListin
           </IconButton>
         </Box>
         <Box className="design-panel-content">
+          {timelineTransition && selectTimelineTransition && (
+            <Box className="design-panel-option-section">
+              <Typography component="h3" variant="titleXS" id="timeline-transition-label">Timeline transition</Typography>
+              <RadioGroup aria-labelledby="timeline-transition-label" value={timelineTransition} onChange={(event) => selectTimelineTransition(event.target.value as TimelineTransition)}>
+                <FormControlLabel value="divider" control={<Radio />} label="Divider" />
+                <FormControlLabel value="dark" control={<Radio />} label="Dark band" />
+              </RadioGroup>
+            </Box>
+          )}
           {beforeListing && <Typography variant="bodySStandard" color="text.secondary">Before listing uses the compact header with team and brokerage logos. Switch to Under contract to compare listing layouts.</Typography>}
           {!beforeListing && <Box className="design-panel-option-section">
             <Typography component="h3" variant="titleXS" id="header-listing-link-label">Header listing link</Typography>

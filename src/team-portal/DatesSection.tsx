@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Box, Button, Checkbox, FormControlLabel, MenuItem, Stack, TextField, Typography } from '@mui/material'
+import { Autocomplete, Box, Button, Checkbox, Chip, FormControlLabel, Stack, TextField, Typography } from '@mui/material'
 import EditOutlined from '@mui/icons-material/EditOutlined'
 import MenuBookOutlined from '@mui/icons-material/MenuBookOutlined'
 import InfoOutlined from '@mui/icons-material/InfoOutlined'
@@ -14,42 +14,42 @@ const day = (date: string) => date.slice(8, 10)
 
 export function DatesSection({ state, setState }: { state: TeamState; setState: SetState }) {
   const [editing, setEditing] = useState<UpcomingDate | null>(null)
-  const [draft, setDraft] = useState({ date: '', title: '', description: '', explanation: '', preparation: '', resourceId: '' })
+  const [draft, setDraft] = useState({ date: '', title: '', description: '', explanation: '', preparation: '', resourceIds: [] as string[] })
   const [alsoShow, setAlsoShow] = useState(true)
   const published = state.resources.filter(resource => resource.published && !resource.archived)
   const titleOf = (id?: string) => state.resources.find(resource => resource.id === id)?.published?.title
   const dates = [...state.dates].sort((a, b) => a.date.localeCompare(b.date))
-  const draftHidden = !!draft.resourceId && !state.visible.includes(draft.resourceId)
+  const draftHidden = draft.resourceIds.filter(id => !state.visible.includes(id))
 
   function open(date: UpcomingDate) {
-    setDraft({ date: date.date, title: date.title, description: date.description, explanation: date.guidance?.explanation ?? '', preparation: date.guidance?.preparation ?? '', resourceId: date.guidance?.resourceId ?? '' })
+    setDraft({ date: date.date, title: date.title, description: date.description, explanation: date.guidance?.explanation ?? '', preparation: date.guidance?.preparation ?? '', resourceIds: date.guidance?.resourceIds ?? [] })
     setAlsoShow(true)
     setEditing(date)
   }
   function save() {
     if (!editing) return
     if (!draft.title.trim() || !draft.date) { toast.error('Add a title and a date.'); return }
-    const hasGuidance = draft.explanation.trim() || draft.preparation.trim() || draft.resourceId
-    const updated: UpcomingDate = { id: editing.id, date: draft.date, title: draft.title.trim(), description: draft.description.trim(), guidance: hasGuidance ? { explanation: draft.explanation.trim(), preparation: draft.preparation.trim(), resourceId: draft.resourceId } : undefined }
-    const show = draftHidden && alsoShow
-    setState(previous => ({ ...previous, dates: previous.dates.map(item => item.id === editing.id ? updated : item), visible: show ? [...previous.visible, draft.resourceId] : previous.visible }))
-    toast.success(show ? 'Date updated, and its resource is now visible' : 'Date updated in Tim and Alex’s portal')
+    const hasGuidance = draft.explanation.trim() || draft.preparation.trim() || draft.resourceIds.length
+    const updated: UpcomingDate = { id: editing.id, date: draft.date, title: draft.title.trim(), description: draft.description.trim(), guidance: hasGuidance ? { explanation: draft.explanation.trim(), preparation: draft.preparation.trim(), resourceIds: draft.resourceIds } : undefined }
+    const show = draftHidden.length > 0 && alsoShow
+    setState(previous => ({ ...previous, dates: previous.dates.map(item => item.id === editing.id ? updated : item), visible: show ? [...previous.visible, ...draftHidden] : previous.visible }))
+    toast.success(show ? `Date updated, and ${draftHidden.length === 1 ? 'its resource is' : 'its resources are'} now visible` : 'Date updated in Tim and Alex’s portal')
     setEditing(null)
   }
 
   return <Box>
-    <Typography variant="bodySStandard" color="text.secondary" className="team-tab-intro">What each date means for Tim and Alex, and the resource that goes with it.</Typography>
     <Box component="ul" className="team-resource-list">{dates.map(date => {
-      const resourceId = date.guidance?.resourceId
-      const hidden = !!resourceId && !state.visible.includes(resourceId)
+      const ids = date.guidance?.resourceIds ?? []
+      const hiddenCount = ids.filter(id => !state.visible.includes(id)).length
       return <Box component="li" className="team-row team-date-row" key={date.id}>
         <Box className="team-date-badge" aria-hidden="true"><Typography variant="labelS">{month(date.date)}</Typography><Typography variant="titleS">{day(date.date)}</Typography></Box>
         <Box className="team-row-copy">
           <Typography variant="titleXS">{date.title}</Typography>
           <Typography variant="bodySStandard" color="text.secondary">{date.description}</Typography>
           <Box className="team-date-meta">
-            <Typography variant="labelS" color={resourceId ? 'text.primary' : 'text.secondary'} className="team-date-resource"><MenuBookOutlined sx={{ fontSize: 16 }} />{resourceId ? titleOf(resourceId) ?? 'Resource no longer available' : 'No resource attached'}</Typography>
-            {hidden && <Typography variant="labelS" className="team-date-warning"><InfoOutlined sx={{ fontSize: 16 }} />Hidden from clients, so the link won’t show</Typography>}
+            {ids.length === 0 && <Typography variant="labelS" color="text.secondary" className="team-date-resource"><MenuBookOutlined sx={{ fontSize: 16 }} />No resources attached</Typography>}
+            {ids.map(id => <Typography variant="labelS" key={id} color={state.visible.includes(id) ? 'text.primary' : 'text.secondary'} className="team-date-resource"><MenuBookOutlined sx={{ fontSize: 16 }} />{titleOf(id) ?? 'Resource no longer available'}{state.visible.includes(id) ? '' : ' (hidden)'}</Typography>)}
+            {hiddenCount > 0 && <Typography variant="labelS" className="team-date-warning"><InfoOutlined sx={{ fontSize: 16 }} />{hiddenCount === 1 && ids.length === 1 ? 'Hidden from clients, so the link won’t show' : `${hiddenCount} hidden from clients, so ${hiddenCount === 1 ? 'its link won’t' : 'their links won’t'} show`}</Typography>}
             {!date.guidance?.explanation && <Typography variant="labelS" color="text.secondary">No “what this means” yet</Typography>}
           </Box>
         </Box>
@@ -62,11 +62,10 @@ export function DatesSection({ state, setState }: { state: TeamState; setState: 
         <TextField label="Short description" value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} fullWidth helperText="Shown under the date in the client’s list." />
         <TextField label="What this means" value={draft.explanation} onChange={event => setDraft({ ...draft, explanation: event.target.value })} fullWidth multiline minRows={3} helperText="Plain-language context clients see when they open the date." />
         <TextField label="How to prepare" value={draft.preparation} onChange={event => setDraft({ ...draft, preparation: event.target.value })} fullWidth multiline minRows={2} />
-        <TextField select label="Attached resource" value={draft.resourceId} onChange={event => setDraft({ ...draft, resourceId: event.target.value })} fullWidth helperText="Clients see a link to this resource next to the date.">
-          <MenuItem value=""><em>No resource</em></MenuItem>
-          {published.map(resource => <MenuItem value={resource.id} key={resource.id}>{resource.published?.title}{state.visible.includes(resource.id) ? '' : ' · hidden'}</MenuItem>)}
-        </TextField>
-        {draftHidden && <FormControlLabel control={<Checkbox checked={alsoShow} onChange={event => setAlsoShow(event.target.checked)} />} label="This resource is hidden. Also show it to clients so the link appears." />}
+        <Autocomplete multiple options={published.map(resource => resource.id)} value={draft.resourceIds} onChange={(_, value) => setDraft({ ...draft, resourceIds: value })} getOptionLabel={id => `${titleOf(id) ?? id}${state.visible.includes(id) ? '' : ' · hidden'}`} disableCloseOnSelect filterSelectedOptions
+          renderValue={(value, getItemProps) => value.map((id, index) => { const { key, ...itemProps } = getItemProps({ index }); return <Chip key={key} {...itemProps} size="small" label={titleOf(id) ?? id} variant="outlined" /> })}
+          renderInput={params => <TextField {...params} label="Attached resources" helperText="One resource shows as a link next to the date. Two or more show as a list when the client opens the date." />} />
+        {draftHidden.length > 0 && <FormControlLabel control={<Checkbox checked={alsoShow} onChange={event => setAlsoShow(event.target.checked)} />} label={`${draftHidden.length === 1 ? 'One of these is' : `${draftHidden.length} of these are`} hidden. Also show ${draftHidden.length === 1 ? 'it' : 'them'} to clients so the ${draftHidden.length === 1 ? 'link appears' : 'links appear'}.`} />}
       </Stack>
     </PlaceModal>
   </Box>

@@ -33,7 +33,8 @@ export type UpcomingDate = {
   guidance?: {
     explanation: string
     preparation: string
-    resourceId: string
+    /** Resources attached to this date. One shows as a direct chip; two or more open the date's explanation with a list. */
+    resourceIds: string[]
   }
 }
 

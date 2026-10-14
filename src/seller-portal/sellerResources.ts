@@ -89,21 +89,21 @@ export const sellerMilestoneGuidance: Record<string, NonNullable<UpcomingDate['g
   'date-1': {
     explanation: 'Earnest money is the buyer’s deposit toward the purchase. It is held by a neutral party until it is applied at closing or handled according to the contract.',
     preparation: 'Your team will confirm receipt. You do not need to send this deposit as the seller.',
-    resourceId: 'earnest-money',
+    resourceIds: ['earnest-money'],
   },
   'date-2': {
     explanation: 'Seller disclosures help the buyer understand what you know about the property’s condition and history.',
     preparation: 'Review the form carefully. Ask your agent about unclear questions and confirm the correct form for your property before signing.',
-    resourceId: 'disclosures',
+    resourceIds: ['disclosures'],
   },
   'date-3': {
     explanation: 'The buyer’s lender uses an independent estimate of your home’s value to help decide how much it can lend. This is different from a home inspection.',
     preparation: 'Confirm property access with your team and share any major improvements with your agent.',
-    resourceId: 'appraisal',
+    resourceIds: ['appraisal', 'contingencies'],
   },
   'date-4': {
     explanation: 'Your sale is completed after the required signing, funding, and recording steps. Signing and handing over the keys may happen at different times.',
     preparation: 'Review your closing statement and confirm your signing appointment, move-out timing, and key handoff with your team.',
-    resourceId: 'closing',
+    resourceIds: ['closing', 'team-moving'],
   },
 }

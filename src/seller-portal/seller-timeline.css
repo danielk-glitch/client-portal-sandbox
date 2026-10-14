@@ -1,11 +1,24 @@
 /* Seller timeline · open-canvas milestone tracker with a vertical mobile rail */
 
 .seller-timeline {
-  --timeline-ink: var(--color-semantic-surface-reverse-primary);
-  --timeline-halo: color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 8%, transparent);
+  /* Tracker palette. The dark transition swaps these inside .timeline-stage. */
+  --tl-ink: var(--color-semantic-surface-reverse-primary);
+  --tl-on-ink: var(--color-semantic-text-on-color-primary);
+  --tl-surface: var(--color-semantic-surface-primary);
+  --tl-track: var(--color-semantic-stroke-primary-light);
+  --tl-ring: var(--color-semantic-stroke-primary);
+  --tl-ring-strong: var(--color-semantic-stroke-primary-darkest);
+  --tl-text-strong: var(--color-semantic-text-dark);
+  --tl-text: var(--color-semantic-text-primary);
+  --tl-text-muted: var(--color-semantic-text-light);
+  --tl-glint: var(--color-semantic-surface-primary);
+  --tl-halo: color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 8%, transparent);
+  --tl-glow: color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 7%, transparent);
+  --tl-shadow: color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 35%, transparent);
   --timeline-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --timeline-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-  margin-top: 56px;
+  position: relative;
+  margin-top: 48px;
 }
 
 .seller-timeline .sr-only {
@@ -17,14 +30,69 @@
   white-space: nowrap;
 }
 
+.timeline-stage { position: relative; padding-top: 40px; }
+
 .seller-timeline-eyebrow.MuiTypography-root {
   display: block;
   margin-bottom: 4px;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: var(--color-semantic-text-light);
+  color: var(--tl-text-muted);
 }
+
+/* ---------- Transition A: divider ---------- */
+
+.seller-timeline--divider .timeline-stage,
+/* The dark band is desktop-only for now; small screens fall back to the divider. */
+.seller-timeline--stacked.seller-timeline--dark .timeline-stage { border-top: 1px solid var(--color-semantic-stroke-primary-light); }
+
+/* ---------- Transition B: dark band that fades into the content ---------- */
+
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stage {
+  --tl-ink: var(--color-semantic-surface-primary);
+  --tl-on-ink: var(--color-semantic-surface-reverse-primary);
+  --tl-surface: var(--color-semantic-surface-reverse-primary);
+  --tl-track: color-mix(in srgb, var(--color-semantic-surface-primary) 20%, transparent);
+  --tl-ring: color-mix(in srgb, var(--color-semantic-surface-primary) 40%, transparent);
+  --tl-ring-strong: var(--color-semantic-surface-primary);
+  --tl-text-strong: var(--color-semantic-text-on-color-primary);
+  --tl-text: var(--color-semantic-text-on-color-light);
+  --tl-text-muted: color-mix(in srgb, var(--color-semantic-text-on-color-primary) 55%, transparent);
+  --tl-glint: var(--color-semantic-surface-primary);
+  --tl-halo: color-mix(in srgb, var(--color-semantic-surface-primary) 14%, transparent);
+  --tl-glow: color-mix(in srgb, var(--color-semantic-surface-primary) 12%, transparent);
+  --tl-shadow: oklch(0 0 0 / 0.5);
+  color: var(--tl-text-strong);
+  padding-top: 56px;
+  padding-bottom: 24px;
+}
+
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stage::before {
+  position: absolute;
+  z-index: -3;
+  top: 0;
+  bottom: -120px;
+  left: calc(50% - 50vw);
+  width: 100vw;
+  content: '';
+  background: linear-gradient(
+    180deg,
+    var(--color-semantic-surface-reverse-primary) 0%,
+    var(--color-semantic-surface-reverse-primary) calc(100% - 200px),
+    color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 70%, transparent) calc(100% - 140px),
+    color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 25%, transparent) calc(100% - 70px),
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.seller-timeline--dark { isolation: isolate; }
+.seller-timeline--dark .timeline-panel { margin-top: 96px; }
+
+/* In dark, the progress fill is a soft white so a pure white glint still reads on top of it. */
+.seller-timeline--dark .timeline-rail-fill { background: color-mix(in srgb, var(--color-semantic-surface-primary) 72%, transparent); }
+.seller-timeline--dark .timeline-glint { filter: drop-shadow(0 0 4px color-mix(in srgb, var(--color-semantic-surface-primary) 70%, transparent)); }
 
 /* ---------- Tracker ---------- */
 
@@ -52,14 +120,14 @@
 
 .timeline-rail {
   width: 100vw;
-  background: var(--color-semantic-stroke-primary-light);
+  background: var(--tl-track);
   mask-image: linear-gradient(90deg, transparent, #000 var(--edge-fade), #000 calc(100% - var(--edge-fade)), transparent);
 }
 
 /* Progress: from the left edge, through finished milestones, partway into the current one. */
 .timeline-rail-fill {
   width: calc(50vw - 50% + var(--col) / 2 + var(--timeline-progress) * (100% - var(--col)));
-  background: var(--timeline-ink);
+  background: var(--tl-ink);
   mask-image: linear-gradient(90deg, transparent, #000 var(--edge-fade), #000 calc(100% - 24px), transparent);
   transition: width 900ms var(--timeline-ease);
 }
@@ -74,7 +142,7 @@
   height: 180px;
   translate: -50% 0;
   border-radius: 50%;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 7%, transparent), transparent);
+  background: radial-gradient(closest-side, var(--tl-glow), transparent);
   pointer-events: none;
   animation: timeline-bloom 700ms var(--timeline-ease) both;
 }
@@ -94,7 +162,7 @@
   height: 3px;
   translate: -50% 0;
   border-radius: 2px;
-  background: linear-gradient(90deg, transparent, var(--color-semantic-surface-primary) 50%, transparent);
+  background: linear-gradient(90deg, transparent, var(--tl-glint) 50%, transparent);
   pointer-events: none;
   animation:
     timeline-glint-travel var(--glint-duration) cubic-bezier(0.65, 0, 0.35, 1) both,
@@ -119,14 +187,14 @@
   align-content: start;
   padding: 0 8px 16px;
   text-align: center;
-  color: var(--color-semantic-text-light);
+  color: var(--tl-text-muted);
   background: none;
 }
 
 .timeline-node:focus-visible { outline: none; }
 
 .timeline-node:focus-visible .timeline-marker {
-  outline: 2px solid var(--color-semantic-stroke-primary-darkest);
+  outline: 2px solid var(--tl-ring-strong);
   outline-offset: 6px;
   border-radius: 50%;
 }
@@ -141,8 +209,8 @@
   line-height: 18px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-semantic-text-on-color-primary);
-  background: var(--timeline-ink);
+  color: var(--tl-on-ink);
+  background: var(--tl-ink);
 }
 
 .timeline-now:empty { visibility: hidden; }
@@ -151,17 +219,17 @@
   margin-top: 14px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--color-semantic-text-light);
+  color: var(--tl-text-muted);
   transition: color 200ms ease, letter-spacing 300ms var(--timeline-ease);
 }
 
 .timeline-node--complete .timeline-node-label.MuiTypography-root,
-.timeline-node--current .timeline-node-label.MuiTypography-root { color: var(--color-semantic-text-primary); }
+.timeline-node--current .timeline-node-label.MuiTypography-root { color: var(--tl-text); }
 
 .timeline-node-caption.MuiTypography-root {
   margin-top: 4px;
   font-variant-numeric: tabular-nums;
-  color: var(--color-semantic-text-light);
+  color: var(--tl-text-muted);
   opacity: 0;
   translate: 0 -4px;
   transition: opacity 220ms ease, translate 320ms var(--timeline-ease);
@@ -174,16 +242,16 @@
   margin-top: 12px;
   content: '';
   border-radius: 2px;
-  background: var(--timeline-ink);
+  background: var(--tl-ink);
   scale: 0 1;
   transition: scale 360ms var(--timeline-spring);
 }
 
-.timeline-node.is-arrived .timeline-node-label.MuiTypography-root { color: var(--color-semantic-text-dark); letter-spacing: 0.14em; }
+.timeline-node.is-arrived .timeline-node-label.MuiTypography-root { color: var(--tl-text-strong); letter-spacing: 0.14em; }
 .timeline-node.is-arrived .timeline-node-caption.MuiTypography-root { opacity: 1; translate: 0 0; }
 .timeline-node.is-arrived::after { scale: 1 1; }
 
-.timeline-node:hover .timeline-node-label.MuiTypography-root { color: var(--color-semantic-text-dark); }
+.timeline-node:hover .timeline-node-label.MuiTypography-root { color: var(--tl-text-strong); }
 .timeline-node:hover .timeline-node-caption.MuiTypography-root { opacity: 1; translate: 0 0; }
 
 /* ---------- Markers ---------- */
@@ -202,8 +270,8 @@
   inset: 8px;
   content: '';
   border-radius: 50%;
-  background: var(--color-semantic-surface-primary);
-  box-shadow: inset 0 0 0 1.5px var(--color-semantic-stroke-primary), 0 0 0 0 var(--timeline-halo);
+  background: var(--tl-surface);
+  box-shadow: inset 0 0 0 1.5px var(--tl-ring), 0 0 0 0 var(--tl-halo);
   transition: scale 420ms var(--timeline-spring), box-shadow 300ms ease, background-color 200ms ease;
 }
 
@@ -214,19 +282,19 @@
   font-size: 0.6875rem;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
-  color: var(--color-semantic-text-light);
+  color: var(--tl-text-muted);
 }
 
-.timeline-marker--complete { color: var(--color-semantic-text-on-color-primary); }
-.timeline-marker--complete::before { background: var(--timeline-ink); box-shadow: 0 0 0 0 var(--timeline-halo); }
+.timeline-marker--complete { color: var(--tl-on-ink); }
+.timeline-marker--complete::before { background: var(--tl-ink); box-shadow: 0 0 0 0 var(--tl-halo); }
 
-.timeline-marker--current::before { box-shadow: inset 0 0 0 2px var(--timeline-ink), 0 0 0 0 var(--timeline-halo); }
+.timeline-marker--current::before { box-shadow: inset 0 0 0 2px var(--tl-ink), 0 0 0 0 var(--tl-halo); }
 
 .timeline-marker-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--timeline-ink);
+  background: var(--tl-ink);
 }
 
 /* Live pulse on the current stage. */
@@ -235,7 +303,7 @@
   inset: 8px;
   content: '';
   border-radius: 50%;
-  border: 2px solid var(--timeline-ink);
+  border: 2px solid var(--tl-ink);
   opacity: 0;
   animation: timeline-pulse 2.8s var(--timeline-ease) infinite;
   pointer-events: none;
@@ -249,9 +317,9 @@
 /* Hover: lift and a soft halo. */
 .timeline-node:hover .timeline-marker::before,
 .timeline-node:hover .timeline-marker > * { scale: 1.12; }
-.timeline-node:hover .timeline-marker::before { box-shadow: inset 0 0 0 1.5px var(--color-semantic-stroke-primary-dark), 0 0 0 7px var(--timeline-halo); }
-.timeline-node--complete:hover .timeline-marker::before { box-shadow: 0 0 0 7px var(--timeline-halo); }
-.timeline-node--current:hover .timeline-marker::before { box-shadow: inset 0 0 0 2px var(--timeline-ink), 0 0 0 7px var(--timeline-halo); }
+.timeline-node:hover .timeline-marker::before { box-shadow: inset 0 0 0 1.5px var(--tl-ring-strong), 0 0 0 7px var(--tl-halo); }
+.timeline-node--complete:hover .timeline-marker::before { box-shadow: 0 0 0 7px var(--tl-halo); }
+.timeline-node--current:hover .timeline-marker::before { box-shadow: inset 0 0 0 2px var(--tl-ink), 0 0 0 7px var(--tl-halo); }
 .timeline-node:active .timeline-marker::before,
 .timeline-node:active .timeline-marker > * { scale: 1.02; transition-duration: 120ms; }
 
@@ -260,25 +328,26 @@
 .timeline-node.is-arrived .timeline-marker > * { scale: 1.3; }
 .timeline-node.is-arrived .timeline-marker::before {
   box-shadow:
-    inset 0 0 0 1.5px var(--color-semantic-stroke-primary-darkest),
-    0 0 0 5px var(--color-semantic-surface-primary),
-    0 0 0 6px var(--color-semantic-stroke-primary-light),
-    0 10px 24px -8px color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 35%, transparent);
+    inset 0 0 0 1.5px var(--tl-ring-strong),
+    0 0 0 5px var(--tl-surface),
+    0 0 0 6px var(--tl-track),
+    0 10px 24px -8px var(--tl-shadow);
 }
 .timeline-node--complete.is-arrived .timeline-marker::before,
 .timeline-node--current.is-arrived .timeline-marker::before {
   box-shadow:
-    inset 0 0 0 2px var(--timeline-ink),
-    0 0 0 5px var(--color-semantic-surface-primary),
-    0 0 0 6px var(--color-semantic-stroke-primary-light),
-    0 10px 24px -8px color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 35%, transparent);
+    inset 0 0 0 2px var(--tl-ink),
+    0 0 0 5px var(--tl-surface),
+    0 0 0 6px var(--tl-track),
+    0 10px 24px -8px var(--tl-shadow);
 }
-.timeline-node.is-arrived .timeline-marker-number { color: var(--color-semantic-text-dark); }
+.timeline-node.is-arrived .timeline-marker-number { color: var(--tl-text-strong); }
 
-/* ---------- Panel ---------- */
+/* ---------- Milestone list ---------- */
 
 .timeline-panel {
-  margin-top: 32px;
+  max-width: 920px;
+  margin: 40px auto 0;
   animation: timeline-panel-in 360ms var(--timeline-ease);
 }
 
@@ -287,18 +356,7 @@
   to { opacity: 1; translate: 0 0; }
 }
 
-.milestone-content {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr);
-  gap: 72px;
-  align-items: start;
-}
-
-.milestone-main { min-width: 0; display: grid; gap: 20px; }
-
-.milestone-heading { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-
-.milestone-dates.MuiTypography-root { font-variant-numeric: tabular-nums; }
+.milestone-items { display: grid; gap: 28px; }
 
 .milestone-locked-note {
   display: flex;
@@ -311,193 +369,122 @@
 
 .milestone-group-title.MuiTypography-root {
   display: block;
-  margin: 0 0 4px 12px;
+  margin-bottom: 20px;
   color: var(--color-semantic-text-light);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
 
-.milestone-done { display: grid; gap: 4px; padding-top: 8px; }
+.milestone-done { padding-top: 8px; border-top: 1px solid var(--color-semantic-stroke-primary-lightest); padding-top: 28px; }
 
-/* ---------- Action items ---------- */
-
-.milestone-steps {
+/* Rows reuse the dates pattern: stamp · copy · resource chip on the right. */
+.timeline-item-list {
   margin: 0;
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 2px;
+  gap: 32px;
 }
 
-.step-row.MuiButtonBase-root {
-  width: 100%;
-  min-height: 56px;
-  display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) 20px;
-  align-items: start;
-  gap: 16px;
-  padding: 12px;
-  border-radius: 12px;
-  text-align: left;
-  color: inherit;
-  transition: background-color 160ms ease;
+.timeline-item.portal-date-row { padding: 0; align-items: center; }
+
+.timeline-item .portal-date-row-main.MuiButtonBase-root { align-items: center; }
+
+.timeline-item-copy.portal-date-copy { gap: 2px; }
+
+.timeline-item-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-bottom: 2px;
 }
 
-.step-row:hover { background: var(--color-semantic-surface-primary-dark); }
-.step-row:focus-visible { outline: 2px solid var(--color-semantic-stroke-primary-darkest); outline-offset: 2px; }
-
-.step-check {
-  width: 22px;
-  height: 22px;
-  margin-top: 1px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 1.5px var(--color-semantic-stroke-primary);
-  transition: box-shadow 160ms ease;
-}
-
-.step-row:hover .step-check:not(.step-check--done) { box-shadow: inset 0 0 0 1.5px var(--color-semantic-stroke-primary-darkest); }
-
-.step-check--done {
-  color: var(--color-semantic-text-on-color-primary);
-  background: var(--timeline-ink);
-  box-shadow: none;
-}
-
-.step-check svg { width: 15px; height: 15px; }
-
-.step-body { min-width: 0; display: grid; gap: 4px; }
-
-.step-item--done .step-title.MuiTypography-root { color: var(--color-semantic-text-primary); }
-
-.step-meta.MuiTypography-root {
+.timeline-item-meta.MuiTypography-root {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-variant-numeric: tabular-nums;
-}
-
-.step-avatar.MuiAvatar-root { width: 18px; height: 18px; }
-
-.timeline-chevron {
-  width: 20px;
-  height: 20px;
-  margin-top: 2px;
+  margin-top: 6px;
   color: var(--color-semantic-text-light);
-  transition: rotate 240ms var(--timeline-ease);
 }
 
-.is-expanded > .step-row .timeline-chevron,
-.is-open > .timeline-stack-header .timeline-chevron { rotate: 180deg; }
+.timeline-item-avatar.MuiAvatar-root { width: 18px; height: 18px; }
 
-.step-detail {
-  display: grid;
-  gap: 12px;
-  padding: 0 12px 16px 50px;
-}
-
-.step-detail[hidden] { display: none; }
-.step-detail .MuiTypography-root { max-width: 60ch; }
-
-/* Next step: an item type, not a separate module. */
-.step-item--featured {
-  display: grid;
-  grid-template-columns: 22px minmax(0, 1fr);
-  gap: 16px;
-  margin-bottom: 6px;
-  padding: 20px 12px 22px;
-  border-radius: 14px;
-  background: var(--color-semantic-surface-primary-dark);
-  box-shadow: inset 0 0 0 1px var(--color-semantic-stroke-primary-lightest);
-}
-
-.step-item--featured .step-check {
-  margin-top: 22px;
-  box-shadow: inset 0 0 0 2px var(--timeline-ink);
-}
-
-.step-eyebrow.MuiTypography-root {
-  color: var(--color-semantic-text-light);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.step-item--featured .step-title.MuiTypography-root { font-size: 1.125rem; }
-
-.step-detail-copy.MuiTypography-root { max-width: 60ch; margin-top: 4px; }
-
-.step-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 4px; }
-.step-item--featured .step-actions { padding-top: 12px; }
-
-.step-action,
-.step-action.MuiButtonBase-root {
-  min-height: 36px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px 6px 12px;
-  border: 1px solid var(--color-semantic-stroke-primary-light);
+.timeline-next-tag {
+  padding: 1px 8px;
   border-radius: 999px;
-  font-size: 0.8125rem;
+  font-size: 0.6875rem;
   font-weight: 500;
-  line-height: 1.3;
-  color: var(--color-semantic-text-dark);
-  background: var(--color-semantic-surface-primary);
-  transition: background-color 160ms ease, border-color 160ms ease;
+  line-height: 1.6;
+  color: var(--color-semantic-text-on-color-primary);
+  background: var(--color-semantic-surface-reverse-primary);
 }
 
-.step-action.MuiButtonBase-root:hover { background: var(--color-semantic-surface-primary-dark); border-color: var(--color-semantic-stroke-primary); }
-.step-action.MuiButtonBase-root:focus-visible { outline: 2px solid var(--color-semantic-stroke-primary-darkest); outline-offset: 2px; }
-.step-action svg { width: 16px; height: 16px; }
+.timeline-item.is-done .timeline-item-title .MuiTypography-root { color: var(--color-semantic-text-primary); }
 
-.step-action--locked {
-  color: var(--color-semantic-text-light);
-  border-style: dashed;
-  background: transparent;
-}
+/* Stamp: date or type icon, with a small type badge. */
+.timeline-stamp.portal-date-stamp { overflow: visible; transition: box-shadow 200ms ease, background-color 200ms ease; }
 
-/* ---------- Resources ---------- */
+.timeline-stamp--icon { color: var(--color-semantic-text-primary); }
+.timeline-stamp-icon { display: grid; place-items: center; }
+.timeline-stamp-icon svg { width: 24px; height: 24px; }
 
-.milestone-aside { min-width: 0; display: grid; gap: 4px; padding-top: 44px; }
-
-.milestone-aside .milestone-group-title.MuiTypography-root { margin-left: 0; }
-
-.milestone-guide-list { margin: 0; padding: 0; list-style: none; display: grid; }
-
-.milestone-guide-list > li + li { border-top: 1px solid var(--color-semantic-stroke-primary-lightest); }
-
-.milestone-guide.MuiButtonBase-root {
-  width: 100%;
-  min-height: 52px;
+.timeline-stamp-badge {
+  position: absolute;
+  right: -10px;
+  bottom: -4px;
+  width: 24px;
+  height: 24px;
   display: grid;
-  grid-template-columns: 20px minmax(0, 1fr) 18px;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 0;
-  text-align: left;
-  color: var(--color-semantic-text-dark);
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-semantic-text-primary);
+  background: var(--color-semantic-surface-primary);
+  box-shadow: 0 0 0 2px var(--color-semantic-surface-primary), inset 0 0 0 1px var(--color-semantic-stroke-primary-light);
 }
 
-.milestone-guide > svg:first-child { width: 20px; height: 20px; color: var(--color-semantic-text-light); }
+.timeline-stamp-badge svg { width: 14px; height: 14px; }
 
-.milestone-guide-copy.MuiTypography-root { min-width: 0; }
-
-.milestone-guide-arrow {
-  width: 18px;
-  height: 18px;
-  color: var(--color-semantic-text-light);
-  transition: translate 200ms var(--timeline-ease), color 160ms ease;
+.timeline-stamp-badge--done {
+  color: var(--color-semantic-text-on-color-primary);
+  background: var(--color-semantic-surface-reverse-primary);
+  box-shadow: 0 0 0 2px var(--color-semantic-surface-primary);
 }
 
-.milestone-guide:hover .milestone-guide-arrow { translate: 3px 0; color: var(--color-semantic-text-dark); }
-.milestone-guide:focus-visible { outline: 2px solid var(--color-semantic-stroke-primary-darkest); outline-offset: 2px; border-radius: 8px; }
+.timeline-stamp.is-done { color: var(--color-semantic-text-primary); background: var(--color-semantic-surface-primary-dark); }
+.timeline-stamp.is-next { box-shadow: inset 0 0 0 2px var(--color-semantic-surface-reverse-primary); background: var(--color-semantic-surface-primary); }
+
+.timeline-item .portal-date-row-main:hover .timeline-stamp:not(.is-next) { background: var(--color-semantic-surface-secondary-dark); }
+
+/* ---------- Item modal ---------- */
+
+.timeline-modal-body { display: grid; gap: 20px; }
+
+.timeline-modal-facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  background: var(--color-semantic-surface-primary-dark);
+}
+
+.timeline-modal-fact { display: grid; gap: 4px; min-width: 0; }
+.timeline-modal-fact dt { color: var(--color-semantic-text-light); text-transform: uppercase; letter-spacing: 0.08em; }
+.timeline-modal-fact dd { margin: 0; color: var(--color-semantic-text-dark); }
+
+.timeline-modal-type.MuiTypography-root,
+.timeline-modal-owner.MuiTypography-root { display: inline-flex; align-items: center; gap: 6px; }
+.timeline-modal-type svg { width: 16px; height: 16px; color: var(--color-semantic-text-primary); }
 
 /* ---------- Stacked (mobile): vertical rail ---------- */
 
+.seller-timeline--stacked .timeline-stage { padding-top: 32px; padding-bottom: 8px; }
+
 .timeline-stack {
   position: relative;
-  margin: 8px 0 0;
+  margin: 24px 0 0;
   padding: 0;
   list-style: none;
   display: grid;
@@ -529,7 +516,7 @@
 }
 
 .timeline-stack-header:focus-visible { outline: none; }
-.timeline-stack-header:focus-visible .timeline-marker { outline: 2px solid var(--color-semantic-stroke-primary-darkest); outline-offset: 4px; border-radius: 50%; }
+.timeline-stack-header:focus-visible .timeline-marker { outline: 2px solid var(--tl-ring-strong); outline-offset: 4px; border-radius: 50%; }
 
 .timeline-stack-heading { display: flex; align-items: center; gap: 10px; }
 
@@ -541,21 +528,22 @@
 .timeline-stack-item.is-open .timeline-marker > * { scale: 1.15; }
 
 .timeline-stack-body {
-  padding: 4px 0 24px 56px;
+  padding: 8px 0 28px;
   animation: timeline-panel-in 260ms var(--timeline-ease);
 }
 
-.milestone-content--compact { grid-template-columns: minmax(0, 1fr); gap: 24px; }
-.milestone-content--compact .milestone-aside { padding-top: 0; }
-.milestone-content--compact .step-row.MuiButtonBase-root,
-.milestone-content--compact .step-item--featured { padding-inline: 10px; }
-.milestone-content--compact .step-detail { padding-left: 48px; padding-right: 0; }
+.timeline-stack-body .timeline-item-list { gap: 24px; }
 
-/* ---------- Responsive + preferences ---------- */
-
-@media (max-width: 1199.95px) {
-  .milestone-content:not(.milestone-content--compact) { gap: 40px; }
+.timeline-chevron {
+  width: 20px;
+  height: 20px;
+  color: var(--color-semantic-text-light);
+  transition: rotate 240ms var(--timeline-ease);
 }
+
+.is-open > .timeline-stack-header .timeline-chevron { rotate: 180deg; }
+
+/* ---------- Preferences ---------- */
 
 @media (prefers-reduced-motion: reduce) {
   .timeline-panel,
@@ -568,6 +556,5 @@
   .timeline-marker > *,
   .timeline-node::after,
   .timeline-node-caption,
-  .timeline-chevron,
-  .milestone-guide-arrow { transition: none; }
+  .timeline-chevron { transition: none; }
 }

@@ -16,37 +16,50 @@ function renderTimeline(layout: 'tracker' | 'stacked', handlers = { onOpenResour
 }
 
 describe('SellerTimeline', () => {
-  it('opens on the current milestone with the next step', () => {
-    const handlers = renderTimeline('tracker')
+  it('opens on the current milestone and marks the next step', () => {
+    renderTimeline('tracker')
     expect(screen.getByRole('tab', { name: /Under contract/ })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getByText('Next step')).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Review document' }))
+    expect(screen.getByRole('button', { name: /Review and sign Form 17\. Document, next step/ })).toBeInTheDocument()
+  })
+
+  it('opens an item in a modal with its primary action', () => {
+    const handlers = renderTimeline('tracker')
+    fireEvent.click(screen.getByRole('button', { name: /Review and sign Form 17/ }))
+    const dialog = screen.getByRole('dialog', { name: 'Review and sign Form 17' })
+    expect(within(dialog).getByText('Document')).toBeInTheDocument()
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Review document' }))
     expect(handlers.onOpenDocument).toHaveBeenCalledWith(expect.objectContaining({ id: 'doc-2' }))
   })
 
-  it('lets sellers look ahead with document actions locked and guides open', () => {
+  it('keeps resource links on the right and lists standalone guides as items', () => {
     const handlers = renderTimeline('tracker')
+    fireEvent.click(screen.getByRole('button', { name: 'Read What to expect from the appraisal' }))
+    expect(handlers.onOpenResource).toHaveBeenCalledWith(expect.objectContaining({ id: 'appraisal' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Read What “under contract” means' }))
+    expect(handlers.onOpenResource).toHaveBeenCalledWith(expect.objectContaining({ id: 'contingencies' }))
+  })
+
+  it('lets sellers look ahead with documents locked', () => {
+    renderTimeline('tracker')
     fireEvent.click(screen.getByRole('tab', { name: /Closing/ }))
     const panel = screen.getByRole('tabpanel')
     expect(within(panel).getByText(/Opens after under contract/)).toBeInTheDocument()
-    fireEvent.click(within(panel).getByRole('button', { name: /Review your closing statement/ }))
-    expect(within(panel).getByText('Closing statement')).toHaveAttribute('title', 'Shared in closing')
-    fireEvent.click(within(screen.getByRole('complementary', { name: 'Closing resources' })).getByRole('button', { name: 'Read Getting ready for closing day' }))
-    expect(handlers.onOpenResource).toHaveBeenCalledWith(expect.objectContaining({ id: 'closing' }))
+    fireEvent.click(within(panel).getByRole('button', { name: /^Review your closing statement/ }))
+    const dialog = screen.getByRole('dialog', { name: 'Review your closing statement' })
+    expect(within(dialog).getByText(/Closing statement will be shared in closing/)).toBeInTheDocument()
+    expect(within(dialog).queryByRole('button', { name: 'Review document' })).not.toBeInTheDocument()
   })
 
   it('moves between milestones with arrow keys', () => {
     renderTimeline('tracker')
-    const current = screen.getByRole('tab', { name: /Under contract/ })
-    fireEvent.keyDown(current, { key: 'ArrowLeft' })
+    fireEvent.keyDown(screen.getByRole('tab', { name: /Under contract/ }), { key: 'ArrowLeft' })
     expect(screen.getByRole('tab', { name: /Active listing/ })).toHaveAttribute('aria-selected', 'true')
   })
 
-  it('stacks milestones as an expandable list', () => {
+  it('stacks milestones along a vertical rail on small screens', () => {
     renderTimeline('stacked')
-    expect(screen.getByRole('button', { name: /Under contract/ })).toHaveAttribute('aria-expanded', 'true')
-    const closing = screen.getByRole('button', { name: /Closing/ })
-    expect(closing).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByRole('button', { name: /^Under contract/ })).toHaveAttribute('aria-expanded', 'true')
+    const closing = screen.getByRole('button', { name: /^Closing/ })
     fireEvent.click(closing)
     expect(closing).toHaveAttribute('aria-expanded', 'true')
   })

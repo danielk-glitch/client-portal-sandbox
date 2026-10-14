@@ -40,3 +40,10 @@
 @media (prefers-reduced-motion: reduce) {
   .resources-panel .MuiButtonBase-root { transition: none; }
 }
+
+.milestone-resource-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.milestone-resource-link.MuiButtonBase-root { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--color-semantic-stroke-primary-light); border-radius: 12px; text-align: left; transition: background-color 160ms ease-out; }
+.milestone-resource-link.MuiButtonBase-root:hover { background: var(--color-semantic-surface-primary-dark); }
+.milestone-resource-link.MuiButtonBase-root:focus-visible { outline: 2px solid var(--color-semantic-stroke-primary-dark); outline-offset: 2px; }
+.milestone-resource-copy { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.milestone-resource-copy .MuiTypography-root { display: block; }

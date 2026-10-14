@@ -65,7 +65,7 @@ export const initialTeamState: TeamState = {
   ],
 }
 
-export const teamStateKey = 'place-team-exploration-v5'
+export const teamStateKey = 'place-team-exploration-v6'
 export function loadTeamState(): TeamState {
   const saved = localStorage.getItem(teamStateKey)
   if (!saved) return initialTeamState
