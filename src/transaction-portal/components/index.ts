@@ -19,6 +19,7 @@ export {
   DocumentRow,
   PersonContactActions,
   PersonRow,
+  DateStamp,
   ShowingFeedbackRow,
   TaskRow,
   TransactionRowList,

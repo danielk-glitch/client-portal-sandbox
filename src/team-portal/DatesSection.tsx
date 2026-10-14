@@ -6,11 +6,10 @@ import InfoOutlined from '@mui/icons-material/InfoOutlined'
 import { toast } from 'sonner'
 import { PlaceModal } from '../components/PlaceModal'
 import type { UpcomingDate } from '../transaction-portal/types'
+import { DateStamp } from '../transaction-portal/components'
 import type { TeamState } from './teamData'
 
 type SetState = (next: TeamState | ((previous: TeamState) => TeamState)) => void
-const month = (date: string) => new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
-const day = (date: string) => date.slice(8, 10)
 
 export function DatesSection({ state, setState }: { state: TeamState; setState: SetState }) {
   const [editing, setEditing] = useState<UpcomingDate | null>(null)
@@ -42,7 +41,7 @@ export function DatesSection({ state, setState }: { state: TeamState; setState: 
       const ids = date.guidance?.resourceIds ?? []
       const hiddenCount = ids.filter(id => !state.visible.includes(id)).length
       return <Box component="li" className="team-row team-date-row" key={date.id}>
-        <Box className="team-date-badge" aria-hidden="true"><Typography variant="labelS">{month(date.date)}</Typography><Typography variant="titleS">{day(date.date)}</Typography></Box>
+        <DateStamp date={date.date} />
         <Box className="team-row-copy">
           <Typography variant="titleXS">{date.title}</Typography>
           <Typography variant="bodySStandard" color="text.secondary">{date.description}</Typography>

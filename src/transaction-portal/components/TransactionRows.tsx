@@ -69,6 +69,19 @@ export function DateEventList({ children }: { children: ReactNode }) {
   return <Box component="ol" className="portal-date-list">{children}</Box>
 }
 
+/** The round month/day bubble shared by the client portal and the team workspace. `date` is an ISO day (YYYY-MM-DD). */
+export function DateStamp({ date, className }: { date: string; className?: string }) {
+  const value = new Date(`${date}T12:00:00Z`)
+  const month = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' }).format(value)
+  const day = new Intl.DateTimeFormat('en-US', { day: '2-digit', timeZone: 'UTC' }).format(value)
+  return (
+    <Box component="time" dateTime={date} className={['portal-date-stamp', className].filter(Boolean).join(' ')}>
+      <Typography variant="labelS">{month}</Typography>
+      <Typography variant="metricM">{day}</Typography>
+    </Box>
+  )
+}
+
 /**
  * A date in the client's list. Behavior by attached resources:
  * - none: no chip.
@@ -78,18 +91,12 @@ export function DateEventList({ children }: { children: ReactNode }) {
  */
 export function DateEventRow({ date, title, description, children, guidance, resources = [], onReadResource }: Pick<UpcomingDate, 'date' | 'title' | 'description' | 'guidance'> & { children?: ReactNode; resources?: TransactionResource[]; onReadResource?: (resource: TransactionResource) => void }) {
   const [explanationOpen, setExplanationOpen] = useState(false)
-  const value = new Date(`${date}T12:00:00Z`)
-  const month = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' }).format(value)
-  const day = new Intl.DateTimeFormat('en-US', { day: '2-digit', timeZone: 'UTC' }).format(value)
   const readable = onReadResource ? resources : []
   const single = readable.length === 1 ? readable[0] : undefined
   const multiple = readable.length > 1
   const hasExplanation = !!guidance || multiple
   const content = <>
-    <Box component="time" dateTime={date} className="portal-date-stamp">
-      <Typography variant="labelS">{month}</Typography>
-      <Typography variant="metricM">{day}</Typography>
-    </Box>
+    <DateStamp date={date} />
     <Box component="span" className="portal-date-copy">
       <Typography variant="titleXS">{title}</Typography>
       <Typography variant="bodySStandard" color="text.secondary">{description}</Typography>

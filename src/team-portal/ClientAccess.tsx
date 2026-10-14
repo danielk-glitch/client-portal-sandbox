@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Avatar, Box, Button, Stack, Tab, Tabs, TextField, Typography } from '@mui/material'
+import { Box, Button, Paper, Stack, Tab, Tabs, TextField, Typography } from '@mui/material'
 import AddOutlined from '@mui/icons-material/AddOutlined'
 import { toast } from 'sonner'
 import { PlaceModal } from '../components/PlaceModal'
 import { EmailPreview } from '../email-templates/EmailPreview'
 import { emailTemplates } from '../email-templates/emailTemplates'
-import { PortalSection } from '../transaction-portal/components'
+import { PersonContactActions, PersonRow } from '../transaction-portal/components'
+import '../transaction-portal/components/people-section.css'
 import { sampleSellerTransaction as transaction } from '../seller-portal/sellerTransaction'
 import { teamPeople } from './teamData'
 import type { ClientInvite, ClientPerson, TeamState } from './teamData'
@@ -24,11 +25,11 @@ export function inviteTemplate(name: string) {
 }
 
 const shortDate = (date?: string) => date?.replace(/, \d{4}$/, '') ?? ''
-function detail(person: ClientPerson, invite: ClientInvite) {
+function detail(invite: ClientInvite) {
   if (invite.status === 'active') return `Joined ${shortDate(invite.updatedOn)}`
   if (invite.status === 'invited') return `Invite sent ${shortDate(invite.updatedOn)}`
   if (invite.status === 'removed') return `Access removed ${shortDate(invite.updatedOn)}`
-  return person.source === 'Brivity' ? `${person.role} in Brivity` : person.role
+  return 'Not invited'
 }
 
 export function ClientAccess({ state, setState }: { state: TeamState; setState: SetState }) {
@@ -70,32 +71,33 @@ export function ClientAccess({ state, setState }: { state: TeamState; setState: 
     setRemoving(null)
   }
 
-  return <PortalSection prominent title="Portal access" subtitle={isAdmin ? undefined : 'Admins send invites and manage access.'} action={isAdmin ? <Button size="small" variant="contained" startIcon={<AddOutlined />} onClick={() => open(null)} aria-label="Invite a client">Invite</Button> : undefined}>
-    <Tabs value={tab} onChange={(_, value) => setTab(value)} aria-label="Who can see this portal" className="team-access-tabs">
-      <Tab value="team" label={`Team · ${transaction.team.length}`} id="access-tab-team" aria-controls="access-panel-team" />
-      <Tab value="viewers" label={`Viewers · ${viewers.length}`} id="access-tab-viewers" aria-controls="access-panel-viewers" />
+  const initials = (name: string) => name.split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase()
+  return <Paper component="section" elevation={0} className="people-section team-portal-access" aria-labelledby="portal-access-heading">
+    <Box className="team-portal-access-header">
+      <Typography component="h2" variant="titleS" id="portal-access-heading">Portal access</Typography>
+      {isAdmin && <Button size="small" variant="contained" startIcon={<AddOutlined />} onClick={() => open(null)} aria-label="Invite a client">Invite</Button>}
+    </Box>
+    <Tabs value={tab} onChange={(_, value) => setTab(value)} aria-label="Who can see this portal" className="people-tabs">
+      <Tab value="team" label="Your Team" id="access-tab-team" aria-controls="access-panel-team" />
+      <Tab value="viewers" label="Viewers" id="access-tab-viewers" aria-controls="access-panel-viewers" />
     </Tabs>
-    {tab === 'team' && <Box role="tabpanel" id="access-panel-team" aria-labelledby="access-tab-team">
-      <Box component="ul" className="team-access-list">{transaction.team.map(member => <Box component="li" className="team-access-person" key={member.id}>
-        <Avatar src={member.photoUrl} alt="" sx={{ width: 40, height: 40 }}>{member.initials}</Avatar>
-        <Box className="team-access-copy"><Typography variant="titleXS">{member.name}</Typography><Typography variant="bodySStandard" color="text.secondary">{member.role}</Typography></Box>
-      </Box>)}</Box>
-      <Typography variant="bodySStandard" color="text.secondary" className="team-access-footnote">Team members come from the Brivity transaction.</Typography>
+    {tab === 'team' && <Box role="tabpanel" id="access-panel-team" aria-labelledby="access-tab-team" className="people-panel">
+      <Box className="team-list">{transaction.team.map(member => <PersonRow key={member.id} person={member} actions={<PersonContactActions person={member} />} />)}</Box>
+      <Typography variant="labelS" color="text.secondary" className="team-access-footnote">Team members come from the Brivity transaction.</Typography>
     </Box>}
-    {tab === 'viewers' && <Box role="tabpanel" id="access-panel-viewers" aria-labelledby="access-tab-viewers">
-      {viewers.length === 0 && <Typography variant="bodyMStandard" color="text.secondary" sx={{ py: 2 }}>No one has been invited yet.</Typography>}
-      <Box component="ul" className="team-access-list">{viewers.map(person => {
-        const invite = inviteOf(person)
-        return <Box component="li" className="team-access-person" key={person.id}>
-          <Avatar src={person.photoUrl} alt="" sx={{ width: 40, height: 40 }}>{person.name[0]}</Avatar>
-          <Box className="team-access-copy"><Typography variant="titleXS">{person.name}</Typography><Typography variant="bodySStandard" color="text.secondary">{detail(person, invite)}</Typography></Box>
-          {isAdmin && <Box className="team-access-actions">
+    {tab === 'viewers' && <Box role="tabpanel" id="access-panel-viewers" aria-labelledby="access-tab-viewers" className="people-panel">
+      <Box className="team-list">
+        {viewers.length === 0 && <Typography variant="bodySStandard" color="text.secondary">No one has been invited yet.</Typography>}
+        {viewers.map(person => {
+          const invite = inviteOf(person)
+          return <PersonRow key={person.id} person={{ name: person.name, role: `${person.role} · ${detail(invite)}`, initials: initials(person.name), photoUrl: person.photoUrl }} actions={isAdmin ? <Box className="team-access-actions">
             {invite.status === 'removed' && <Button size="small" variant="outlined" onClick={() => open(person)} aria-label={`Invite ${person.name}`}>Invite again</Button>}
             {invite.status === 'invited' && <Button size="small" variant="outlined" onClick={() => open(person)}>Resend</Button>}
             {invite.status === 'active' && <Button size="small" className="team-remove-access" onClick={() => setRemoving(person)} aria-label={`Remove access for ${person.name}`}>Remove</Button>}
-          </Box>}
-        </Box>
-      })}</Box>
+          </Box> : undefined} />
+        })}
+      </Box>
+      {!isAdmin && <Typography variant="labelS" color="text.secondary" className="team-access-footnote">Admins send invites and manage access.</Typography>}
     </Box>}
     <PlaceModal open={!!dialog} onClose={() => setDialog(null)} size="l" title={target ? `${resending ? 'Resend invite to' : 'Invite'} ${target.name}` : 'Invite someone to this portal'} description="Nothing is sent until you choose Send." actions={<><Button onClick={() => setDialog(null)}>Cancel</Button><Button variant="contained" onClick={send}>{resending ? 'Resend invite' : 'Send invite'}</Button></>}>
       {dialog && <Stack spacing={3} sx={{ pt: 1 }}>
@@ -109,5 +111,5 @@ export function ClientAccess({ state, setState }: { state: TeamState; setState: 
     <PlaceModal open={!!removing} onClose={() => setRemoving(null)} title={removing ? `Remove ${removing.name}’s portal access?` : ''} description="This takes effect right away." actions={<><Button onClick={() => setRemoving(null)}>Cancel</Button><Button variant="contained" color="error" onClick={remove}>Remove access</Button></>}>
       <Typography variant="bodyMStandard">{removing && `${firstName(removing.name)} won’t be able to open the portal for this transaction. Nothing is sent to them. You can invite them again later.`}</Typography>
     </PlaceModal>
-  </PortalSection>
+  </Paper>
 }

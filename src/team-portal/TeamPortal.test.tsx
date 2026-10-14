@@ -128,8 +128,8 @@ describe('Team defaults', () => {
 describe('Client invites', () => {
   it('resends an invite with a personal note, and nothing is sent before Send', async () => {
     renderAt('/team')
-    expect(screen.getByRole('tab', { name: 'Viewers · 2' })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getByText('Invite sent Oct 12')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Viewers' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByText(/Invite sent Oct 12/)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Resend' }))
     fireEvent.change(screen.getByRole('textbox', { name: 'Personal note (optional)' }), { target: { value: 'Excited to get started!' } })
     expect(loadTeamState().invites['co-seller'].note).toBeUndefined()
@@ -140,8 +140,8 @@ describe('Client invites', () => {
 
   it('lists the transaction team separately from viewers', () => {
     renderAt('/team')
-    fireEvent.click(screen.getByRole('tab', { name: /^Team/ }))
-    expect(screen.getByText('Morgan Ellis')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('tab', { name: 'Your Team' }))
+    expect(screen.getAllByText('Morgan Ellis').length).toBeGreaterThan(0)
     expect(screen.getByText('Team members come from the Brivity transaction.')).toBeInTheDocument()
   })
 
@@ -157,7 +157,7 @@ describe('Client invites', () => {
 
   it('shows invite status to members without controls', () => {
     renderAt('/team?as=member')
-    expect(screen.getByRole('tab', { name: 'Viewers · 2' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Viewers' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^Invite|Resend/ })).not.toBeInTheDocument()
     expect(screen.getByText('Admins send invites and manage access.')).toBeInTheDocument()
   })
