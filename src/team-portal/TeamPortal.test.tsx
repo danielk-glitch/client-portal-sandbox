@@ -126,18 +126,23 @@ describe('Team defaults', () => {
 })
 
 describe('Client invites', () => {
-  it('sends nothing until an admin chooses Send, and includes the personal note', async () => {
+  it('resends an invite with a personal note, and nothing is sent before Send', async () => {
     renderAt('/team')
-    expect(screen.getByText('Not invited · 1')).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Invite Alex Bennett' }))
-    expect(loadTeamState().invites['co-seller'].status).toBe('not-invited')
+    expect(screen.getByRole('tab', { name: 'Viewers · 2' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByText('Invite sent Oct 12, 2026')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Resend' }))
     fireEvent.change(screen.getByRole('textbox', { name: 'Personal note (optional)' }), { target: { value: 'Excited to get started!' } })
+    expect(loadTeamState().invites['co-seller'].note).toBeUndefined()
     expect(within(screen.getByRole('dialog')).getAllByText('Excited to get started!').length).toBeGreaterThan(0)
-    fireEvent.click(screen.getByRole('button', { name: 'Send invite' }))
-    const invite = loadTeamState().invites['co-seller']
-    expect(invite.status).toBe('invited')
-    expect(invite.note).toBe('Excited to get started!')
-    expect(await screen.findByRole('button', { name: 'Resend' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Resend invite' }))
+    expect(loadTeamState().invites['co-seller'].note).toBe('Excited to get started!')
+  })
+
+  it('lists the transaction team separately from viewers', () => {
+    renderAt('/team')
+    fireEvent.click(screen.getByRole('tab', { name: /^Team/ }))
+    expect(screen.getByText('Morgan Ellis')).toBeInTheDocument()
+    expect(screen.getByText('Team members come from the Brivity transaction.')).toBeInTheDocument()
   })
 
   it('lets admins remove access after confirming', async () => {
@@ -151,8 +156,8 @@ describe('Client invites', () => {
 
   it('shows invite status to members without controls', () => {
     renderAt('/team?as=member')
-    expect(screen.getByText('Not invited · 1')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /^Invite/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Viewers · 2' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^Invite|Resend/ })).not.toBeInTheDocument()
     expect(screen.getByText('Admins send invites and manage access.')).toBeInTheDocument()
   })
 

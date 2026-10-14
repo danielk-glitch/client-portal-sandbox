@@ -163,7 +163,7 @@ function TransactionPage({ state, setState }: { state: TeamState; setState: SetS
       </Box>
     </Box>
     <Box className="team-split team-txn-top">
-      <Box component="section" className="team-preview-section" aria-labelledby="preview-heading"><Box className="team-preview-heading"><Typography component="h2" variant="titleS" id="preview-heading">What Tim and Alex see</Typography><Typography variant="bodySStandard" color="text.secondary">Their seller portal right now. Opens in a new tab.</Typography></Box><PreviewCard state={state} /></Box>
+      <Box component="section" className="team-preview-section" aria-labelledby="preview-heading"><Box className="team-preview-heading"><Typography component="h2" variant="titleS" id="preview-heading">Preview client view</Typography><Typography variant="bodySStandard" color="text.secondary">Tim and Alex’s seller portal right now. Opens in a new tab.</Typography></Box><PreviewCard state={state} /></Box>
       <ClientAccess state={state} setState={setState} />
     </Box>
     <Box component="section" id="resources" className="team-plain-section" aria-labelledby="manage-heading">

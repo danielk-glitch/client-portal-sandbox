@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Avatar, Box, Button, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack, TextField, Typography } from '@mui/material'
+import { Avatar, Box, Button, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tab, Tabs, TextField, Typography } from '@mui/material'
 import AddOutlined from '@mui/icons-material/AddOutlined'
 import MoreHorizOutlined from '@mui/icons-material/MoreHorizOutlined'
 import PersonOffOutlined from '@mui/icons-material/PersonOffOutlined'
@@ -8,6 +8,7 @@ import { PlaceModal } from '../components/PlaceModal'
 import { EmailPreview } from '../email-templates/EmailPreview'
 import { emailTemplates } from '../email-templates/emailTemplates'
 import { PortalSection } from '../transaction-portal/components'
+import { sampleSellerTransaction as transaction } from '../seller-portal/sellerTransaction'
 import { teamPeople } from './teamData'
 import type { ClientInvite, ClientPerson, TeamState } from './teamData'
 
@@ -40,11 +41,9 @@ export function ClientAccess({ state, setState }: { state: TeamState; setState: 
   const [menu, setMenu] = useState<{ anchor: HTMLElement; person: ClientPerson } | null>(null)
   const [removing, setRemoving] = useState<ClientPerson | null>(null)
   const inviteOf = (person: ClientPerson): ClientInvite => state.invites[person.id] ?? { status: 'not-invited' }
-  const groups = [
-    { title: 'Active', people: state.clients.filter(person => inviteOf(person).status === 'active') },
-    { title: 'Invited', people: state.clients.filter(person => inviteOf(person).status === 'invited') },
-    { title: 'Not invited', people: state.clients.filter(person => ['not-invited', 'removed'].includes(inviteOf(person).status)) },
-  ].filter(group => group.people.length > 0)
+  const [tab, setTab] = useState<'team' | 'viewers'>('viewers')
+  /** Only people who were invited appear; nobody is pre-listed. */
+  const viewers = state.clients.filter(person => inviteOf(person).status !== 'not-invited')
   const target = dialog?.person
   const resending = target ? inviteOf(target).status === 'invited' : false
   const recipient = target?.name ?? name.trim()
@@ -62,6 +61,7 @@ export function ClientAccess({ state, setState }: { state: TeamState; setState: 
       clients: previous.clients.some(item => item.id === person.id) ? previous.clients : [...previous.clients, person],
       invites: { ...previous.invites, [person.id]: { status: 'invited', updatedOn: today(), updatedBy: teamPeople.admin.name, note: note.trim() || undefined } },
     }))
+    setTab('viewers')
     toast.success(`${resending ? 'Invite resent' : 'Invite sent'} to ${firstName(person.name)}`)
     setDialog(null)
   }
@@ -73,21 +73,32 @@ export function ClientAccess({ state, setState }: { state: TeamState; setState: 
   }
 
   return <PortalSection prominent title="Client access" subtitle={isAdmin ? undefined : 'Admins send invites and manage access.'} action={isAdmin ? <Button size="small" variant="contained" startIcon={<AddOutlined />} onClick={() => open(null)} aria-label="Invite a client">Invite</Button> : undefined}>
-    <Stack spacing={3}>{groups.map(group => <Box key={group.title}>
-      <Typography component="h3" variant="labelS" color="text.secondary" className="team-access-group">{group.title} · {group.people.length}</Typography>
-      <Box component="ul" className="team-access-list">{group.people.map(person => {
+    <Tabs value={tab} onChange={(_, value) => setTab(value)} aria-label="Who can see this portal" className="team-access-tabs">
+      <Tab value="team" label={`Team · ${transaction.team.length}`} id="access-tab-team" aria-controls="access-panel-team" />
+      <Tab value="viewers" label={`Viewers · ${viewers.length}`} id="access-tab-viewers" aria-controls="access-panel-viewers" />
+    </Tabs>
+    {tab === 'team' && <Box role="tabpanel" id="access-panel-team" aria-labelledby="access-tab-team">
+      <Box component="ul" className="team-access-list">{transaction.team.map(member => <Box component="li" className="team-access-person" key={member.id}>
+        <Avatar src={member.photoUrl} alt="" sx={{ width: 40, height: 40 }}>{member.initials}</Avatar>
+        <Box className="team-access-copy"><Typography variant="titleXS">{member.name}</Typography><Typography variant="bodySStandard" color="text.secondary">{member.role}</Typography></Box>
+      </Box>)}</Box>
+      <Typography variant="bodySStandard" color="text.secondary" className="team-access-footnote">Team members come from the Brivity transaction.</Typography>
+    </Box>}
+    {tab === 'viewers' && <Box role="tabpanel" id="access-panel-viewers" aria-labelledby="access-tab-viewers">
+      {viewers.length === 0 && <Typography variant="bodyMStandard" color="text.secondary" sx={{ py: 2 }}>No one has been invited yet.</Typography>}
+      <Box component="ul" className="team-access-list">{viewers.map(person => {
         const invite = inviteOf(person)
         return <Box component="li" className="team-access-person" key={person.id}>
           <Avatar src={person.photoUrl} alt="" sx={{ width: 40, height: 40 }}>{person.name[0]}</Avatar>
           <Box className="team-access-copy"><Typography variant="titleXS">{person.name}</Typography><Typography variant="bodySStandard" color="text.secondary">{detail(person, invite)}</Typography></Box>
           {isAdmin && <Box className="team-access-actions">
-            {['not-invited', 'removed'].includes(invite.status) && <Button size="small" variant="outlined" onClick={() => open(person)} aria-label={`Invite ${person.name}`}>{invite.status === 'removed' ? 'Invite again' : 'Invite'}</Button>}
-            {invite.status === 'invited' && <Button size="small" onClick={() => open(person)}>Resend</Button>}
+            {invite.status === 'removed' && <Button size="small" variant="outlined" onClick={() => open(person)} aria-label={`Invite ${person.name}`}>Invite again</Button>}
+            {invite.status === 'invited' && <Button size="small" variant="outlined" onClick={() => open(person)}>Resend</Button>}
             {['invited', 'active'].includes(invite.status) && <IconButton size="small" aria-label={`More access options for ${person.name}`} aria-haspopup="menu" onClick={event => setMenu({ anchor: event.currentTarget, person })}><MoreHorizOutlined fontSize="small" /></IconButton>}
           </Box>}
         </Box>
       })}</Box>
-    </Box>)}</Stack>
+    </Box>}
     <Menu anchorEl={menu?.anchor} open={!!menu} onClose={() => setMenu(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} transformOrigin={{ vertical: 'top', horizontal: 'right' }}>
       <MenuItem onClick={() => { setRemoving(menu!.person); setMenu(null) }} sx={{ color: 'error.main' }}><ListItemIcon sx={{ color: 'inherit' }}><PersonOffOutlined fontSize="small" /></ListItemIcon><ListItemText>Remove access</ListItemText></MenuItem>
     </Menu>

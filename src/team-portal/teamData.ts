@@ -37,7 +37,7 @@ export const initialTeamState: TeamState = {
   clients: sampleSellerTransaction.viewers.map(viewer => ({ id: viewer.id, name: viewer.name, email: clientEmails[viewer.id] ?? '', role: viewer.role, photoUrl: viewer.photoUrl, source: 'Brivity' as const })),
   invites: {
     seller: { status: 'active', updatedOn: 'Sep 14, 2026', updatedBy: 'Avery Coleman' },
-    'co-seller': { status: 'not-invited' },
+    'co-seller': { status: 'invited', updatedOn: 'Oct 12, 2026', updatedBy: 'Avery Coleman' },
   },
   defaults: {
     seller: { visible: ['disclosures', 'closing', 'team-welcome', 'team-moving'], updatedBy: 'Avery Coleman', updatedOn: 'Sep 30, 2026' },
@@ -65,7 +65,7 @@ export const initialTeamState: TeamState = {
   ],
 }
 
-export const teamStateKey = 'place-team-exploration-v6'
+export const teamStateKey = 'place-team-exploration-v7'
 export function loadTeamState(): TeamState {
   const saved = localStorage.getItem(teamStateKey)
   if (!saved) return initialTeamState

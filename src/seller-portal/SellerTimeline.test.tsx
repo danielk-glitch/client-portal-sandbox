@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { ThemeProvider } from '@mui/material/styles'
+import { act } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { theme } from '../theme'
 import { SellerTimeline } from './SellerTimeline'
@@ -48,6 +49,36 @@ describe('SellerTimeline', () => {
     const dialog = screen.getByRole('dialog', { name: 'Review your closing statement' })
     expect(within(dialog).getByText(/Closing statement will be shared in closing/)).toBeInTheDocument()
     expect(within(dialog).queryByRole('button', { name: 'Review document' })).not.toBeInTheDocument()
+  })
+
+  it('collapses the Done group until it is opened', () => {
+    renderTimeline('tracker')
+    const toggle = screen.getByRole('button', { name: /Done/ })
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByRole('button', { name: /^Purchase agreement signed/ })).not.toBeInTheDocument()
+    fireEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('button', { name: /^Purchase agreement signed/ })).toBeInTheDocument()
+  })
+
+  it('lets sellers check off an action, which then moves to Done', () => {
+    vi.useFakeTimers()
+    renderTimeline('tracker')
+    const check = screen.getByRole('checkbox', { name: /Confirm appraisal access: mark as done/ })
+    expect(check).toHaveAttribute('aria-checked', 'false')
+    fireEvent.click(check)
+    expect(check).toHaveAttribute('aria-checked', 'true')
+    act(() => { vi.advanceTimersByTime(700) })
+    expect(screen.getByRole('tab', { name: /Under contract/ })).toHaveTextContent('3 of 7 done')
+    expect(screen.getByRole('button', { name: /Done/ })).toHaveTextContent('3')
+    vi.useRealTimers()
+  })
+
+  it('shows documents with their file icon instead of a date', () => {
+    const { container } = render(<ThemeProvider theme={theme}><SellerTimeline layout="tracker" data={underContractTimeline} resources={timelineResources} documents={sampleSellerTransaction.documents} team={sampleSellerTransaction.team} onOpenResource={vi.fn()} onOpenDocument={vi.fn()} /></ThemeProvider>)
+    const documentRow = container.querySelector('.timeline-item--document')!
+    expect(documentRow.querySelector('.timeline-stamp--icon')).not.toBeNull()
+    expect(documentRow.textContent).not.toMatch(/OCT/i)
   })
 
   it('moves between milestones with arrow keys', () => {

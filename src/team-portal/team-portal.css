@@ -182,3 +182,5 @@
 .team-preview-skeleton .sk-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 3%; padding: 0 2%; }
 .team-preview-skeleton .sk-card { border-radius: 10px; }
 @keyframes team-skeleton-pulse { 50% { opacity: 0.55; } }
+.team-access-tabs { margin: -8px 0 16px; border-bottom: 1px solid var(--color-semantic-stroke-primary-lightest); }
+.team-access-footnote.MuiTypography-root { display: block; margin-top: 16px; }
