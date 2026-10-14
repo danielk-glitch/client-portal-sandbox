@@ -139,3 +139,17 @@
 @media(max-width:600px) { .team-visibility-label { display: none !important; } .team-default-bar { padding: 16px; } }
 @media(max-width:800px) { .team-txn-top > .portal-section:first-child { display: none; } }
 @media(max-width:600px) { .team-app .portal-section.MuiPaper-root { padding: 20px; } }
+/* uncontained sections sit on the page background, below the two primary cards */
+.team-plain-section { margin-top: 56px; }
+.team-plain-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-bottom: 16px; margin-bottom: 8px; border-bottom: 1px solid var(--color-semantic-stroke-primary-light); }
+.team-plain-heading > div:first-child { display: grid; gap: 6px; }
+.team-plain-section .team-resource-group:first-of-type { margin-top: 24px; }
+.team-date-row { align-items: flex-start; justify-content: flex-start; }
+.team-date-row .team-row-copy { flex: 1; }
+.team-date-badge { width: 52px; height: 52px; flex-shrink: 0; border-radius: 50%; display: grid; place-content: center; text-align: center; background: var(--color-semantic-surface-secondary); line-height: 1; }
+.team-date-badge .MuiTypography-root { line-height: 1.1; }
+.team-date-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 4px; }
+.team-date-resource.MuiTypography-root, .team-date-warning.MuiTypography-root { display: inline-flex; align-items: center; gap: 6px; }
+.team-date-warning.MuiTypography-root { color: var(--color-semantic-text-caution); }
+.team-date-fields { display: grid; grid-template-columns: minmax(0,1fr) 200px; gap: 16px; }
+@media(max-width:600px) { .team-date-fields { grid-template-columns: 1fr; } .team-date-badge { width: 44px; height: 44px; } }

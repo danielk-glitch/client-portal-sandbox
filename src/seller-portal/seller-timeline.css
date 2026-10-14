@@ -17,7 +17,14 @@
   white-space: nowrap;
 }
 
-.seller-timeline-title.MuiTypography-root { margin-bottom: 8px; }
+.seller-timeline-eyebrow.MuiTypography-root {
+  display: block;
+  margin-bottom: 4px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--color-semantic-text-light);
+}
 
 /* ---------- Tracker ---------- */
 
@@ -57,7 +64,7 @@
   transition: width 900ms var(--timeline-ease);
 }
 
-/* Soft light that glides to the selected milestone. */
+/* Soft light that blooms behind a milestone once the glint arrives. */
 .timeline-spotlight {
   position: absolute;
   z-index: -2;
@@ -69,7 +76,40 @@
   border-radius: 50%;
   background: radial-gradient(closest-side, color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 7%, transparent), transparent);
   pointer-events: none;
-  transition: left 620ms var(--timeline-spring);
+  animation: timeline-bloom 700ms var(--timeline-ease) both;
+}
+
+@keyframes timeline-bloom {
+  from { opacity: 0; scale: 0.3; }
+  60% { opacity: 1; }
+  to { opacity: 1; scale: 1; }
+}
+
+/* A white glint that runs along the stroke from the old selection to the new one. */
+.timeline-glint {
+  position: absolute;
+  z-index: 0;
+  top: calc(var(--rail-y) - 1px);
+  width: 112px;
+  height: 2px;
+  translate: -50% 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-semantic-surface-primary) 50%, transparent);
+  pointer-events: none;
+  animation:
+    timeline-glint-travel var(--glint-duration) cubic-bezier(0.65, 0, 0.35, 1) both,
+    timeline-glint-fade var(--glint-duration) linear both;
+}
+
+@keyframes timeline-glint-travel {
+  from { left: calc(var(--col) * (var(--glint-from) + 0.5)); }
+  to { left: calc(var(--col) * (var(--glint-to) + 0.5)); }
+}
+
+@keyframes timeline-glint-fade {
+  0% { opacity: 0; }
+  15%, 75% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 .timeline-node.MuiButtonBase-root {
@@ -139,9 +179,9 @@
   transition: scale 360ms var(--timeline-spring);
 }
 
-.timeline-node.is-selected .timeline-node-label.MuiTypography-root { color: var(--color-semantic-text-dark); letter-spacing: 0.14em; }
-.timeline-node.is-selected .timeline-node-caption.MuiTypography-root { opacity: 1; translate: 0 0; }
-.timeline-node.is-selected::after { scale: 1 1; }
+.timeline-node.is-arrived .timeline-node-label.MuiTypography-root { color: var(--color-semantic-text-dark); letter-spacing: 0.14em; }
+.timeline-node.is-arrived .timeline-node-caption.MuiTypography-root { opacity: 1; translate: 0 0; }
+.timeline-node.is-arrived::after { scale: 1 1; }
 
 .timeline-node:hover .timeline-node-label.MuiTypography-root { color: var(--color-semantic-text-dark); }
 .timeline-node:hover .timeline-node-caption.MuiTypography-root { opacity: 1; translate: 0 0; }
@@ -216,24 +256,24 @@
 .timeline-node:active .timeline-marker > * { scale: 1.02; transition-duration: 120ms; }
 
 /* Selected: larger dot, layered halo, raised shadow. */
-.timeline-node.is-selected .timeline-marker::before,
-.timeline-node.is-selected .timeline-marker > * { scale: 1.3; }
-.timeline-node.is-selected .timeline-marker::before {
+.timeline-node.is-arrived .timeline-marker::before,
+.timeline-node.is-arrived .timeline-marker > * { scale: 1.3; }
+.timeline-node.is-arrived .timeline-marker::before {
   box-shadow:
     inset 0 0 0 1.5px var(--color-semantic-stroke-primary-darkest),
     0 0 0 5px var(--color-semantic-surface-primary),
     0 0 0 6px var(--color-semantic-stroke-primary-light),
     0 10px 24px -8px color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 35%, transparent);
 }
-.timeline-node--complete.is-selected .timeline-marker::before,
-.timeline-node--current.is-selected .timeline-marker::before {
+.timeline-node--complete.is-arrived .timeline-marker::before,
+.timeline-node--current.is-arrived .timeline-marker::before {
   box-shadow:
     inset 0 0 0 2px var(--timeline-ink),
     0 0 0 5px var(--color-semantic-surface-primary),
     0 0 0 6px var(--color-semantic-stroke-primary-light),
     0 10px 24px -8px color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 35%, transparent);
 }
-.timeline-node.is-selected .timeline-marker-number { color: var(--color-semantic-text-dark); }
+.timeline-node.is-arrived .timeline-marker-number { color: var(--color-semantic-text-dark); }
 
 /* ---------- Panel ---------- */
 
@@ -520,9 +560,10 @@
 @media (prefers-reduced-motion: reduce) {
   .timeline-panel,
   .timeline-stack-body,
-  .timeline-marker--current::after { animation: none; }
+  .timeline-marker--current::after,
+  .timeline-spotlight { animation: none; }
+  .timeline-glint { display: none; }
   .timeline-rail-fill,
-  .timeline-spotlight,
   .timeline-marker::before,
   .timeline-marker > *,
   .timeline-node::after,

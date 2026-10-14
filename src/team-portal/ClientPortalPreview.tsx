@@ -36,7 +36,7 @@ export function ClientPortalPreview({ buyerPortal }: { buyerPortal: ReactNode })
   const resources = state.resources.filter(resource => resource.published && state.visible.includes(resource.id)).map(clientResource)
   return <Box className="client-preview-page">
     {!embedded && <ClientPreviewBanner clientLabel={buyer ? 'Buyer portal' : 'Tim & Alex Bennett’s seller portal'} />}
-    {buyer ? buyerPortal : <SellerPortal transaction={{ ...futureSellerTransaction, resources }} marketingSnapshot={futureMarketingSnapshot} basePath="/team/preview" initialListingOpen={window.location.pathname.endsWith('/listing')} readOnly showReviewTools={false} />}
+    {buyer ? buyerPortal : <SellerPortal transaction={{ ...futureSellerTransaction, resources, upcomingDates: [...state.dates].sort((a, b) => a.date.localeCompare(b.date)) }} marketingSnapshot={futureMarketingSnapshot} basePath="/team/preview" initialListingOpen={window.location.pathname.endsWith('/listing')} readOnly showReviewTools={false} />}
   </Box>
 }
 

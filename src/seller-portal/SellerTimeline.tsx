@@ -1,4 +1,4 @@
-import { useId, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
+import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
 import { Avatar, Box, Button, ButtonBase, Typography, useMediaQuery } from '@mui/material'
 import CheckRounded from '@mui/icons-material/CheckRounded'
 import ExpandMoreRounded from '@mui/icons-material/ExpandMoreRounded'
@@ -56,7 +56,7 @@ export function SellerTimeline({ data, layout = 'auto', ...handlers }: SellerTim
 
   return (
     <Box component="section" aria-labelledby={titleId} className={`seller-timeline${stacked ? ' seller-timeline--stacked' : ''}`}>
-      <Typography component="h2" id={titleId} variant="titleM" className="seller-timeline-title">Your sale timeline</Typography>
+      <Typography component="h2" id={titleId} variant="labelS" className="seller-timeline-eyebrow">Transaction timeline</Typography>
       {stacked
         ? <StackedTimeline data={data} currentId={current.id} {...handlers} />
         : <TrackerTimeline data={data} currentId={current.id} {...handlers} />}
@@ -69,10 +69,18 @@ export function SellerTimeline({ data, layout = 'auto', ...handlers }: SellerTim
 function TrackerTimeline({ data, currentId, ...handlers }: Handlers & { data: SellerTimelineData; currentId: MilestoneId }) {
   const [selectedId, setSelectedId] = useState<MilestoneId>(currentId)
   const [prevCurrent, setPrevCurrent] = useState(currentId)
+  const initialIndex = Math.max(0, data.milestones.findIndex((milestone) => milestone.id === currentId))
+  /** Where the selection visually rests. Trails selectedId while the glint travels. */
+  const [arrivedIndex, setArrivedIndex] = useState(initialIndex)
+  const [glint, setGlint] = useState<{ from: number; to: number; key: number } | null>(null)
+  const glintTimer = useRef<number | undefined>(undefined)
   if (prevCurrent !== currentId) {
     setPrevCurrent(currentId)
     setSelectedId(currentId)
+    setArrivedIndex(initialIndex)
+    setGlint(null)
   }
+  useEffect(() => () => window.clearTimeout(glintTimer.current), [])
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
   const baseId = useId()
   const milestones = data.milestones
@@ -83,9 +91,28 @@ function TrackerTimeline({ data, currentId, ...handlers }: Handlers & { data: Se
   const fraction = current.steps.length ? completedCount(current) / current.steps.length : 0
   const progress = Math.min(1, (currentIndex + fraction) / (milestones.length - 1))
 
+  function select(index: number) {
+    setSelectedId(milestones[index].id)
+    window.clearTimeout(glintTimer.current)
+    const from = glint ? glint.to : arrivedIndex
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
+    if (index === from || reduceMotion) {
+      setGlint(null)
+      setArrivedIndex(index)
+      return
+    }
+    const duration = glintDuration(from, index)
+    setArrivedIndex(-1)
+    setGlint({ from, to: index, key: Date.now() })
+    glintTimer.current = window.setTimeout(() => {
+      setGlint(null)
+      setArrivedIndex(index)
+    }, duration)
+  }
+
   function focusTab(index: number) {
     const next = (index + milestones.length) % milestones.length
-    setSelectedId(milestones[next].id)
+    select(next)
     tabRefs.current[next]?.focus()
   }
 
@@ -96,14 +123,22 @@ function TrackerTimeline({ data, currentId, ...handlers }: Handlers & { data: Se
     if (event.key === 'End') { event.preventDefault(); focusTab(milestones.length - 1) }
   }
 
-  const trackerStyle = { '--timeline-columns': milestones.length, '--timeline-progress': progress, '--timeline-selected': selectedIndex } as CSSProperties
+  const trackerStyle = { '--timeline-columns': milestones.length, '--timeline-progress': progress } as CSSProperties
 
   return (
     <>
       <Box role="tablist" aria-label="Sale milestones" className="timeline-tracker" onKeyDown={onKeyDown} style={trackerStyle}>
         <Box className="timeline-rail" aria-hidden="true" />
         <Box className="timeline-rail-fill" aria-hidden="true" />
-        <Box className="timeline-spotlight" aria-hidden="true" />
+        {glint && (
+          <Box
+            key={glint.key}
+            className="timeline-glint"
+            aria-hidden="true"
+            style={{ '--glint-from': glint.from, '--glint-to': glint.to, '--glint-duration': `${glintDuration(glint.from, glint.to)}ms` } as CSSProperties}
+          />
+        )}
+        {arrivedIndex >= 0 && <Box key={`bloom-${arrivedIndex}`} className="timeline-spotlight" aria-hidden="true" style={{ '--timeline-selected': arrivedIndex } as CSSProperties} />}
         {milestones.map((milestone, index) => {
           const isSelected = milestone.id === selectedId
           return (
@@ -116,8 +151,8 @@ function TrackerTimeline({ data, currentId, ...handlers }: Handlers & { data: Se
               aria-selected={isSelected}
               aria-description={statusCopy[milestone.status]}
               tabIndex={isSelected ? 0 : -1}
-              onClick={() => setSelectedId(milestone.id)}
-              className={`timeline-node timeline-node--${milestone.status}${isSelected ? ' is-selected' : ''}`}
+              onClick={() => select(index)}
+              className={`timeline-node timeline-node--${milestone.status}${isSelected ? ' is-selected' : ''}${index === arrivedIndex ? ' is-arrived' : ''}`}
               disableRipple
             >
               <Box component="span" className="timeline-now" aria-hidden={milestone.status !== 'current'}>{milestone.status === 'current' ? 'Now' : ''}</Box>
@@ -134,6 +169,11 @@ function TrackerTimeline({ data, currentId, ...handlers }: Handlers & { data: Se
       </Box>
     </>
   )
+}
+
+/** Glint travel time grows gently with distance. */
+function glintDuration(from: number, to: number) {
+  return 240 + Math.abs(to - from) * 120
 }
 
 /* ---------- Mobile: vertical rail ---------- */

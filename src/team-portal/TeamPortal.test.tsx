@@ -87,18 +87,24 @@ describe('Admin-managed library', () => {
 })
 
 describe('Team defaults', () => {
-  it('compares a transaction with the seller default and resets it', () => {
-    renderAt('/team/resources')
-    expect(screen.getByText('2 changes from the seller default')).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Reset' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Reset resources' }))
-    expect([...loadTeamState().visible].sort()).toEqual([...initialTeamState.defaults.seller!.visible].sort())
-    expect(screen.getByText('Matches the seller default')).toBeInTheDocument()
+  it('edits a date and attaches a hidden resource, showing it to clients', () => {
+    renderAt('/team')
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Appraisal' }))
+    fireEvent.change(screen.getByRole('textbox', { name: 'Title' }), { target: { value: 'Appraisal visit' } })
+    fireEvent.mouseDown(screen.getByRole('combobox', { name: 'Attached resource' }))
+    fireEvent.click(screen.getByRole('option', { name: /A smoother move/ }))
+    expect(screen.getByRole('checkbox', { name: /Also show it to clients/ })).toBeChecked()
+    fireEvent.click(screen.getByRole('button', { name: 'Save date' }))
+    const saved = loadTeamState()
+    const date = saved.dates.find(item => item.id === 'date-3')
+    expect(date?.title).toBe('Appraisal visit')
+    expect(date?.guidance?.resourceId).toBe('team-moving')
+    expect(saved.visible).toContain('team-moving')
   })
 
   it('lets admins save the current selection as the seller default', () => {
     renderAt('/team/resources')
-    fireEvent.click(screen.getByRole('button', { name: 'Update seller default' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save as seller default' }))
     fireEvent.click(screen.getByRole('button', { name: 'Update default' }))
     expect([...loadTeamState().defaults.seller!.visible].sort()).toEqual([...initialTeamState.visible].sort())
   })
@@ -106,7 +112,7 @@ describe('Team defaults', () => {
   it('hides default saving from members', () => {
     renderAt('/team/resources?as=member')
     expect(screen.queryByRole('button', { name: /seller default/ })).not.toBeInTheDocument()
-    expect(screen.getByText(/Admins manage team defaults/)).toBeInTheDocument()
+    expect(screen.getByRole('switch', { name: 'Show A smoother move to clients' })).toBeInTheDocument()
   })
 
   it('sets up a buyer default from the defaults page', () => {
@@ -153,8 +159,8 @@ describe('Client invites', () => {
   it('invites someone who is not on the Brivity transaction', async () => {
     renderAt('/team')
     fireEvent.click(screen.getByRole('button', { name: 'Invite a client' }))
-    fireEvent.change(screen.getByRole('textbox', { name: 'Full name' }), { target: { value: 'Jamie Bennett' } })
-    fireEvent.change(screen.getByRole('textbox', { name: 'Email' }), { target: { value: 'jamie@example.com' } })
+    fireEvent.change(screen.getByRole('textbox', { name: 'Name (optional)' }), { target: { value: 'Jamie Bennett' } })
+    fireEvent.change(screen.getByRole('textbox', { name: /^Email/ }), { target: { value: 'jamie@example.com' } })
     fireEvent.click(screen.getByRole('button', { name: 'Send invite' }))
     const person = loadTeamState().clients.find(client => client.name === 'Jamie Bennett')
     expect(person?.email).toBe('jamie@example.com')

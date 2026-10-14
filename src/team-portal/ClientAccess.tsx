@@ -19,6 +19,7 @@ const validEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.tr
 /** The seller invite email, personalized for one client. */
 export function inviteTemplate(name: string) {
   const template = emailTemplates.find(item => item.id === 'seller-activate')!
+  if (!name.trim()) return { ...template, subject: template.subject.replace('John, your', 'Your'), intro: template.intro.replace('Hi John, ', 'Hi, ') }
   const first = firstName(name)
   return { ...template, subject: template.subject.replace('John', first), intro: template.intro.replace('Hi John', `Hi ${first}`) }
 }
@@ -46,7 +47,7 @@ export function ClientAccess({ state, setState }: { state: TeamState; setState: 
   ].filter(group => group.people.length > 0)
   const target = dialog?.person
   const resending = target ? inviteOf(target).status === 'invited' : false
-  const recipient = target?.name ?? name
+  const recipient = target?.name ?? name.trim()
 
   function open(person: ClientPerson | null) {
     setName(''); setEmail(''); setNote(person ? inviteOf(person).note ?? '' : '')
@@ -54,8 +55,8 @@ export function ClientAccess({ state, setState }: { state: TeamState; setState: 
   }
   function send() {
     if (!dialog || !isAdmin) return
-    if (!target && (!name.trim() || !validEmail(email))) { toast.error('Add a name and a valid email address.'); return }
-    const person: ClientPerson = target ?? { id: `client-${Date.now()}`, name: name.trim(), email: email.trim(), role: 'Invited by your team', source: 'Invited' }
+    if (!target && !validEmail(email)) { toast.error('Add a valid email address.'); return }
+    const person: ClientPerson = target ?? { id: `client-${Date.now()}`, name: name.trim() || email.trim(), email: email.trim(), role: 'Invited by your team', source: 'Invited' }
     setState(previous => ({
       ...previous,
       clients: previous.clients.some(item => item.id === person.id) ? previous.clients : [...previous.clients, person],
@@ -94,8 +95,8 @@ export function ClientAccess({ state, setState }: { state: TeamState; setState: 
       {dialog && <Stack spacing={3} sx={{ pt: 1 }}>
         {target
           ? <TextField label="To" value={target.email} disabled fullWidth helperText={target.source === 'Brivity' ? 'Contact details come from Brivity. Update them there.' : undefined} />
-          : <><TextField label="Full name" value={name} onChange={event => setName(event.target.value)} fullWidth autoFocus /><TextField label="Email" type="email" value={email} onChange={event => setEmail(event.target.value)} fullWidth helperText="Clients on the Brivity transaction already appear in the list." /></>}
-        <TextField label="Personal note (optional)" value={note} onChange={event => setNote(event.target.value)} fullWidth multiline minRows={3} placeholder={`A few words for ${firstName(recipient)}…`} helperText="Appears in the email below Avery’s introduction." />
+          : <><TextField label="Email" type="email" value={email} onChange={event => setEmail(event.target.value)} fullWidth autoFocus required /><TextField label="Name (optional)" value={name} onChange={event => setName(event.target.value)} fullWidth helperText="Used to greet them in the email." /></>}
+        <TextField label="Personal note (optional)" value={note} onChange={event => setNote(event.target.value)} fullWidth multiline minRows={3} placeholder={recipient ? `A few words for ${firstName(recipient)}…` : 'A few words for your client…'} helperText="Appears in the email below Avery’s introduction." />
         <Box><Typography variant="labelM" sx={{ mb: 1.5, display: 'block' }}>Email preview</Typography><Box className="team-email-preview"><Typography variant="bodySStandard" color="text.secondary" className="team-email-subject">Subject: {inviteTemplate(recipient).subject}</Typography><EmailPreview template={inviteTemplate(recipient)} personalNote={note} /></Box></Box>
       </Stack>}
     </PlaceModal>

@@ -13,7 +13,6 @@ import InfoOutlined from '@mui/icons-material/InfoOutlined'
 import EditOutlined from '@mui/icons-material/EditOutlined'
 import MoreHorizOutlined from '@mui/icons-material/MoreHorizOutlined'
 import DeleteOutlineOutlined from '@mui/icons-material/DeleteOutlineOutlined'
-import RestartAltOutlined from '@mui/icons-material/RestartAltOutlined'
 import FormatBoldOutlined from '@mui/icons-material/FormatBoldOutlined'
 import FormatItalicOutlined from '@mui/icons-material/FormatItalicOutlined'
 import FormatListBulletedOutlined from '@mui/icons-material/FormatListBulletedOutlined'
@@ -29,6 +28,7 @@ import { sampleSellerTransaction as transaction } from '../seller-portal/sellerT
 import { cleanResourceHtml, defaultDifferences, liveCount, loadTeamState, roleFromUrl, selectableResources, statusOf, teamPeople, teamStateKey, titleOf } from './teamData'
 import type { DefaultSelection, ResourceContent, TeamResource, TeamState, TransactionKind } from './teamData'
 import { ClientAccess } from './ClientAccess'
+import { DatesSection } from './DatesSection'
 import './team-portal.css'
 
 type SetState = (next: TeamState | ((previous: TeamState) => TeamState)) => void
@@ -113,7 +113,7 @@ function PreviewCard({ state }: { state: TeamState }) {
   }, [])
   return <a className="team-preview-card" href="/team/preview" target="_blank" rel="noopener noreferrer" aria-label="Open Tim and Alex’s client view in a new tab">
     <Box ref={frame} className="team-preview-frame" aria-hidden="true">
-      <iframe key={state.visible.join('|')} src="/team/preview?embed=1" title="Client view snapshot" tabIndex={-1} style={{ transform: `scale(${scale})` }} />
+      <iframe key={JSON.stringify([state.visible, state.dates])} src="/team/preview?embed=1" title="Client view snapshot" tabIndex={-1} style={{ transform: `scale(${scale})` }} />
     </Box>
     <Box className="team-preview-hover" aria-hidden="true"><Typography variant="labelM">Open client view</Typography><OpenInNewOutlined fontSize="small" /></Box>
   </a>
@@ -122,28 +122,18 @@ function PreviewCard({ state }: { state: TeamState }) {
 function TransactionPage({ state, setState }: { state: TeamState; setState: SetState }) {
   const [guide, setGuide] = useState<ResourceContent | null>(null)
   const [saveOpen, setSaveOpen] = useState(false)
-  const [resetOpen, setResetOpen] = useState(false)
   const isAdmin = state.role === 'admin'
   const selection = state.defaults.seller
-  const baseline: DefaultSelection = selection ?? { visible: brivityBasics(state), updatedBy: '', updatedOn: '' }
-  const differences = defaultDifferences(state, baseline)
-  const changes = differences.shown.length + differences.hidden.length
   const available = state.resources.filter(resource => resource.published && (!resource.archived || state.visible.includes(resource.id)))
   const visibleCount = state.visible.filter(id => state.resources.some(resource => resource.id === id && resource.published)).length
-  const savedVisible = new Set(baseline.visible)
   const toSave = selectableResources(state).filter(resource => state.visible.includes(resource.id)).map(resource => resource.id)
   const saveChanges = defaultDifferences({ ...state, visible: toSave }, selection)
+  const attached = new Set(state.dates.map(date => date.guidance?.resourceId).filter(Boolean))
   useEffect(() => { if (window.location.pathname.startsWith('/team/resources')) document.getElementById('resources')?.scrollIntoView?.() }, [])
   function toggle(resource: TeamResource) {
     const showing = state.visible.includes(resource.id)
     setState(previous => ({ ...previous, visible: showing ? previous.visible.filter(id => id !== resource.id) : [...previous.visible, resource.id], resources: !showing && resource.source === 'Team' && resource.linked === 0 ? previous.resources.map(item => item.id === resource.id ? { ...item, linked: 1 } : item) : previous.resources }))
     toast.success(`${showing ? 'Hidden from' : 'Visible in'} Tim and Alex’s portal`)
-  }
-  function resetToDefault() {
-    const selectable = selectableResources(state).map(resource => resource.id)
-    setState(previous => ({ ...previous, visible: [...previous.visible.filter(id => !selectable.includes(id)), ...baseline.visible.filter(id => selectable.includes(id))] }))
-    setResetOpen(false)
-    toast.success('Reset to the seller default')
   }
   function saveDefault() {
     if (!isAdmin) return
@@ -159,36 +149,33 @@ function TransactionPage({ state, setState }: { state: TeamState; setState: SetS
         <Typography component="h1" variant="displayS">128 Meadowbrook Lane</Typography>
         <Typography variant="bodyMStandard" color="text.secondary">Tim & Alex Bennett · Kalispell, MT 59901</Typography>
       </Box>
-      <Button component="a" href="/team/preview" target="_blank" rel="noopener noreferrer" variant="contained" size="large" startIcon={<VisibilityOutlined />} endIcon={<OpenInNewOutlined />}>Preview client view</Button>
     </Box>
     <Box className="team-split team-txn-top">
       <PortalSection prominent title="What Tim and Alex see" subtitle="Their seller portal right now. Opens in a new tab."><PreviewCard state={state} /></PortalSection>
       <ClientAccess state={state} setState={setState} />
     </Box>
-    <Box id="resources" className="team-txn-resources">
-      <PortalSection prominent title="Resources clients see" subtitle={`${plural(visibleCount, 'resource')} visible · changes apply right away`} action={<Button component="a" href="/team/library" size="small">Open library</Button>}>
-        <Box className="team-default-bar">
-          <Box><Typography variant="titleXS">{changes === 0 ? `Matches the ${selection ? 'seller default' : 'Brivity basics'}` : `${plural(changes, 'change')} from the ${selection ? 'seller default' : 'Brivity basics'}`}</Typography><Typography variant="bodySStandard" color="text.secondary">{isAdmin ? 'New seller transactions start from the team default.' : 'Admins manage team defaults.'} <a href="/team/defaults">View defaults</a></Typography></Box>
-          <Stack direction="row" spacing={1}>{changes > 0 && <Button size="small" startIcon={<RestartAltOutlined />} onClick={() => setResetOpen(true)}>Reset</Button>}{isAdmin && <Button size="small" variant="outlined" onClick={() => setSaveOpen(true)} disabled={!!selection && saveChanges.shown.length + saveChanges.hidden.length === 0}>{selection ? 'Update seller default' : 'Save as seller default'}</Button>}</Stack>
-        </Box>
-        {(['Brivity', 'Team'] as const).map(source => <Box key={source} className="team-resource-group">
-          <Typography component="h3" variant="labelS" color="text.secondary" className="team-access-group">{source === 'Brivity' ? 'Transaction basics · from Brivity' : 'From your team library'}</Typography>
-          <Box component="ul" className="team-resource-list">{available.filter(resource => resource.source === source).map(resource => {
-            const showing = state.visible.includes(resource.id)
-            const differs = !resource.archived && showing !== savedVisible.has(resource.id)
-            return <Box component="li" className={`team-row${showing ? '' : ' is-hidden'}`} key={resource.id}>
-              <Box className="team-row-copy"><Typography variant="titleXS">{resource.published?.title}</Typography><Typography variant="bodySStandard" color="text.secondary">{resource.published?.summary}</Typography>{(differs || resource.archived) && <Box className="team-row-meta">{differs && <Typography variant="labelS" color="text.secondary">Changed from default</Typography>}{resource.archived && <Typography variant="labelS" color="text.secondary">Archived</Typography>}</Box>}</Box>
-              <Box className="team-row-actions"><Typography variant="labelS" color={showing ? 'text.primary' : 'text.secondary'} className="team-visibility-label">{showing ? 'Visible' : 'Hidden'}</Typography><IconButton aria-label={`Preview ${resource.published?.title}`} onClick={() => setGuide(resource.published)}><VisibilityOutlined fontSize="small" /></IconButton><Switch checked={showing} onChange={() => toggle(resource)} slotProps={{ input: { 'aria-label': `Show ${resource.published?.title} to clients` } }} color="primary" /></Box>
-            </Box>
-          })}</Box>
-        </Box>)}
-      </PortalSection>
+    <DatesSection state={state} setState={setState} />
+    <Box component="section" id="resources" className="team-plain-section" aria-labelledby="resources-heading">
+      <Box className="team-plain-heading">
+        <Box><Typography component="h2" variant="titleM" id="resources-heading">Manage client resources</Typography><Typography variant="bodySStandard" color="text.secondary">{plural(visibleCount, 'resource')} visible to clients · changes apply right away</Typography></Box>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          {isAdmin && <Button size="small" onClick={() => setSaveOpen(true)} disabled={!!selection && saveChanges.shown.length + saveChanges.hidden.length === 0}>Save as seller default</Button>}
+          <Button component="a" href="/team/library" size="small" variant="outlined" endIcon={<ArrowForwardOutlined />}>Resource library</Button>
+        </Stack>
+      </Box>
+      {(['Brivity', 'Team'] as const).map(source => <Box key={source} className="team-resource-group">
+        <Typography component="h3" variant="labelS" color="text.secondary" className="team-access-group">{source === 'Brivity' ? 'Transaction basics · from Brivity' : 'From your team library'}</Typography>
+        <Box component="ul" className="team-resource-list">{available.filter(resource => resource.source === source).map(resource => {
+          const showing = state.visible.includes(resource.id)
+          return <Box component="li" className={`team-row${showing ? '' : ' is-hidden'}`} key={resource.id}>
+            <Box className="team-row-copy"><Typography variant="titleXS">{resource.published?.title}</Typography><Typography variant="bodySStandard" color="text.secondary">{resource.published?.summary}</Typography>{(attached.has(resource.id) || resource.archived) && <Box className="team-row-meta">{attached.has(resource.id) && <Typography variant="labelS" color="text.secondary">Attached to a date</Typography>}{resource.archived && <Typography variant="labelS" color="text.secondary">Archived</Typography>}</Box>}</Box>
+            <Box className="team-row-actions"><Typography variant="labelS" color={showing ? 'text.primary' : 'text.secondary'} className="team-visibility-label">{showing ? 'Visible' : 'Hidden'}</Typography><IconButton aria-label={`Preview ${resource.published?.title}`} onClick={() => setGuide(resource.published)}><VisibilityOutlined fontSize="small" /></IconButton><Switch checked={showing} onChange={() => toggle(resource)} slotProps={{ input: { 'aria-label': `Show ${resource.published?.title} to clients` } }} color="primary" /></Box>
+          </Box>
+        })}</Box>
+      </Box>)}
     </Box>
     <PlaceModal open={saveOpen} onClose={() => setSaveOpen(false)} title={selection ? 'Update the seller default?' : 'Save as the seller default?'} description="New seller transactions will start with this selection. Existing transactions keep their current choices." actions={<><Button onClick={() => setSaveOpen(false)}>Cancel</Button><Button variant="contained" onClick={saveDefault}>{selection ? 'Update default' : 'Save default'}</Button></>}>
       <Stack spacing={3}>{selection ? <><Typography variant="bodyMStandard">Changes from the current default, saved {selection.updatedOn} by {selection.updatedBy}:</Typography><ChangeSummary shown={saveChanges.shown} hidden={saveChanges.hidden} state={state} /></> : <><Typography variant="bodyMStandard">{plural(toSave.length, 'resource')} will start visible:</Typography><ResourceNameList ids={toSave} state={state} /></>}</Stack>
-    </PlaceModal>
-    <PlaceModal open={resetOpen} onClose={() => setResetOpen(false)} title="Reset to the seller default?" description="Tim and Alex’s portal updates right away." actions={<><Button onClick={() => setResetOpen(false)}>Cancel</Button><Button variant="contained" onClick={resetToDefault}>Reset resources</Button></>}>
-      <ChangeSummary shown={differences.hidden} hidden={differences.shown} state={state} />
     </PlaceModal>
     <PlaceModal open={!!guide} onClose={() => setGuide(null)} title="Resource preview" size="l">{guide && <ResourceBody content={guide} />}</PlaceModal>
   </>
