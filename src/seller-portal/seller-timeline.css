@@ -734,8 +734,9 @@
 /* ---------- Collapsible details: collapsed shows only the tracker ---------- */
 
 .timeline-collapse.MuiButtonBase-root {
+  position: relative;
   min-height: 36px;
-  margin: 4px auto 0;
+  margin: 32px auto 0;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -750,6 +751,9 @@
 .timeline-collapse:focus-visible { outline: 2px solid var(--tl-ring-strong); outline-offset: 2px; }
 .timeline-collapse .timeline-chevron { color: inherit; rotate: 180deg; }
 .timeline-collapse.is-collapsed .timeline-chevron { rotate: 0deg; }
+/* Collapsed, the toggle tucks up under the tracker. */
+.timeline-collapse.is-collapsed.MuiButtonBase-root { margin-top: 4px; }
+.timeline-collapse.MuiButtonBase-root { transition: color 160ms ease, box-shadow 160ms ease, margin-top 420ms var(--timeline-ease); }
 
 .timeline-panel-shell {
   display: grid;
@@ -774,3 +778,33 @@
   .timeline-panel-shell,
   .timeline-panel-shell.is-collapsed { transition: none; }
 }
+
+/* ---------- Card: the timeline inside a column layout ---------- */
+
+.seller-timeline-countdown.MuiTypography-root { display: none; }
+
+.seller-timeline--card {
+  margin-top: 0;
+  overflow: hidden;
+  padding-bottom: 28px;
+  border: 1px solid var(--color-semantic-stroke-primary-light);
+  border-radius: 14px;
+  background: var(--color-semantic-surface-primary);
+}
+
+.seller-timeline--card .timeline-stage { padding-top: 32px; }
+.seller-timeline--card .seller-timeline-heading { display: grid; gap: 6px; padding-inline: 32px; }
+.seller-timeline--card .seller-timeline-eyebrow.MuiTypography-root { margin: 0; text-align: left; }
+.seller-timeline--card .seller-timeline-countdown.MuiTypography-root { display: block; color: var(--color-semantic-text-dark); font-variant-numeric: tabular-nums; }
+
+/* The rail fades at the card's edges rather than the viewport's. */
+.seller-timeline--card .timeline-tracker { --edge-fade: 56px; margin-top: 8px; }
+.seller-timeline--card .timeline-rail { left: 0; width: 100%; }
+.seller-timeline--card .timeline-rail-fill { left: 0; width: calc(var(--col) / 2 + var(--timeline-progress) * (100% - var(--col))); }
+
+.seller-timeline--card .timeline-panel { max-width: none; margin-top: 24px; padding-inline: 8px; }
+.seller-timeline--card .timeline-collapse.MuiButtonBase-root { margin-top: 24px; }
+.seller-timeline--card .timeline-collapse.is-collapsed.MuiButtonBase-root { margin-top: 4px; }
+
+.seller-timeline--card.seller-timeline--stacked { padding: 0 20px 20px; }
+.seller-timeline--card.seller-timeline--stacked .seller-timeline-heading { padding-inline: 0; }

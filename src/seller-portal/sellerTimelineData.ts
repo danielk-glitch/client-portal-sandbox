@@ -41,6 +41,8 @@ export type SellerMilestone = {
 export type SellerTimelineData = {
   today: string
   nextStepId: string
+  /** The headline moment for the countdown, e.g. "31 days until closing". */
+  countdown?: { date: string; label: string }
   milestones: SellerMilestone[]
 }
 
@@ -120,6 +122,7 @@ export const timelineResources: TransactionResource[] = [...timelineOnlyResource
 export const underContractTimeline: SellerTimelineData = {
   today: '2026-10-06',
   nextStepId: 'uc-disclosures',
+  countdown: { date: '2026-11-06', label: 'closing' },
   milestones: [
     {
       id: 'pre-listing',
@@ -195,6 +198,7 @@ export const underContractTimeline: SellerTimelineData = {
 export const beforeListingTimeline: SellerTimelineData = {
   today: '2026-08-24',
   nextStepId: 'bl-prepare',
+  countdown: { date: '2026-09-01', label: 'your home goes live' },
   milestones: [
     {
       id: 'pre-listing',

@@ -332,3 +332,15 @@
 @media (max-width: 420px) {
   .portal-feedback-interest { flex-wrap: wrap; }
 }
+
+/* Team mode of the date row: same anatomy, plus an end action and team-only notes. */
+.portal-date-row--trailing { grid-template-columns: var(--date-stamp-size) minmax(0, 1fr) auto; }
+.portal-date-row--trailing.portal-date-row--resource { grid-template-columns: var(--date-stamp-size) minmax(0, 1fr) auto auto; }
+.portal-date-trailing { position: relative; z-index: 1; grid-column: -2; grid-row: 1; align-self: center; }
+.portal-date-notes { grid-column: 2 / -1; grid-row: 2; display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: -6px; }
+@media (max-width: 600px) {
+  .portal-date-row--trailing.portal-date-row--resource { grid-template-columns: var(--date-stamp-size) minmax(0, 1fr) auto; }
+  .portal-date-row--trailing .portal-date-trailing { grid-column: 3; grid-row: 1; }
+  .portal-date-row--trailing.portal-date-row--resource .portal-date-row-main { grid-column: 1 / 3; }
+  .portal-date-row--notes .portal-date-notes { grid-row: 3; }
+}

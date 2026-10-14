@@ -60,7 +60,9 @@ import { ListingPreparation } from './ListingPreparation'
 import { createBeforeListingTransaction, readSellerJourneyView, type SellerJourneyView } from '../internal/review/sellerJourneyViews'
 import { SellerReviewTools } from '../internal/review/SellerReviewTools'
 import { SellerTimeline, type TimelineTransition } from './SellerTimeline'
-import { beforeListingTimeline, timelineResources, underContractTimeline } from './sellerTimelineData'
+import { PropertySummaryCard } from './PropertySummaryCard'
+import './seller-columns.css'
+import { beforeListingTimeline, timelineResources, underContractTimeline, type SellerTimelineData } from './sellerTimelineData'
 import './seller-portal.css'
 import './seller-polestar.css'
 
@@ -73,7 +75,7 @@ type SellerPortalProps = {
   readOnly?: boolean
   showReviewTools?: boolean
   /** 'timeline' swaps the dates + activity overview for the milestone timeline exploration. */
-  layout?: 'dashboard' | 'timeline'
+  layout?: 'dashboard' | 'timeline' | 'timeline-columns'
 }
 
 export type PortalTab = 'activity' | 'tasks' | 'notes' | 'documents' | 'resources'
@@ -87,7 +89,9 @@ export const portalTabs: Array<{ id: PortalTab; label: string }> = [
 ]
 
 export function SellerPortal({ transaction: baseTransaction = sampleSellerTransaction, marketingSnapshot, initialListingOpen = false, basePath = '/seller', visualTheme, readOnly = false, showReviewTools = true, layout = 'dashboard' }: SellerPortalProps) {
-  const timelineLayout = layout === 'timeline'
+  /** Both timeline explorations share the timeline; 'timeline-columns' rearranges the page into two columns. */
+  const timelineLayout = layout === 'timeline' || layout === 'timeline-columns'
+  const columnsLayout = layout === 'timeline-columns'
   const [journeyView, setJourneyView] = useState(() => readSellerJourneyView(window.location.search))
   const beforeListing = journeyView === 'before-listing'
   const transaction = useMemo(() => {
@@ -302,6 +306,63 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
     }
   }
 
+
+  const timelineData = beforeListing ? beforeListingTimeline : underContractTimeline
+  const marketingBlock = !beforeListing && (marketingSnapshot && marketingLayout === 'views' && marketingSnapshot.insights ? (
+    <AdvertisingSnapshot
+      data={marketingSnapshot.insights}
+      feedback={transaction.feedback}
+      onOpenDashboard={() => setMarketingDashboardSection('overview')}
+    />
+  ) : marketingSnapshot && (
+    <MarketingSnapshot
+      data={marketingSnapshot}
+      feedback={transaction.feedback}
+      feedbackLayout={feedbackLayout}
+      onOpenDashboard={() => setMarketingDashboardSection('overview')}
+    />
+  ))
+
+  const transactionSections = (
+    <Box id="transaction-information" className="transaction-sections">
+      <Box component="nav" aria-label="Transaction sections" className="portal-section-nav">
+        <Tabs
+          value={visibleTab}
+          onChange={(_, value: PortalTab) => selectTab(value)}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+          aria-label="Transaction information"
+        >
+          {availableTabs.map((tab) => (
+            <Tab
+              key={tab.id}
+              id={`seller-tab-${tab.id}`}
+              aria-controls={`seller-panel-${tab.id}`}
+              value={tab.id}
+              label={tab.label}
+            />
+          ))}
+        </Tabs>
+      </Box>
+
+      <Box
+        role="tabpanel"
+        id={`seller-panel-${visibleTab}`}
+        aria-labelledby={`seller-tab-${visibleTab}`}
+        className="portal-panel"
+      >
+        {visibleTab === 'resources' && transaction.resources && <ResourcesPanel resources={transaction.resources} onOpen={setSelectedResource} />}
+        {visibleTab === 'activity' && <ActivityPanel events={transaction.timeline} />}
+        {visibleTab === 'tasks' && <TasksPanel tasks={transaction.tasks} />}
+        {visibleTab === 'notes' && <NotesPanel notes={transaction.notes} />}
+        {visibleTab === 'documents' && (
+          <DocumentsPanel readOnly={readOnly} key={`${transaction.listing.mlsNumber}:${transaction.viewers[0]?.id}`} storageKey={`place-document-pins:${transaction.listing.mlsNumber}:${transaction.viewers[0]?.id ?? "guest"}`} documents={transaction.documents} onOpen={setSelectedDocument} />
+        )}
+      </Box>
+    </Box>
+  )
+
   return (
     <Box className={`seller-portal${visualTheme === 'polestar' ? ' seller-portal--polestar' : ''}`} ref={portalRef}>
       <Box component="header" className="portal-topbar">
@@ -323,6 +384,44 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
         </Container>
       </Box>
 
+      {columnsLayout ? (
+        <Container maxWidth="xl" className="portal-main portal-main--columns">
+          <Box className="columns-greeting">
+            <Box>
+              <Typography variant="labelS" className="columns-greeting-date">{new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${timelineData.today}T12:00:00Z`))}</Typography>
+              <Typography component="h1" variant="displayS" className="columns-greeting-title">Good morning, Tim.</Typography>
+            </Box>
+            <Typography variant="bodySStandard" color="text.secondary" className="columns-greeting-status">Your sale is on track. One item needs your attention.</Typography>
+          </Box>
+
+          <Box className="columns-grid">
+            <Box component="aside" className="columns-side" aria-label="Your home and team">
+              <PropertySummaryCard
+                transaction={transaction}
+                stage={beforeListing ? 'Preparing to list' : 'Under contract'}
+                facts={columnFacts(timelineData)}
+                onSeeListing={openListing}
+              />
+              <PeopleSection team={transaction.team} viewers={transaction.viewers} value={activePeopleTab} onChange={selectPeopleTab} />
+            </Box>
+
+            <Box className="columns-main">
+              <SellerTimeline
+                data={timelineData}
+                transition="card"
+                resources={transaction.resources ?? []}
+                documents={transaction.documents}
+                team={transaction.team}
+                onOpenResource={setSelectedResource}
+                onOpenDocument={setSelectedDocument}
+                onOpenMarketing={!beforeListing && marketingSnapshot ? () => setMarketingDashboardSection('overview') : undefined}
+              />
+              {marketingBlock}
+              {transactionSections}
+            </Box>
+          </Box>
+        </Container>
+      ) : (
       <Container maxWidth="xl" className="portal-main">
         <ListingOverview transaction={transaction} onSeeListing={openListing} listingLink={listingLink} variant={beforeListing ? 'no-listing' : headerVariant} polestarLayout={visualTheme === 'polestar'} />
 
@@ -330,7 +429,7 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
 
         {timelineLayout ? (
           <SellerTimeline
-            data={beforeListing ? beforeListingTimeline : underContractTimeline}
+            data={timelineData}
             transition={timelineTransition}
             resources={transaction.resources ?? []}
             documents={transaction.documents}
@@ -350,63 +449,15 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
           </PortalSection>
         </Box>}
 
-        {!beforeListing && (marketingSnapshot && marketingLayout === 'views' && marketingSnapshot.insights ? (
-          <AdvertisingSnapshot
-            data={marketingSnapshot.insights}
-            feedback={transaction.feedback}
-            onOpenDashboard={() => setMarketingDashboardSection('overview')}
-          />
-        ) : marketingSnapshot && (
-          <MarketingSnapshot
-            data={marketingSnapshot}
-            feedback={transaction.feedback}
-            feedbackLayout={feedbackLayout}
-            onOpenDashboard={() => setMarketingDashboardSection('overview')}
-          />
-        ))}
+        {marketingBlock}
 
         <Box className="transaction-lower-grid">
           <PeopleSection team={transaction.team} viewers={transaction.viewers} value={activePeopleTab} onChange={selectPeopleTab} />
 
-          <Box id="transaction-information" className="transaction-sections">
-            <Box component="nav" aria-label="Transaction sections" className="portal-section-nav">
-              <Tabs
-                value={visibleTab}
-                onChange={(_, value: PortalTab) => selectTab(value)}
-                variant="scrollable"
-                scrollButtons="auto"
-                allowScrollButtonsMobile
-                aria-label="Transaction information"
-              >
-                {availableTabs.map((tab) => (
-                  <Tab
-                    key={tab.id}
-                    id={`seller-tab-${tab.id}`}
-                    aria-controls={`seller-panel-${tab.id}`}
-                    value={tab.id}
-                    label={tab.label}
-                  />
-                ))}
-              </Tabs>
-            </Box>
-
-            <Box
-              role="tabpanel"
-              id={`seller-panel-${visibleTab}`}
-              aria-labelledby={`seller-tab-${visibleTab}`}
-              className="portal-panel"
-            >
-              {visibleTab === 'resources' && transaction.resources && <ResourcesPanel resources={transaction.resources} onOpen={setSelectedResource} />}
-              {visibleTab === 'activity' && <ActivityPanel events={transaction.timeline} />}
-              {visibleTab === 'tasks' && <TasksPanel tasks={transaction.tasks} />}
-              {visibleTab === 'notes' && <NotesPanel notes={transaction.notes} />}
-              {visibleTab === 'documents' && (
-                <DocumentsPanel readOnly={readOnly} key={`${transaction.listing.mlsNumber}:${transaction.viewers[0]?.id}`} storageKey={`place-document-pins:${transaction.listing.mlsNumber}:${transaction.viewers[0]?.id ?? "guest"}`} documents={transaction.documents} onOpen={setSelectedDocument} />
-              )}
-            </Box>
-          </Box>
+          {transactionSections}
         </Box>
       </Container>
+      )}
 
       <PortalFooter agent={leadAgent} brand={transaction.teamBrand} />
 
@@ -424,7 +475,7 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
         selectMarketingLayout={selectMarketingLayout}
         feedbackLayout={feedbackLayout}
         selectFeedbackLayout={selectFeedbackLayout}
-        timelineTransition={timelineLayout ? timelineTransition : undefined}
+        timelineTransition={timelineLayout && !columnsLayout ? timelineTransition : undefined}
         selectTimelineTransition={selectTimelineTransition}
       />}
 
@@ -504,6 +555,18 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
       </Dialog>
     </Box>
   )
+}
+
+/** Two quick facts for the narrow property card: what's next, and the headline date. */
+function columnFacts(data: SellerTimelineData) {
+  const current = data.milestones.find((milestone) => milestone.status === 'current')
+  const facts: Array<{ label: string; value: string }> = []
+  if (current?.startDate) facts.push({ label: `${current.label} since`, value: new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${current.startDate}T12:00:00Z`)) })
+  if (data.countdown) {
+    const label = data.countdown.label === 'closing' ? 'Closing' : 'Goes live'
+    facts.push({ label, value: new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${data.countdown.date}T12:00:00Z`)) })
+  }
+  return facts
 }
 
 function TimelineEventsList({ events }: { events: TimelineEvent[] }) {

@@ -12,7 +12,8 @@ import type { TeamMember, TransactionDocument, TransactionResource } from '../tr
 import type { MilestoneId, SellerMilestone, SellerTimelineData, SellerTimelineStep, TimelineItemKind, TimelineStatus } from './sellerTimelineData'
 import './seller-timeline.css'
 
-export type TimelineTransition = 'divider' | 'dark'
+/** divider and dark sit on the page under a hero; card sits inside a column layout. */
+export type TimelineTransition = 'divider' | 'dark' | 'card'
 
 type SellerTimelineProps = {
   data: SellerTimelineData
@@ -91,6 +92,25 @@ export function SellerTimeline({ data, layout = 'auto', transition = 'divider', 
 
 type OpenStep = (step: SellerTimelineStep, milestone: SellerMilestone) => void
 
+function daysBetween(from: string, to: string) {
+  return Math.round((new Date(`${to}T12:00:00Z`).getTime() - new Date(`${from}T12:00:00Z`).getTime()) / 86400000)
+}
+
+/** Eyebrow, plus a countdown headline that only the card layout shows. */
+function TimelineHeading({ titleId, data }: { titleId: string; data: SellerTimelineData }) {
+  const days = data.countdown ? daysBetween(data.today, data.countdown.date) : null
+  return (
+    <Box className="seller-timeline-heading">
+      <Typography component="h2" id={titleId} variant="labelS" className="seller-timeline-eyebrow">Transaction timeline</Typography>
+      {data.countdown && days !== null && (
+        <Typography component="p" variant="titleL" className="seller-timeline-countdown">
+          {days === 0 ? `Today: ${data.countdown.label}` : `${days} ${days === 1 ? 'day' : 'days'} until ${data.countdown.label}`}
+        </Typography>
+      )}
+    </Box>
+  )
+}
+
 /* ---------- Desktop: full-bleed tracker + milestone list ---------- */
 
 function TrackerTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: Handlers & { data: SellerTimelineData; currentId: MilestoneId; titleId: string; onOpenStep: OpenStep }) {
@@ -161,7 +181,7 @@ function TrackerTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: 
   return (
     <>
       <Box className="timeline-stage">
-        <Typography component="h2" id={titleId} variant="labelS" className="seller-timeline-eyebrow">Transaction timeline</Typography>
+        <TimelineHeading titleId={titleId} data={data} />
         <Box role="tablist" aria-label="Sale milestones" className="timeline-tracker" onKeyDown={onKeyDown} style={trackerStyle}>
           <Box className="timeline-rail" aria-hidden="true" />
           <Box className="timeline-rail-fill" aria-hidden="true" />
@@ -198,16 +218,6 @@ function TrackerTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: 
             )
           })}
         </Box>
-        <ButtonBase
-          className={`timeline-collapse${collapsed ? ' is-collapsed' : ''}`}
-          onClick={() => setCollapsed(!collapsed)}
-          aria-expanded={!collapsed}
-          aria-controls={`${baseId}-panel-shell`}
-          disableRipple
-        >
-          <Typography variant="labelM" component="span">{collapsed ? 'Show details' : 'Hide details'}</Typography>
-          <ExpandMoreRounded className="timeline-chevron" aria-hidden="true" />
-        </ButtonBase>
       </Box>
 
       <Box id={`${baseId}-panel-shell`} className={`timeline-panel-shell${collapsed ? ' is-collapsed' : ''}`} inert={collapsed}>
@@ -217,6 +227,16 @@ function TrackerTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: 
           </Box>
         </Box>
       </Box>
+      <ButtonBase
+        className={`timeline-collapse${collapsed ? ' is-collapsed' : ''}`}
+        onClick={() => setCollapsed(!collapsed)}
+        aria-expanded={!collapsed}
+        aria-controls={`${baseId}-panel-shell`}
+        disableRipple
+      >
+        <Typography variant="labelM" component="span">{collapsed ? 'Show details' : 'Hide details'}</Typography>
+        <ExpandMoreRounded className="timeline-chevron" aria-hidden="true" />
+      </ButtonBase>
     </>
   )
 }
@@ -235,7 +255,7 @@ function StackedTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: 
   return (
     <>
       <Box className="timeline-stage">
-        <Typography component="h2" id={titleId} variant="labelS" className="seller-timeline-eyebrow">Transaction timeline</Typography>
+        <TimelineHeading titleId={titleId} data={data} />
       </Box>
       <Box component="ol" className="timeline-stack">
         {data.milestones.map((milestone, index) => {

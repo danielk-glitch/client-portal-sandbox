@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { Autocomplete, Box, Button, Checkbox, Chip, FormControlLabel, Stack, TextField, Typography } from '@mui/material'
 import EditOutlined from '@mui/icons-material/EditOutlined'
-import MenuBookOutlined from '@mui/icons-material/MenuBookOutlined'
 import InfoOutlined from '@mui/icons-material/InfoOutlined'
 import { toast } from 'sonner'
 import { PlaceModal } from '../components/PlaceModal'
-import type { UpcomingDate } from '../transaction-portal/types'
-import { DateStamp } from '../transaction-portal/components'
+import type { TransactionResource, UpcomingDate } from '../transaction-portal/types'
+import { DateEventList, DateEventRow } from '../transaction-portal/components'
+import { futureSellerTransaction } from '../seller-portal/futureSellerTransaction'
+import { cleanResourceHtml } from './teamData'
 import type { TeamState } from './teamData'
 
 type SetState = (next: TeamState | ((previous: TeamState) => TeamState)) => void
@@ -18,6 +19,13 @@ export function DatesSection({ state, setState }: { state: TeamState; setState: 
   const published = state.resources.filter(resource => resource.published && !resource.archived)
   const titleOf = (id?: string) => state.resources.find(resource => resource.id === id)?.published?.title
   const dates = [...state.dates].sort((a, b) => a.date.localeCompare(b.date))
+  const [preview, setPreview] = useState<TransactionResource | null>(null)
+  const toClientResource = (id: string): TransactionResource | undefined => {
+    const original = futureSellerTransaction.resources?.find(resource => resource.id === id)
+    const content = state.resources.find(resource => resource.id === id)?.published
+    if (!content) return undefined
+    return { id, title: content.title, shortTitle: original?.shortTitle, summary: content.summary, readingTime: original?.readingTime ?? 'Team guide', relevance: 'Good to know', sections: [], questions: [] }
+  }
   const draftHidden = draft.resourceIds.filter(id => !state.visible.includes(id))
 
   function open(date: UpcomingDate) {
@@ -37,24 +45,21 @@ export function DatesSection({ state, setState }: { state: TeamState; setState: 
   }
 
   return <Box>
-    <Box component="ul" className="team-resource-list">{dates.map(date => {
+    <DateEventList>{dates.map(date => {
       const ids = date.guidance?.resourceIds ?? []
-      const hiddenCount = ids.filter(id => !state.visible.includes(id)).length
-      return <Box component="li" className="team-row team-date-row" key={date.id}>
-        <DateStamp date={date.date} />
-        <Box className="team-row-copy">
-          <Typography variant="titleXS">{date.title}</Typography>
-          <Typography variant="bodySStandard" color="text.secondary">{date.description}</Typography>
-          <Box className="team-date-meta">
-            {ids.length === 0 && <Typography variant="labelS" color="text.secondary" className="team-date-resource"><MenuBookOutlined sx={{ fontSize: 16 }} />No resources attached</Typography>}
-            {ids.map(id => <Typography variant="labelS" key={id} color={state.visible.includes(id) ? 'text.primary' : 'text.secondary'} className="team-date-resource"><MenuBookOutlined sx={{ fontSize: 16 }} />{titleOf(id) ?? 'Resource no longer available'}{state.visible.includes(id) ? '' : ' (hidden)'}</Typography>)}
-            {hiddenCount > 0 && <Typography variant="labelS" className="team-date-warning"><InfoOutlined sx={{ fontSize: 16 }} />{hiddenCount === 1 && ids.length === 1 ? 'Hidden from clients, so the link won’t show' : `${hiddenCount} hidden from clients, so ${hiddenCount === 1 ? 'its link won’t' : 'their links won’t'} show`}</Typography>}
-            {!date.guidance?.explanation && <Typography variant="labelS" color="text.secondary">No “what this means” yet</Typography>}
-          </Box>
-        </Box>
-        <Button size="small" startIcon={<EditOutlined />} onClick={() => open(date)} aria-label={`Edit ${date.title}`}>Edit</Button>
-      </Box>
-    })}</Box>
+      const hidden = ids.filter(id => !state.visible.includes(id))
+      // Exactly what the client sees: only attached resources that are visible to them.
+      const clientResources = ids.filter(id => state.visible.includes(id)).map(toClientResource).filter((resource): resource is TransactionResource => !!resource)
+      const notes = [
+        ...hidden.map(id => <Typography key={id} variant="labelS" className="team-date-warning"><InfoOutlined sx={{ fontSize: 16 }} />{titleOf(id) ?? 'A resource'} is hidden, so clients won’t see it</Typography>),
+        ...(!date.guidance?.explanation ? [<Typography key="explain" variant="labelS" color="text.secondary">No “what this means” yet</Typography>] : []),
+      ]
+      return <DateEventRow key={date.id} date={date.date} title={date.title} description={date.description} guidance={date.guidance} resources={clientResources} onReadResource={setPreview} onEdit={() => open(date)} notes={notes.length ? notes : undefined}
+        trailing={<Button size="small" startIcon={<EditOutlined />} onClick={() => open(date)} aria-hidden="true" tabIndex={-1}>Edit</Button>} />
+    })}</DateEventList>
+    <PlaceModal open={!!preview} onClose={() => setPreview(null)} title={preview?.title ?? ''} description={preview?.summary} size="l">
+      {preview && <Typography component="div" variant="bodyMStandard" className="team-guide-content" dangerouslySetInnerHTML={{ __html: cleanResourceHtml(state.resources.find(resource => resource.id === preview.id)?.published?.html ?? '') }} />}
+    </PlaceModal>
     <PlaceModal open={!!editing} onClose={() => setEditing(null)} size="l" title={editing ? `Edit “${editing.title}”` : ''} description="Changes appear in Tim and Alex’s portal right away." actions={<><Button onClick={() => setEditing(null)}>Cancel</Button><Button variant="contained" onClick={save}>Save date</Button></>}>
       <Stack spacing={3} sx={{ pt: 1 }}>
         <Box className="team-date-fields"><TextField label="Title" value={draft.title} onChange={event => setDraft({ ...draft, title: event.target.value })} fullWidth /><TextField label="Date" type="date" value={draft.date} onChange={event => setDraft({ ...draft, date: event.target.value })} slotProps={{ inputLabel: { shrink: true } }} /></Box>

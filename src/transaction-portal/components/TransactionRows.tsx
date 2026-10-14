@@ -89,12 +89,23 @@ export function DateStamp({ date, className }: { date: string; className?: strin
  * - two or more: a "<n> resources" chip opens the date's explanation dialog, which lists every resource.
  * The row itself opens the explanation whenever there is guidance or more than one resource.
  */
-export function DateEventRow({ date, title, description, children, guidance, resources = [], onReadResource }: Pick<UpcomingDate, 'date' | 'title' | 'description' | 'guidance'> & { children?: ReactNode; resources?: TransactionResource[]; onReadResource?: (resource: TransactionResource) => void }) {
+export function DateEventRow({ date, title, description, children, guidance, resources = [], onReadResource, onEdit, notes, trailing }: Pick<UpcomingDate, 'date' | 'title' | 'description' | 'guidance'> & {
+  children?: ReactNode
+  resources?: TransactionResource[]
+  onReadResource?: (resource: TransactionResource) => void
+  /** Team mode: clicking the row edits the date instead of opening the client explanation. */
+  onEdit?: () => void
+  /** Team mode: notes shown under the row (never shown to clients). */
+  notes?: ReactNode
+  /** Team mode: an action at the end of the row, such as Edit. */
+  trailing?: ReactNode
+}) {
   const [explanationOpen, setExplanationOpen] = useState(false)
   const readable = onReadResource ? resources : []
   const single = readable.length === 1 ? readable[0] : undefined
   const multiple = readable.length > 1
   const hasExplanation = !!guidance || multiple
+  const rowIsButton = !!onEdit || hasExplanation
   const content = <>
     <DateStamp date={date} />
     <Box component="span" className="portal-date-copy">
@@ -105,10 +116,12 @@ export function DateEventRow({ date, title, description, children, guidance, res
   </>
 
   return (
-    <Box component="li" className={`portal-date-row${readable.length ? ' portal-date-row--resource' : ''}`}>
-      {hasExplanation ? <ButtonBase className="portal-date-row-main" onClick={() => setExplanationOpen(true)} aria-haspopup="dialog" aria-label={`About ${title}`} disableRipple>{content}</ButtonBase> : content}
+    <Box component="li" className={['portal-date-row', readable.length ? 'portal-date-row--resource' : '', trailing ? 'portal-date-row--trailing' : '', notes ? 'portal-date-row--notes' : ''].filter(Boolean).join(' ')}>
+      {rowIsButton ? <ButtonBase className="portal-date-row-main" onClick={() => onEdit ? onEdit() : setExplanationOpen(true)} aria-haspopup="dialog" aria-label={onEdit ? `Edit ${title}` : `About ${title}`} disableRipple>{content}</ButtonBase> : content}
       {single && <Chip component="button" type="button" variant="outlined" icon={<MenuBookOutlined />} label={`Resource: ${single.shortTitle ?? single.title}`} title={single.title} aria-label={`Read ${single.title}`} onClick={() => onReadResource!(single)} className="portal-date-resource" />}
       {multiple && <Chip component="button" type="button" variant="outlined" icon={<MenuBookOutlined />} label={`${readable.length} resources`} title={readable.map(resource => resource.title).join(', ')} aria-label={`See ${readable.length} resources for ${title}`} aria-haspopup="dialog" onClick={() => setExplanationOpen(true)} className="portal-date-resource" />}
+      {trailing && <Box className="portal-date-trailing">{trailing}</Box>}
+      {notes && <Box className="portal-date-notes">{notes}</Box>}
       {hasExplanation && <MilestoneExplanation title={title} guidance={guidance} resources={readable} open={explanationOpen} onClose={() => setExplanationOpen(false)} onReadResource={onReadResource} />}
     </Box>
   )

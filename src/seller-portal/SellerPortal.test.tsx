@@ -83,4 +83,12 @@ describe('Seller journey views', () => {
     expect(screen.queryByRole('heading', { name: 'Before your home goes live' })).not.toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'Activity' })).toHaveAttribute('aria-selected', 'true')
   })
+
+  it('lays out the two-column timeline page with a narrow property column', () => {
+    window.history.replaceState(null, '', '/seller/timeline-columns')
+    render(<ThemeProvider theme={theme}><SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} basePath="/seller/timeline-columns" layout="timeline-columns" /></ThemeProvider>)
+    expect(screen.getByRole('heading', { name: 'Good morning, Tim.' })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Your home' })).toHaveTextContent('128 Meadowbrook Lane')
+    expect(screen.getByText('31 days until closing')).toBeInTheDocument()
+  })
 })

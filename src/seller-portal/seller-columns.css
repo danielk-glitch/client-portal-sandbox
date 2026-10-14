@@ -1,0 +1,52 @@
+/* Timeline · 2 column: a narrow property column beside a wide timeline column. */
+
+.portal-main--columns.MuiContainer-root { padding-top: 40px; }
+
+.columns-greeting {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.columns-greeting-date.MuiTypography-root {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--color-semantic-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.columns-greeting-title.MuiTypography-root { margin: 0; }
+.columns-greeting-status.MuiTypography-root { max-width: 36ch; text-align: right; text-wrap: balance; }
+
+.columns-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.columns-side,
+.columns-main { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; align-content: start; }
+.columns-main > * { grid-column: 1 / -1; }
+
+.columns-main > .advertising-snapshot.MuiPaper-root,
+.columns-main > .marketing-snapshot.MuiPaper-root { margin-top: 0; }
+
+.columns-main > .transaction-sections { min-width: 0; margin-top: 16px; }
+
+@media (max-width: 1099.95px) {
+  .columns-grid { grid-template-columns: minmax(0, 1fr); }
+  /* Flatten so the timeline sits right under the property card. */
+  .columns-side { display: contents; }
+  .columns-side > .property-summary { order: 1; }
+  .columns-main { order: 2; }
+  .columns-side > .people-section { order: 3; }
+}
+
+@media (max-width: 599.95px) {
+  .columns-greeting { flex-direction: column; align-items: flex-start; }
+  .columns-greeting-status.MuiTypography-root { text-align: left; }
+}
