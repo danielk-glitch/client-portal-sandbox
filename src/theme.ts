@@ -85,7 +85,46 @@ export const theme = createTheme({
   },
   components: {
     MuiButton: {
+      variants: [
+        {
+          props: { variant: 'onImagePrimary' },
+          style: {
+            color: primitive('neutral-800'),
+            backgroundColor: primitive('base-white'),
+            boxShadow: 'var(--elevation-raised)',
+            '& .MuiButton-loadingIndicator': { color: primitive('neutral-800') },
+            '&.MuiButton-loadingPositionCenter.MuiButton-loading': { color: 'transparent' },
+            '&:hover': { backgroundColor: primitive('neutral-100') },
+            '&:focus-visible': { outline: `2px solid ${primitive('neutral-800')}`, outlineOffset: 3 },
+            '&.Mui-disabled': {
+              color: `color-mix(in srgb, ${primitive('neutral-800')} 40%, transparent)`,
+              backgroundColor: `color-mix(in srgb, ${primitive('base-white')} 70%, transparent)`,
+              boxShadow: 'none',
+            },
+          },
+        },
+        {
+          props: { variant: 'onImageSecondary' },
+          style: {
+            color: primitive('base-white'),
+            border: 0,
+            '& .MuiButton-loadingIndicator': { color: primitive('base-white') },
+            '&.MuiButton-loadingPositionCenter.MuiButton-loading': { color: 'transparent' },
+            backgroundColor: `color-mix(in srgb, ${primitive('base-black')} 55%, transparent)`,
+            '&:hover': { backgroundColor: `color-mix(in srgb, ${primitive('base-black')} 67%, transparent)` },
+            '&:focus-visible': { outline: '2px solid currentColor', outlineOffset: 3 },
+            '&.Mui-disabled': {
+              color: `color-mix(in srgb, ${primitive('base-white')} 40%, transparent)`,
+              backgroundColor: `color-mix(in srgb, ${primitive('base-black')} 22%, transparent)`,
+            },
+          },
+        },
+      ],
       styleOverrides: {
+        loadingIndicator: { color: color('text-primary') },
+        sizeSmall: { ...type.labelS, minHeight: 44, padding: '8px 16px' },
+        sizeMedium: { ...type.labelM, minHeight: 48, padding: '12px 20px' },
+        sizeLarge: { ...type.titleXS, minHeight: 56, padding: '16px 24px' },
         root: {
           borderRadius: 999,
           paddingInline: 20,

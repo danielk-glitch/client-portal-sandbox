@@ -22,4 +22,4 @@ The portal may favor agent or team branding slightly, while nationwide search an
 
 Follow `DESIGN.md` for the detailed visual direction. Reuse the semantic tokens in `src/design-tokens.css` and `src/design-tokens.ts`.
 
-Whenever you add or change a PLACE component or design token, update `src/component-gallery/ComponentGallery.tsx` in the same change with its visual sample and relevant guidance; document variants and interaction states where they apply. List only components with project styling or implementation, not untouched MUI defaults.
+Whenever you add or change a PLACE component or design token, update `src/internal/component-gallery/ComponentGallery.tsx` in the same change with its visual sample and relevant guidance; document variants and interaction states where they apply. List only components with project styling or implementation, not untouched MUI defaults.

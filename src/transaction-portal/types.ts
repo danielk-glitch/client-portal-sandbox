@@ -30,6 +30,22 @@ export type UpcomingDate = {
   date: string
   title: string
   description: string
+  guidance?: {
+    explanation: string
+    preparation: string
+    resourceId: string
+  }
+}
+
+export type TransactionResource = {
+  id: string
+  title: string
+  shortTitle?: string
+  summary: string
+  readingTime: string
+  relevance: 'Useful now' | 'Coming up' | 'Good to know'
+  sections: Array<{ title: string; body?: string; points?: string[]; html?: string }>
+  questions: string[]
 }
 
 export type TransactionTask = {
@@ -69,8 +85,9 @@ export type TransactionDocument = {
   id: string
   name: string
   category: string
-  updatedAt: string
+  uploadedAt: string
   postedBy: string
   status: 'Ready to view' | 'Signature requested' | 'Signed'
   summary: string
+  thumbnailUrl?: string
 }

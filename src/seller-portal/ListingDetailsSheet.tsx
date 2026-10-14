@@ -1,5 +1,5 @@
 /* design-build · self-critique: Clarity5 Warmth4 Restraint5 Craft4 Variety4 SlopFree5 */
-import { Avatar, Box, Button, Chip, Divider, Drawer, IconButton, Stack, Typography } from '@mui/material'
+import { Avatar, Box, Button, Chip, Divider, IconButton, Stack, Typography } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import ArrowBackOutlined from '@mui/icons-material/ArrowBackOutlined'
 import CloseOutlined from '@mui/icons-material/CloseOutlined'
@@ -7,6 +7,7 @@ import GridViewOutlined from '@mui/icons-material/GridViewOutlined'
 import ImageOutlined from '@mui/icons-material/ImageOutlined'
 import type { ListingFact, SellerTransaction } from './sellerTransaction'
 import { PartnerBrandLockup } from '../transaction-portal/components/PartnerBrandLockup'
+import { PlaceSheet } from '../components/PlaceSheet'
 import './listing-details.css'
 
 type ListingDetailsSheetProps = {
@@ -58,14 +59,14 @@ export function ListingDetailsSheet({ open, onClose, transaction }: ListingDetai
   }
 
   return (
-    <Drawer
-      anchor="bottom"
+    <PlaceSheet
       open={open}
       onClose={closeSheet}
       className="listing-sheet-root"
-      slotProps={{ paper: { className: 'listing-sheet-paper', role: 'dialog', 'aria-label': `${photoView ? 'Photos' : 'Listing'} for ${listing.address}` } }}
+      paperClassName="listing-sheet-paper"
+      label={`${photoView ? 'Photos' : 'Listing'} for ${listing.address}`}
     >
-      <Box ref={scrollRef} className="listing-sheet-scroll">
+      <Box ref={scrollRef} className="place-sheet-scroll listing-sheet-scroll">
         {photoView ? (
           <>
             <Box component="header" className="listing-photo-view-header">
@@ -224,7 +225,7 @@ export function ListingDetailsSheet({ open, onClose, transaction }: ListingDetai
           </>
         )}
       </Box>
-    </Drawer>
+    </PlaceSheet>
   )
 }
 

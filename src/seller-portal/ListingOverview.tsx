@@ -2,30 +2,41 @@ import { Avatar, Box, Button, Chip, Paper, Stack, Typography } from '@mui/materi
 import HomeOutlined from '@mui/icons-material/HomeOutlined'
 import ImageOutlined from '@mui/icons-material/ImageOutlined'
 import ArrowOutwardOutlined from '@mui/icons-material/ArrowOutwardOutlined'
+import ContentCopyOutlined from '@mui/icons-material/ContentCopyOutlined'
+import { toast } from 'sonner'
 import { PortalOutlineTag } from '../components/PortalOutlineTag'
 import { PartnerBrandLockup, PersonContactActions } from '../transaction-portal/components'
 import type { SellerTransaction } from './sellerTransaction'
 import './seller-portal.css'
 
-export type ListingOverviewVariant = 'card' | 'full' | 'light' | 'light-bottom'
+export type ListingOverviewVariant = 'card' | 'full' | 'light' | 'light-bottom' | 'no-listing'
+
+export type HeaderListingLink = 'first-party' | 'idx-mvp'
+export const idxListingUrl = 'https://www.josiahubben.com/search/washington/bothell/bothell/17913-38th-dr-unit-20-bid-21-2541015'
 
 type ListingOverviewProps = {
   transaction: SellerTransaction
   onSeeListing: () => void
   variant?: ListingOverviewVariant
   polestarLayout?: boolean
+  listingLink?: HeaderListingLink
 }
 
-export function ListingOverview({ transaction, onSeeListing, variant = 'card', polestarLayout = false }: ListingOverviewProps) {
+export function ListingOverview({ transaction, onSeeListing, variant = 'card', polestarLayout = false, listingLink = 'first-party' }: ListingOverviewProps) {
   const { listing } = transaction
   const leadAgent = transaction.team.find((member) => member.id === transaction.teamBrand.leadAgentId)
   const address = `${listing.address}, ${listing.city}, ${listing.state} ${listing.postalCode}`
   const showPolestarCardLayout = polestarLayout && variant === 'card'
   const isLightVariant = variant === 'light' || variant === 'light-bottom'
+  const isNoListing = variant === 'no-listing'
 
   return (
     <Paper component="section" aria-label="Listing overview" className={`listing-overview listing-overview--${variant}${variant === 'light-bottom' ? ' listing-overview--light' : ''}`}>
-      <Box className="listing-photo">
+      {isNoListing ? (
+        <Box className="listing-no-listing-brand">
+          <PartnerBrandLockup brand={transaction.teamBrand} />
+        </Box>
+      ) : <Box className="listing-photo">
         {listing.photoUrl ? (
           <Box component="img" src={listing.photoUrl} alt={`Listing at ${address}`} className="listing-image" />
         ) : (
@@ -36,11 +47,9 @@ export function ListingOverview({ transaction, onSeeListing, variant = 'card', p
           </Stack>
         )}
         {(isLightVariant || showPolestarCardLayout) && (
-          <Button onClick={onSeeListing} variant="contained" className="listing-detail-link listing-detail-link--image">
-            See Listing
-          </Button>
+          <ListingActions onSeeListing={onSeeListing} listingLink={listingLink} published={listing.published} placement="image" />
         )}
-      </Box>
+      </Box>}
       <Box className="listing-summary">
         {variant === 'light-bottom' && (
           <Box className="listing-light-brand">
@@ -66,13 +75,16 @@ export function ListingOverview({ transaction, onSeeListing, variant = 'card', p
           {listing.city}, {listing.state} {listing.postalCode}
         </Typography>
         {variant === 'full' && (
-          <Button onClick={onSeeListing} variant="contained" className="listing-detail-link listing-detail-link--full">
-            See Listing
-          </Button>
+          <ListingActions onSeeListing={onSeeListing} listingLink={listingLink} published={listing.published} placement="full" />
         )}
         {isLightVariant && leadAgent && (
           <Box className="listing-light-agent">
             <ListingAgentDetails agent={leadAgent} inline={variant === 'light-bottom'} />
+          </Box>
+        )}
+        {isNoListing && (
+          <Box className="listing-no-listing-footer">
+            {leadAgent && <ListingAgentDetails agent={leadAgent} inline />}
           </Box>
         )}
         {variant === 'card' && <Box className="listing-feature-footer">
@@ -90,9 +102,7 @@ export function ListingOverview({ transaction, onSeeListing, variant = 'card', p
           {showPolestarCardLayout ? (
             <PartnerBrandLockup brand={transaction.teamBrand} />
           ) : (
-            <Button onClick={onSeeListing} variant="contained" className="listing-detail-link">
-              See Listing
-            </Button>
+            <ListingActions onSeeListing={onSeeListing} listingLink={listingLink} published={listing.published} placement="footer" />
           )}
         </Box>}
       </Box>
@@ -145,4 +155,31 @@ function ListingAgentDetails({ agent, inline = false }: { agent: SellerTransacti
 
 function formatPhoneNumber(phone: string) {
   return phone.replace(/^\+1(\d{3})(\d{3})(\d{4})$/, '($1) $2-$3')
+}
+
+function ListingActions({ onSeeListing, listingLink, published, placement }: { onSeeListing: () => void; listingLink: HeaderListingLink; published: boolean; placement: 'image' | 'full' | 'footer' }) {
+  const onImage = placement !== 'footer'
+  const buttonClass = `listing-detail-link${placement === 'footer' ? '' : ` listing-detail-link--${placement}`}`
+
+  async function copyListingLink() {
+    try {
+      await navigator.clipboard.writeText(idxListingUrl)
+      toast.success('Listing link copied', { id: 'listing-link' })
+    } catch {
+      toast.error('Couldn’t copy the link. Please try again.', { id: 'listing-link' })
+    }
+  }
+
+  if (!published || listingLink === 'first-party') {
+    return <Button onClick={onSeeListing} variant={onImage ? 'onImagePrimary' : 'contained'} className={buttonClass}>{published ? 'See Listing' : 'Preview listing'}</Button>
+  }
+
+  return (
+    <Box className={`listing-actions listing-actions--${placement}`}>
+      <Button type="button" variant={onImage ? 'onImageSecondary' : 'outlined'} onClick={copyListingLink} className={onImage ? undefined : 'listing-copy-link'} endIcon={<ContentCopyOutlined aria-hidden="true" />}>Copy link</Button>
+      <Button component="a" href={idxListingUrl} target="_blank" rel="noopener noreferrer" variant={onImage ? 'onImagePrimary' : 'contained'} className={buttonClass} endIcon={<ArrowOutwardOutlined aria-hidden="true" />} aria-label="See Listing (opens in a new tab)">
+        See Listing
+      </Button>
+    </Box>
+  )
 }

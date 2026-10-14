@@ -16,17 +16,24 @@ const eventIcons = {
   note: <StickyNote2Outlined />,
 }
 
-export function ActivityEventRow({ event }: { event: TimelineEvent }) {
+export function ActivityEventRow({ event, variant = 'standard' }: { event: TimelineEvent; variant?: 'standard' | 'compact' }) {
+  const compact = variant === 'compact'
   return (
-    <Box component="li" className="activity-event-row">
-      <PortalIconBadge>{eventIcons[event.type]}</PortalIconBadge>
+    <Box component="li" className={`activity-event-row activity-event-row--${variant}`}>
+      <PortalIconBadge size={compact ? 's' : 'm'}>{eventIcons[event.type]}</PortalIconBadge>
       <Box className="activity-event-copy">
         <Box className="activity-event-heading">
           <Typography variant="titleXS">{event.title}</Typography>
-          <Typography variant="labelS" color="text.secondary" className="activity-event-date">{event.occurredAt}</Typography>
+          {!compact && <Typography variant="labelS" color="text.secondary" className="activity-event-date">{event.occurredAt}</Typography>}
         </Box>
         <Typography variant="bodySStandard" color="text.secondary">{event.description}</Typography>
-        <Typography variant="labelS" className="activity-event-actor">{event.actor}</Typography>
+        {compact ? (
+          <Box className="activity-event-meta">
+            <Typography variant="labelS" className="activity-event-actor">{event.actor}</Typography>
+            <Typography component="span" variant="labelS" color="text.secondary" aria-hidden="true">·</Typography>
+            <Typography variant="labelS" color="text.secondary" className="activity-event-date">{event.occurredAt}</Typography>
+          </Box>
+        ) : <Typography variant="labelS" className="activity-event-actor">{event.actor}</Typography>}
       </Box>
     </Box>
   )

@@ -1,0 +1,21 @@
+.listing-preparation.MuiPaper-root {
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+  padding: 32px;
+  border-radius: 14px;
+  border: 0;
+  background: var(--color-semantic-surface-reverse-secondary);
+  color: var(--color-semantic-text-on-color-primary);
+  box-shadow: none;
+}
+.listing-preparation-message.MuiTypography-root {
+  max-width: 75ch;
+  color: var(--color-semantic-text-on-color-light);
+  text-wrap: pretty;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 900px) {
+  .listing-preparation.MuiPaper-root { padding: 24px; }
+}

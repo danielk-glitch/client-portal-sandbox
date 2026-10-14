@@ -88,9 +88,10 @@
 }
 
 .portal-date-row {
+  --date-stamp-size: 64px;
   position: relative;
   display: grid;
-  grid-template-columns: 64px minmax(0, 1fr);
+  grid-template-columns: var(--date-stamp-size) minmax(0, 1fr);
   align-items: center;
   gap: 18px;
   padding: 18px 0;
@@ -123,7 +124,76 @@
 .portal-date-copy {
   min-width: 0;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 4px;
+}
+
+.portal-date-row--resource { grid-template-columns: var(--date-stamp-size) minmax(0, 1fr) auto; }
+
+.portal-date-row-main.MuiButtonBase-root {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  min-width: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: center;
+  justify-items: start;
+  text-align: left;
+  isolation: isolate;
+  border-radius: 8px;
+}
+
+.portal-date-row-main::after {
+  position: absolute;
+  inset: -10px -12px;
+  z-index: -1;
+  content: '';
+  border-radius: 10px;
+  background: transparent;
+  transition: background-color 140ms ease;
+}
+
+.portal-date-row-main:hover::after { background: var(--color-semantic-surface-primary-dark); }
+.portal-date-row-main:focus-visible { outline: 2px solid var(--color-semantic-stroke-primary-dark); outline-offset: 6px; }
+.portal-date-copy > .MuiTypography-root { text-wrap: pretty; }
+
+.portal-date-resource.MuiChip-root {
+  position: relative;
+  z-index: 1;
+  grid-column: 3;
+  grid-row: 1;
+  align-self: center;
+  justify-self: start;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 36px;
+  height: auto;
+  padding-block: 4px;
+  color: var(--color-semantic-text-primary);
+  border-color: var(--color-semantic-stroke-primary-light);
+  background: var(--color-semantic-surface-primary);
+  font: inherit;
+  font-size: 0.75rem;
+  text-align: left;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.portal-date-resource.MuiChip-root .MuiChip-icon { font-size: 16px; margin-left: 12px; margin-right: 0; color: inherit; }
+.portal-date-resource.MuiChip-root .MuiChip-label { min-width: 0; padding-inline: 8px 12px; white-space: normal; }
+.portal-date-resource.MuiChip-root:hover { background: var(--color-semantic-surface-primary-dark); color: var(--color-semantic-text-dark); }
+.portal-date-resource.MuiChip-root:focus-visible { outline: 2px solid var(--color-semantic-stroke-primary-dark); outline-offset: 3px; }
+
+@media (max-width: 600px) {
+  .portal-date-row--resource { grid-template-columns: var(--date-stamp-size) minmax(0, 1fr); gap: 12px 18px; }
+  .portal-date-row--resource .portal-date-row-main { grid-row: 1 / span 2; grid-template-rows: subgrid; align-items: start; }
+  .portal-date-row--resource .portal-date-row-main > * { grid-row: 1; }
+  .portal-date-resource.MuiChip-root { min-height: 44px; grid-column: 2; grid-row: 2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-date-resource.MuiChip-root,
+  .portal-date-row-main::after { transition: none; }
 }
 
 .portal-date-meta.MuiTypography-root {

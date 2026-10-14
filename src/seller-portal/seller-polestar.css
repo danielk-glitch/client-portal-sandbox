@@ -208,6 +208,7 @@ body:has(.seller-portal--polestar),
 .seller-portal--polestar .portal-section > .MuiDivider-root { border-color: var(--ps-rule); }
 .seller-portal--polestar .activity-event-row + .activity-event-row { border-color: var(--ps-rule); }
 .seller-portal--polestar .portal-date-list::before { background: var(--ps-rule); }
+.seller-portal--polestar .upcoming-dates-card .portal-date-row::before { background: var(--ps-rule); }
 .seller-portal--polestar .portal-date-stamp { background: var(--ps-surface); color: var(--ps-ink); }
 
 .seller-portal--polestar .marketing-snapshot.MuiPaper-root,

@@ -21,6 +21,7 @@ import type {
   TransactionTask,
   TransactionViewer,
   UpcomingDate,
+  TransactionResource,
 } from '../transaction-portal/types'
 
 export type {
@@ -69,6 +70,8 @@ export type SellerTransaction = {
   viewers: TransactionViewer[]
   timeline: TimelineEvent[]
   upcomingDates: UpcomingDate[]
+  resources?: TransactionResource[]
+  clientMessage?: { title: string; body: string }
   tasks: TransactionTask[]
   advertising: AdvertisingEvent[]
   feedback: ShowingFeedback[]
@@ -347,7 +350,7 @@ export const sampleSellerTransaction: SellerTransaction = {
       id: 'doc-1',
       name: 'Exclusive listing agreement',
       category: 'Listing paperwork',
-      updatedAt: '09/14/2026',
+      uploadedAt: '09/14/2026',
       postedBy: 'Morgan Ellis',
       status: 'Signed',
       summary: 'The signed agreement for the property listing, including the marketing period and agreed listing terms.',
@@ -356,7 +359,7 @@ export const sampleSellerTransaction: SellerTransaction = {
       id: 'doc-2',
       name: 'Property disclosures',
       category: 'Property information',
-      updatedAt: '09/12/2026',
+      uploadedAt: '09/12/2026',
       postedBy: 'Avery Coleman',
       status: 'Signature requested',
       summary: 'Disclosure forms for the seller to review and complete.',
@@ -365,7 +368,7 @@ export const sampleSellerTransaction: SellerTransaction = {
       id: 'doc-3',
       name: 'Listing presentation',
       category: 'Marketing',
-      updatedAt: '09/08/2026',
+      uploadedAt: '09/08/2026',
       postedBy: 'Kendall Ortiz',
       status: 'Ready to view',
       summary: 'A summary of the current marketing plan and published listing destinations.',
@@ -374,7 +377,7 @@ export const sampleSellerTransaction: SellerTransaction = {
       id: 'doc-4',
       name: 'Showing feedback summary',
       category: 'Updates',
-      updatedAt: '09/06/2026',
+      uploadedAt: '09/06/2026',
       postedBy: 'Morgan Ellis',
       status: 'Ready to view',
       summary: 'A collected view of buyer comments received after recent showings.',

@@ -1,0 +1,146 @@
+.feedback-toolbar {
+  --feedback-ink: var(--color-primitive-neutral-50);
+  --feedback-surface: var(--color-primitive-neutral-900);
+  --feedback-duration: 170ms;
+  --feedback-trigger-size: 52px;
+  position: fixed;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  height: var(--feedback-trigger-size);
+  border-radius: calc(var(--feedback-trigger-size) / 2);
+  color: var(--feedback-ink);
+  pointer-events: none;
+  isolation: isolate;
+}
+
+.feedback-toolbar-surface {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  isolation: isolate;
+}
+
+.feedback-toolbar[data-expanded="true"]::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  z-index: -1;
+  pointer-events: auto;
+}
+
+.feedback-toolbar-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--feedback-surface);
+  transform: translateX(calc(100% - var(--feedback-trigger-size)));
+  transition: transform var(--feedback-duration) cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.feedback-toolbar[data-expanded="true"] { --feedback-duration: 220ms; }
+.feedback-toolbar[data-expanded="true"] .feedback-toolbar-surface::before { transform: translateX(0); }
+
+.feedback-toolbar-controls {
+  min-width: 0;
+  order: 1;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-left: 6px;
+  opacity: 0;
+  transform: translateX(12px);
+  transition: transform var(--feedback-duration) cubic-bezier(0.65, 0, 0.35, 1), opacity 130ms ease-out;
+}
+
+.feedback-toolbar[data-expanded="true"] .feedback-toolbar-controls {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.feedback-toolbar-trigger {
+  order: 2;
+  display: grid;
+  place-items: center;
+  flex: 0 0 var(--feedback-trigger-size);
+  width: var(--feedback-trigger-size);
+  height: var(--feedback-trigger-size);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--feedback-surface);
+  color: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.feedback-toolbar-controls .MuiButton-root,
+.feedback-toolbar-controls .annotation-layer-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 22px;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.feedback-toolbar-controls .MuiButton-startIcon { margin: 0; }
+.feedback-toolbar-controls .MuiButton-startIcon .MuiSvgIcon-root { font-size: 20px; }
+.feedback-toolbar-controls .MuiButton-root[aria-expanded="true"] { background: var(--color-primitive-neutral-800); }
+
+.feedback-toolbar-trigger:focus-visible,
+.feedback-toolbar-controls .MuiButton-root:focus-visible {
+  outline: 2px solid var(--feedback-ink);
+  outline-offset: -4px;
+}
+
+.feedback-toolbar--inline { position: relative; right: auto; bottom: auto; z-index: 1; max-width: 100%; margin-left: auto; }
+
+@media (hover: hover) and (pointer: fine) {
+  .feedback-toolbar-trigger:hover,
+  .feedback-toolbar-controls .MuiButton-root:hover,
+  .feedback-toolbar-controls .annotation-layer-trigger:hover { background: var(--color-primitive-neutral-800); color: inherit; box-shadow: none; }
+}
+
+@media (max-width: 600px) {
+  .feedback-toolbar { --feedback-trigger-size: 48px; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); }
+  .feedback-toolbar-controls { gap: 0; padding-left: 4px; }
+  .feedback-toolbar-controls .MuiButton-root,
+  .feedback-toolbar-controls .annotation-layer-trigger { padding-inline: 8px; }
+  .feedback-toolbar-controls .design-panel-trigger.MuiButton-root { flex: 0 0 44px; padding: 0; }
+  .feedback-toolbar-controls .design-panel-trigger-label { display: none; }
+  .feedback-toolbar-controls .annotation-layer-trigger { flex-shrink: 0; }
+  .feedback-toolbar-controls .journey-view-trigger { flex: 1 1 auto; }
+  .feedback-toolbar--inline { right: auto; bottom: auto; }
+}
+
+.feedback-toolbar[data-keyboard="true"] .feedback-toolbar-surface::before,
+.feedback-toolbar[data-keyboard="true"] .feedback-toolbar-controls { transition: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .feedback-toolbar-surface::before,
+  .feedback-toolbar-controls { transition: none; }
+}

@@ -1,6 +1,7 @@
 import { sampleSellerTransaction, type SellerTransaction, type TimelineEvent } from './sellerTransaction'
 import type { MarketingSnapshotData } from './MarketingSnapshot'
 import { sampleMarketingMaterials } from './marketingMaterials'
+import { sellerMilestoneGuidance, sellerResources } from './sellerResources'
 
 const additionalTimelineEvents: TimelineEvent[] = [
   {
@@ -144,6 +145,8 @@ const additionalTimelineEvents: TimelineEvent[] = [
 export const futureSellerTransaction: SellerTransaction = {
   ...structuredClone(sampleSellerTransaction),
   timeline: [...sampleSellerTransaction.timeline, ...additionalTimelineEvents],
+  upcomingDates: sampleSellerTransaction.upcomingDates.map((date) => ({ ...date, guidance: sellerMilestoneGuidance[date.id] })),
+  resources: sellerResources,
 }
 
 export const futureMarketingSnapshot: MarketingSnapshotData = {

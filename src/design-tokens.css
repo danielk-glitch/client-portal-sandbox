@@ -3,6 +3,7 @@
 :root {
   color-scheme: light;
   --color-semantic-surface-glass: color-mix(in srgb, var(--color-primitive-base-white) 94%, transparent);
+  --elevation-document: 0 4px 16px -4px color-mix(in srgb, var(--color-primitive-base-black) 16%, transparent);
   --elevation-raised: 0 20px 48px -30px oklch(0.21 0.032 265 / 0.23), 0 4px 16px -10px oklch(0.21 0.032 265 / 0.13);
   --elevation-hero: 0 30px 64px -38px oklch(0.21 0.032 265 / 0.3), 0 8px 24px -16px oklch(0.21 0.032 265 / 0.17);
   --color-primitive-gray-50: oklch(0.985 0.000 0.000);

@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react'
-import { Avatar, Box, Button, Chip, IconButton, Rating, Stack, Typography } from '@mui/material'
+import { useState, type ReactNode } from 'react'
+import { Avatar, Box, Button, ButtonBase, Chip, IconButton, Rating, Stack, Typography } from '@mui/material'
+import MenuBookOutlined from '@mui/icons-material/MenuBookOutlined'
 import CampaignOutlined from '@mui/icons-material/CampaignOutlined'
 import EmailOutlined from '@mui/icons-material/EmailOutlined'
 import Favorite from '@mui/icons-material/Favorite'
@@ -13,9 +14,11 @@ import type {
   TeamMember,
   TransactionDocument,
   TransactionTask,
+  TransactionResource,
   UpcomingDate,
 } from '../types'
 import { PortalIconBadge } from './PortalIconBadge'
+import { MilestoneExplanation } from './MilestoneExplanation'
 import './transaction-rows.css'
 
 type Person = Pick<TeamMember, 'name' | 'role' | 'initials' | 'photoUrl'>
@@ -66,22 +69,29 @@ export function DateEventList({ children }: { children: ReactNode }) {
   return <Box component="ol" className="portal-date-list">{children}</Box>
 }
 
-export function DateEventRow({ date, title, description, children }: Pick<UpcomingDate, 'date' | 'title' | 'description'> & { children?: ReactNode }) {
+export function DateEventRow({ date, title, description, children, guidance, resource, onReadResource }: Pick<UpcomingDate, 'date' | 'title' | 'description' | 'guidance'> & { children?: ReactNode; resource?: TransactionResource; onReadResource?: () => void }) {
+  const [explanationOpen, setExplanationOpen] = useState(false)
   const value = new Date(`${date}T12:00:00Z`)
   const month = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' }).format(value)
   const day = new Intl.DateTimeFormat('en-US', { day: '2-digit', timeZone: 'UTC' }).format(value)
+  const hasResource = resource && onReadResource
+  const content = <>
+    <Box component="time" dateTime={date} className="portal-date-stamp">
+      <Typography variant="labelS">{month}</Typography>
+      <Typography variant="metricM">{day}</Typography>
+    </Box>
+    <Box component="span" className="portal-date-copy">
+      <Typography variant="titleXS">{title}</Typography>
+      <Typography variant="bodySStandard" color="text.secondary">{description}</Typography>
+      {children && <Typography variant="labelS" color="text.secondary" className="portal-date-meta">{children}</Typography>}
+    </Box>
+  </>
 
   return (
-    <Box component="li" className="portal-date-row">
-      <Box component="time" dateTime={date} className="portal-date-stamp">
-        <Typography variant="labelS">{month}</Typography>
-        <Typography variant="metricM">{day}</Typography>
-      </Box>
-      <Box className="portal-date-copy">
-        <Typography variant="titleXS">{title}</Typography>
-        <Typography variant="bodySStandard" color="text.secondary">{description}</Typography>
-        {children && <Typography variant="labelS" color="text.secondary" className="portal-date-meta">{children}</Typography>}
-      </Box>
+    <Box component="li" className={`portal-date-row${hasResource ? ' portal-date-row--resource' : ''}`}>
+      {guidance ? <ButtonBase className="portal-date-row-main" onClick={() => setExplanationOpen(true)} aria-haspopup="dialog" aria-label={`About ${title}`} disableRipple>{content}</ButtonBase> : content}
+      {hasResource && <Chip component="button" type="button" variant="outlined" icon={<MenuBookOutlined />} label={`Resource: ${resource.shortTitle ?? resource.title}`} title={resource.title} aria-label={`Read ${resource.title}`} onClick={onReadResource} className="portal-date-resource" />}
+      {guidance && <MilestoneExplanation title={title} guidance={guidance} resource={resource} open={explanationOpen} onClose={() => setExplanationOpen(false)} onReadGuide={onReadResource} />}
     </Box>
   )
 }
@@ -138,7 +148,7 @@ export function DocumentRow({ document, onPreview }: { document: TransactionDocu
       <PortalIconBadge><InsertDriveFileOutlined /></PortalIconBadge>
       <Box className="portal-document-copy">
         <Typography variant="titleXS">{document.name}</Typography>
-        <Typography variant="bodySStandard" color="text.secondary">{document.category} · Updated {document.updatedAt}</Typography>
+        <Typography variant="bodySStandard" color="text.secondary">Uploaded {document.uploadedAt}</Typography>
         <Typography variant="labelS" className="portal-document-attribution">Added by {document.postedBy}</Typography>
       </Box>
       <Chip label={document.status} size="small" variant="outlined" className="portal-document-status" />

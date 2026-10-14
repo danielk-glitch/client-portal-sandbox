@@ -1,5 +1,5 @@
-/* design-build · self-critique: Clarity5 Warmth4 Restraint4 Craft4 Variety5 SlopFree5 */
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+/* design-build · self-critique: Clarity5 Warmth4 Restraint5 Craft4 Variety4 SlopFree5 */
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   Avatar,
   Box,
@@ -11,20 +11,14 @@ import {
   DialogTitle,
   Divider,
   Drawer,
-  FormControlLabel,
   IconButton,
-  Popover,
-  Radio,
-  RadioGroup,
   Stack,
   Tab,
   Tabs,
   Typography,
 } from '@mui/material'
 import CloseOutlined from '@mui/icons-material/CloseOutlined'
-import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined'
 import InsertDriveFileOutlined from '@mui/icons-material/InsertDriveFileOutlined'
-import TuneOutlined from '@mui/icons-material/TuneOutlined'
 import { brandAssets } from '../assets/brand'
 import {
   sampleSellerTransaction,
@@ -36,17 +30,20 @@ import {
   type UpcomingDate,
 } from './sellerTransaction'
 import { ListingDetailsSheet } from './ListingDetailsSheet'
-import { ListingOverview, type ListingOverviewVariant } from './ListingOverview'
+import { ListingOverview, type ListingOverviewVariant, type HeaderListingLink } from './ListingOverview'
 import { MarketingSnapshot, type MarketingSnapshotData } from './MarketingSnapshot'
 import { AdvertisingSnapshot } from './AdvertisingSnapshot'
 import { marketingFeedbackLayouts, type MarketingFeedbackLayout } from './marketingFeedbackLayouts'
 import { MarketingDashboardSheet, type MarketingDashboardSection } from './MarketingDashboardSheet'
 import {
+  ResourcesPanel,
+  ResourceGuideSheet,
   ActivityEventRow,
   ActivityPanel,
   DateEventList,
   DateEventRow,
-  DocumentRow,
+  DocumentsPanel,
+  DocumentThumbnail,
   PeopleSection,
   PaginatedTabList,
   PortalIconBadge,
@@ -57,9 +54,11 @@ import {
   TransactionRowList,
   type PeopleTab,
 } from '../transaction-portal/components'
+import type { TransactionResource } from '../transaction-portal/types'
 import { CardActionButton } from '../components/CardActionButton'
-import { AnnotationLayer } from '../components/AnnotationLayer'
-import { sellerAnnotations } from './sellerAnnotations'
+import { ListingPreparation } from './ListingPreparation'
+import { createBeforeListingTransaction, readSellerJourneyView, type SellerJourneyView } from '../internal/review/sellerJourneyViews'
+import { SellerReviewTools } from '../internal/review/SellerReviewTools'
 import './seller-portal.css'
 import './seller-polestar.css'
 
@@ -69,18 +68,26 @@ type SellerPortalProps = {
   initialListingOpen?: boolean
   basePath?: string
   visualTheme?: 'polestar'
+  readOnly?: boolean
+  showReviewTools?: boolean
 }
 
-export type PortalTab = 'activity' | 'tasks' | 'notes' | 'documents'
+export type PortalTab = 'activity' | 'tasks' | 'notes' | 'documents' | 'resources'
 
 export const portalTabs: Array<{ id: PortalTab; label: string }> = [
   { id: 'activity', label: 'Activity' },
   { id: 'tasks', label: 'Tasks' },
   { id: 'notes', label: 'Notes' },
   { id: 'documents', label: 'Documents' },
+  { id: 'resources', label: 'Resources' },
 ]
 
-export function SellerPortal({ transaction = sampleSellerTransaction, marketingSnapshot, initialListingOpen = false, basePath = '/seller', visualTheme }: SellerPortalProps) {
+export function SellerPortal({ transaction: baseTransaction = sampleSellerTransaction, marketingSnapshot, initialListingOpen = false, basePath = '/seller', visualTheme, readOnly = false, showReviewTools = true }: SellerPortalProps) {
+  const [journeyView, setJourneyView] = useState(() => readSellerJourneyView(window.location.search))
+  const beforeListing = journeyView === 'before-listing'
+  const transaction = useMemo(() => beforeListing ? createBeforeListingTransaction(baseTransaction) : baseTransaction, [beforeListing, baseTransaction])
+  const availableTabs = portalTabs.filter((tab) => tab.id !== 'resources' || Boolean(transaction.resources?.length))
+  const [selectedResource, setSelectedResource] = useState<TransactionResource | null>(null)
   const portalRef = useRef<HTMLDivElement>(null)
   const defaultMarketingLayout = marketingSnapshot?.insights ? 'views' : 'materials'
   const [headerVariant, setHeaderVariant] = useState<ListingOverviewVariant>(() => {
@@ -89,7 +96,9 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
     if (requestedHeader === 'card' || requestedHeader === 'full' || requestedHeader === 'light' || requestedHeader === 'light-bottom') return requestedHeader
     return 'light-bottom'
   })
-  const [designPanelAnchor, setDesignPanelAnchor] = useState<HTMLElement | null>(null)
+  const [listingLink, setListingLink] = useState<HeaderListingLink>(() =>
+    new URLSearchParams(window.location.search).get('listingLink') === 'idx-mvp' ? 'idx-mvp' : 'first-party',
+  )
   const [feedbackLayout, setFeedbackLayout] = useState<MarketingFeedbackLayout>(() => {
     const requestedLayout = new URLSearchParams(window.location.search).get('feedback')
     return marketingFeedbackLayouts.find((layout) => layout.id === requestedLayout)?.id ?? 'editorial'
@@ -101,21 +110,22 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
   const [activeTab, setActiveTab] = useState<PortalTab>(() => {
     const requestedTab = new URLSearchParams(window.location.search).get('section')
     if (requestedTab === 'timeline') return 'activity'
-    return portalTabs.find((tab) => tab.id === requestedTab)?.id ?? 'activity'
+    return availableTabs.find((tab) => tab.id === requestedTab)?.id ?? 'activity'
   })
-  const visibleTab = portalTabs.find((tab) => tab.id === activeTab)?.id ?? 'activity'
+  const visibleTab = availableTabs.find((tab) => tab.id === activeTab)?.id ?? 'activity'
   const [activePeopleTab, setActivePeopleTab] = useState<PeopleTab>(() =>
     new URLSearchParams(window.location.search).get('people') === 'viewers' ? 'viewers' : 'team',
   )
   const [selectedDocument, setSelectedDocument] = useState<TransactionDocument | null>(null)
   const [datesDrawerOpen, setDatesDrawerOpen] = useState(false)
   const [marketingDashboardSection, setMarketingDashboardSection] = useState<MarketingDashboardSection | null>(() => {
+    if (beforeListing) return null
     const requestedDetail = new URLSearchParams(window.location.search).get('marketing')
     if (requestedDetail === 'advertising' || requestedDetail === 'activity') return 'activity'
     return requestedDetail === 'overview' || requestedDetail === 'materials' || requestedDetail === 'feedback' ? requestedDetail : null
   })
   const [listingOpen, setListingOpen] = useState(initialListingOpen)
-  const listingReturnUrl = useRef(basePath)
+  const listingReturnUrl = useRef(`${basePath}${window.location.search}${window.location.hash}`)
   const leadAgent = transaction.team.find((member) => member.id === transaction.teamBrand.leadAgentId)
   const listingPath = `${basePath.replace(/\/$/, '')}/listing`
 
@@ -143,7 +153,7 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
     }
 
     return () => observer.disconnect()
-  }, [marketingSnapshot])
+  }, [marketingSnapshot, journeyView])
 
   useEffect(() => {
     const target = window.location.hash.slice(1)
@@ -155,24 +165,33 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
   useEffect(() => {
     const url = new URL(window.location.href)
     const section = url.searchParams.get('section')
-    if (section && !portalTabs.some((tab) => tab.id === section)) {
+    if (section && !portalTabs.some((tab) => tab.id === section && (section !== 'resources' || transaction.resources?.length))) {
       url.searchParams.delete('section')
       window.history.replaceState(null, '', url)
     }
-  }, [])
+  }, [transaction.resources])
 
   useEffect(() => {
     function syncListingRoute() {
       setListingOpen(window.location.pathname.replace(/\/$/, '') === listingPath)
+      setJourneyView(readSellerJourneyView(window.location.search))
+      const params = new URLSearchParams(window.location.search)
+      const section = params.get('section')
+      setActiveTab(section === 'timeline' ? 'activity' : portalTabs.find((tab) => tab.id === section && (tab.id !== 'resources' || baseTransaction.resources?.length))?.id ?? 'activity')
+      setActivePeopleTab(params.get('people') === 'viewers' ? 'viewers' : 'team')
+      setMarketingDashboardSection(null)
+      setDatesDrawerOpen(false)
+      setSelectedDocument(null)
+      setSelectedResource(null)
     }
 
     window.addEventListener('popstate', syncListingRoute)
     return () => window.removeEventListener('popstate', syncListingRoute)
-  }, [listingPath])
+  }, [listingPath, baseTransaction.resources])
 
   function openListing() {
     listingReturnUrl.current = `${window.location.pathname}${window.location.search}${window.location.hash}`
-    window.history.pushState(null, '', listingPath)
+    window.history.pushState(null, '', `${listingPath}${window.location.search}`)
     setListingOpen(true)
   }
 
@@ -188,6 +207,21 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
     window.history.replaceState(null, '', url)
   }
 
+  function selectJourneyView(value: SellerJourneyView) {
+    if (value === journeyView) return
+    const url = new URL(window.location.href)
+    url.pathname = basePath
+    url.searchParams.set('view', value)
+    url.searchParams.delete('marketing')
+    window.history.pushState(null, '', url)
+    setJourneyView(value)
+    setListingOpen(false)
+    setMarketingDashboardSection(null)
+    setDatesDrawerOpen(false)
+    setSelectedDocument(null)
+    setSelectedResource(null)
+  }
+
   function selectPeopleTab(value: PeopleTab) {
     setActivePeopleTab(value)
     const url = new URL(window.location.href)
@@ -200,6 +234,14 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
     const url = new URL(window.location.href)
     if (value === 'light-bottom') url.searchParams.delete('header')
     else url.searchParams.set('header', value)
+    window.history.replaceState(null, '', url)
+  }
+
+  function selectListingLink(value: HeaderListingLink) {
+    setListingLink(value)
+    const url = new URL(window.location.href)
+    if (value === 'first-party') url.searchParams.delete('listingLink')
+    else url.searchParams.set('listingLink', value)
     window.history.replaceState(null, '', url)
   }
 
@@ -225,6 +267,11 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
       document.getElementById('transaction-information')?.scrollIntoView({ block: 'start' })
       document.getElementById('seller-tab-activity')?.focus({ preventScroll: true })
     })
+  }
+
+  function openMilestoneGuide(resourceId: string) {
+    const resource = transaction.resources?.find((item) => item.id === resourceId)
+    if (resource) setSelectedResource(resource)
   }
 
   function closeMarketingDetail() {
@@ -258,9 +305,12 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
       </Box>
 
       <Container maxWidth="xl" className="portal-main">
-        <ListingOverview transaction={transaction} onSeeListing={openListing} variant={headerVariant} polestarLayout={visualTheme === 'polestar'} />
+        <ListingOverview transaction={transaction} onSeeListing={openListing} listingLink={listingLink} variant={beforeListing ? 'no-listing' : headerVariant} polestarLayout={visualTheme === 'polestar'} />
+
+        {beforeListing && transaction.clientMessage && <ListingPreparation message={transaction.clientMessage} />}
 
         <Box className="priority-grid" aria-label="Current transaction activity">
+          <UpcomingDatesPanel dates={transaction.upcomingDates} resources={transaction.resources} onSeeAll={() => setDatesDrawerOpen(true)} onReadGuide={openMilestoneGuide} />
           <PortalSection
             title="Recent activity"
             prominent
@@ -268,10 +318,9 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
           >
             <TimelineEventsList events={transaction.timeline.slice(0, 3)} />
           </PortalSection>
-          <UpcomingDatesPanel dates={transaction.upcomingDates} onSeeAll={() => setDatesDrawerOpen(true)} />
         </Box>
 
-        {marketingSnapshot && marketingLayout === 'views' && marketingSnapshot.insights ? (
+        {!beforeListing && (marketingSnapshot && marketingLayout === 'views' && marketingSnapshot.insights ? (
           <AdvertisingSnapshot
             data={marketingSnapshot.insights}
             feedback={transaction.feedback}
@@ -284,7 +333,7 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
             feedbackLayout={feedbackLayout}
             onOpenDashboard={() => setMarketingDashboardSection('overview')}
           />
-        )}
+        ))}
 
         <Box className="transaction-lower-grid">
           <PeopleSection team={transaction.team} viewers={transaction.viewers} value={activePeopleTab} onChange={selectPeopleTab} />
@@ -299,7 +348,7 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
                 allowScrollButtonsMobile
                 aria-label="Transaction information"
               >
-                {portalTabs.map((tab) => (
+                {availableTabs.map((tab) => (
                   <Tab
                     key={tab.id}
                     id={`seller-tab-${tab.id}`}
@@ -317,11 +366,12 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
               aria-labelledby={`seller-tab-${visibleTab}`}
               className="portal-panel"
             >
+              {visibleTab === 'resources' && transaction.resources && <ResourcesPanel resources={transaction.resources} onOpen={setSelectedResource} />}
               {visibleTab === 'activity' && <ActivityPanel events={transaction.timeline} />}
               {visibleTab === 'tasks' && <TasksPanel tasks={transaction.tasks} />}
               {visibleTab === 'notes' && <NotesPanel notes={transaction.notes} />}
               {visibleTab === 'documents' && (
-                <DocumentsPanel documents={transaction.documents} onOpen={setSelectedDocument} />
+                <DocumentsPanel readOnly={readOnly} key={`${transaction.listing.mlsNumber}:${transaction.viewers[0]?.id}`} storageKey={`place-document-pins:${transaction.listing.mlsNumber}:${transaction.viewers[0]?.id ?? "guest"}`} documents={transaction.documents} onOpen={setSelectedDocument} />
               )}
             </Box>
           </Box>
@@ -330,76 +380,25 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
 
       <PortalFooter agent={leadAgent} brand={transaction.teamBrand} />
 
-      <Box className="floating-design-tools">
-        {marketingSnapshot && <AnnotationLayer annotations={sellerAnnotations} />}
-        <Button
-          variant="contained"
-          startIcon={<TuneOutlined />}
-          className="design-panel-trigger"
-          onClick={(event) => setDesignPanelAnchor(event.currentTarget)}
-          aria-label="Open design panel"
-          aria-haspopup="dialog"
-          aria-expanded={Boolean(designPanelAnchor)}
-          aria-controls={designPanelAnchor ? 'seller-design-panel' : undefined}
-        >
-          <Box component="span" className="design-panel-trigger-label">Design panel</Box>
-        </Button>
-      </Box>
-
-      <Popover
-        id="seller-design-panel"
-        open={Boolean(designPanelAnchor)}
-        anchorEl={designPanelAnchor}
-        onClose={() => setDesignPanelAnchor(null)}
-        anchorOrigin={{ vertical: -12, horizontal: 'right' }}
-        transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        disableScrollLock
-        slotProps={{ paper: { className: 'design-panel-paper', role: 'dialog', 'aria-label': 'Design panel' } }}
-      >
-        <Box className="design-panel-header">
-          <Box>
-            <Typography component="h2" variant="titleS">Design panel</Typography>
-            <Typography variant="bodySStandard" color="text.secondary">Preview page layouts</Typography>
-          </Box>
-          <IconButton onClick={() => setDesignPanelAnchor(null)} aria-label="Close design panel">
-            <CloseOutlined />
-          </IconButton>
-        </Box>
-        <Box className="design-panel-content">
-          {visualTheme !== 'polestar' && (
-            <Box className="design-panel-option-section">
-              <Typography component="h3" variant="titleXS" id="header-layout-label">Header layout</Typography>
-              <RadioGroup aria-labelledby="header-layout-label" value={headerVariant} onChange={(event) => selectHeaderVariant(event.target.value as ListingOverviewVariant)}>
-                <FormControlLabel value="card" control={<Radio />} label="Card" />
-                <FormControlLabel value="full" control={<Radio />} label="Full width · Dark" />
-                <FormControlLabel value="light" control={<Radio />} label="Full width · Light split" />
-                <FormControlLabel value="light-bottom" control={<Radio />} label="Light split · Bottom aligned" />
-              </RadioGroup>
-            </Box>
-          )}
-          {marketingSnapshot && (
-            <Box className="design-panel-option-section">
-              <Typography component="h3" variant="titleXS" id="marketing-layout-label">Marketing block</Typography>
-              <RadioGroup aria-labelledby="marketing-layout-label" value={marketingLayout} onChange={(event) => selectMarketingLayout(event.target.value as 'materials' | 'views')}>
-                <FormControlLabel value="materials" control={<Radio />} label="Marketing activity" />
-                <FormControlLabel value="views" control={<Radio />} label="Listing views" disabled={!marketingSnapshot.insights} />
-              </RadioGroup>
-            </Box>
-          )}
-          {marketingSnapshot && marketingLayout === 'materials' && (
-            <Box className="design-panel-option-section">
-              <Typography component="h3" variant="titleXS" id="feedback-layout-label">Showing feedback layout</Typography>
-              <RadioGroup aria-labelledby="feedback-layout-label" value={feedbackLayout} onChange={(event) => selectFeedbackLayout(event.target.value as MarketingFeedbackLayout)}>
-                {marketingFeedbackLayouts.map((layout) => <FormControlLabel key={layout.id} value={layout.id} control={<Radio />} label={layout.label} />)}
-              </RadioGroup>
-            </Box>
-          )}
-        </Box>
-      </Popover>
+      {showReviewTools && <SellerReviewTools
+        journeyView={journeyView}
+        selectJourneyView={selectJourneyView}
+        beforeListing={beforeListing}
+        visualTheme={visualTheme}
+        marketingSnapshot={marketingSnapshot}
+        listingLink={listingLink}
+        selectListingLink={selectListingLink}
+        headerVariant={headerVariant}
+        selectHeaderVariant={selectHeaderVariant}
+        marketingLayout={marketingLayout}
+        selectMarketingLayout={selectMarketingLayout}
+        feedbackLayout={feedbackLayout}
+        selectFeedbackLayout={selectFeedbackLayout}
+      />}
 
       <ListingDetailsSheet open={listingOpen} onClose={closeListing} transaction={transaction} />
 
-      {marketingSnapshot && (
+      {!beforeListing && marketingSnapshot && (
         <MarketingDashboardSheet
           open={marketingDashboardSection !== null}
           onClose={closeMarketingDetail}
@@ -431,7 +430,7 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
             <Typography component="h3" variant="titleXS" id="all-upcoming-dates-title" className="dates-drawer-section-title">
               Upcoming dates
             </Typography>
-            <UpcomingDatesList dates={transaction.upcomingDates} />
+            <UpcomingDatesList dates={transaction.upcomingDates} resources={transaction.resources} onReadGuide={openMilestoneGuide} />
           </Box>
           <Divider />
           <Box component="section" aria-labelledby="past-events-title" className="dates-drawer-section">
@@ -442,6 +441,8 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
           </Box>
         </Box>
       </Drawer>
+
+      <ResourceGuideSheet resource={selectedResource} resources={transaction.resources ?? []} onSelectResource={setSelectedResource} onClose={() => setSelectedResource(null)} />
 
       <Dialog open={selectedDocument !== null} onClose={() => setSelectedDocument(null)} fullWidth maxWidth="sm">
         {selectedDocument && (
@@ -457,13 +458,7 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
             </DialogTitle>
             <DialogContent dividers>
               <Stack spacing={2}>
-                <Box className="document-preview-placeholder">
-                  <DescriptionOutlined />
-                  <Typography variant="bodySStandard">Document preview</Typography>
-                  <Typography variant="labelS" color="text.secondary">
-                    Sample document for this design prototype
-                  </Typography>
-                </Box>
+                <DocumentThumbnail document={selectedDocument} />
                 <Typography variant="bodySStandard" color="text.secondary">
                   {selectedDocument.summary}
                 </Typography>
@@ -482,33 +477,36 @@ export function SellerPortal({ transaction = sampleSellerTransaction, marketingS
 function TimelineEventsList({ events }: { events: TimelineEvent[] }) {
   return (
     <Box component="ol" className="activity-event-list">
-      {events.map((event) => <ActivityEventRow key={event.id} event={event} />)}
+      {events.map((event) => <ActivityEventRow key={event.id} event={event} variant="compact" />)}
     </Box>
   )
 }
 
-function UpcomingDatesPanel({ dates, onSeeAll }: { dates: UpcomingDate[]; onSeeAll: () => void }) {
+function UpcomingDatesPanel({ dates, resources, onSeeAll, onReadGuide }: { dates: UpcomingDate[]; resources?: TransactionResource[]; onSeeAll: () => void; onReadGuide: (resourceId: string) => void }) {
   const nextDates = [...dates].sort((first, second) => first.date.localeCompare(second.date)).slice(0, 3)
 
   return (
     <Box className="upcoming-dates-card">
       <PortalSection
-        title="Upcoming Dates"
+        title="Upcoming dates"
         prominent
         action={<CardActionButton onClick={onSeeAll}>See all</CardActionButton>}
       >
-        <UpcomingDatesList dates={nextDates} />
+        <UpcomingDatesList dates={nextDates} resources={resources} onReadGuide={onReadGuide} />
       </PortalSection>
     </Box>
   )
 }
 
-function UpcomingDatesList({ dates }: { dates: UpcomingDate[] }) {
+function UpcomingDatesList({ dates, resources, onReadGuide }: { dates: UpcomingDate[]; resources?: TransactionResource[]; onReadGuide: (resourceId: string) => void }) {
   return (
     <DateEventList>
-      {[...dates].sort((first, second) => first.date.localeCompare(second.date)).map((item) => (
-        <DateEventRow key={item.id} date={item.date} title={item.title} description={item.description} />
-      ))}
+      {[...dates].sort((first, second) => first.date.localeCompare(second.date)).map((item) => {
+        const guidance = item.guidance
+        const resource = resources?.find(resource => resource.id === guidance?.resourceId)
+        const readResource = resource ? () => onReadGuide(resource.id) : undefined
+        return <DateEventRow key={item.id} date={item.date} title={item.title} description={item.description} resource={resource} onReadResource={readResource} guidance={guidance} />
+      })}
     </DateEventList>
   )
 }
@@ -553,20 +551,6 @@ function NotesPanel({ notes }: { notes: TeamNote[] }) {
           <Stack className="notes-list" spacing={2}>
             {visibleNotes.map((note) => <TeamNoteCard key={note.id} note={note} />)}
           </Stack>
-        )}
-      </PaginatedTabList>
-    </Box>
-  )
-}
-
-function DocumentsPanel({ documents, onOpen }: { documents: TransactionDocument[]; onOpen: (document: TransactionDocument) => void }) {
-  return (
-    <Box component="section" aria-label="Transaction documents" className="portal-tab-content">
-      <PaginatedTabList items={documents} itemName="documents" ariaLabel="Document pages">
-        {(visibleDocuments) => (
-          <TransactionRowList>
-            {visibleDocuments.map((document) => <DocumentRow key={document.id} document={document} onPreview={onOpen} />)}
-          </TransactionRowList>
         )}
       </PaginatedTabList>
     </Box>

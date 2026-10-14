@@ -51,8 +51,20 @@
   letter-spacing: 0;
 }
 
+.activity-event-row--compact {
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 12px;
+  padding-block: 16px;
+}
+
+.activity-event-row--compact .activity-event-copy { gap: 4px; }
+.activity-event-row--compact .activity-event-heading { grid-template-columns: minmax(0, 1fr); }
+.activity-event-row--compact .activity-event-date.MuiTypography-root { max-width: none; text-align: left; }
+.activity-event-row--compact .activity-event-copy > .MuiTypography-root { text-wrap: pretty; }
+.activity-event-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-top: 2px; }
+
 @media (max-width: 760px) {
-  .activity-event-row {
+  .activity-event-row--standard {
     grid-template-columns: 44px minmax(0, 1fr);
     gap: 12px;
   }

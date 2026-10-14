@@ -26,12 +26,14 @@ describe('annotations', () => {
       { id: 'missing', target: '.absent-target', audience: 'business', title: 'Missing note', note: 'Hidden.' },
     ]} />)
 
-    const toggle = screen.getByRole('button', { name: 'Show annotations' })
+    const toggle = screen.getByRole('checkbox', { name: 'Annotations' })
+    expect(toggle).not.toBeChecked()
     fireEvent.click(toggle)
+    expect(toggle).toBeChecked()
     await waitFor(() => expect(screen.getByRole('button', { name: 'Product note: Visible note' })).toBeInTheDocument())
     expect(screen.queryByRole('button', { name: 'Business note: Missing note' })).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Hide annotations' }))
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Annotations' }))
     expect(screen.queryByRole('button', { name: 'Product note: Visible note' })).not.toBeInTheDocument()
     target.remove()
   })

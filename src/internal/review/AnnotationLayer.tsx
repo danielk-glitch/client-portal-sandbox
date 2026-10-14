@@ -1,9 +1,8 @@
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { Button } from '@mui/material'
 import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined'
-import CommentOutlined from '@mui/icons-material/CommentOutlined'
+import CheckOutlined from '@mui/icons-material/CheckOutlined'
 import './annotation-layer.css'
 
 export type AnnotationAudience = 'design' | 'engineering' | 'product' | 'business'
@@ -162,16 +161,13 @@ export function AnnotationLayer({ annotations, className = '' }: { annotations: 
 
   return (
     <>
-      <Button
-        variant={enabled ? 'contained' : 'outlined'}
-        startIcon={<CommentOutlined />}
+      <label
         className={`annotation-layer-trigger ${className}`}
-        onClick={() => setEnabled((value) => !value)}
-        aria-label={enabled ? 'Hide annotations' : 'Show annotations'}
-        aria-pressed={enabled}
       >
+        <input type="checkbox" checked={enabled} onChange={(event) => setEnabled(event.target.checked)} />
+        <span className="annotation-layer-checkbox" aria-hidden="true"><CheckOutlined /></span>
         <span className="annotation-layer-trigger-label">Annotations</span>
-      </Button>
+      </label>
       {enabled && createPortal(
         <div className="annotation-layer" aria-label="Designer annotations">
           {positions.map((annotation) => (

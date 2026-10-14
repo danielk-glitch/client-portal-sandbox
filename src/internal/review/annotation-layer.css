@@ -1,31 +1,36 @@
-.annotation-layer-trigger.MuiButton-root {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  z-index: 1100;
-  min-height: 48px;
-  padding-inline: 20px;
-  border: 1px solid var(--color-primitive-blue-700);
-  background: var(--color-primitive-blue-700);
-  color: var(--color-primitive-neutral-50);
-  box-shadow: var(--elevation-raised);
+.annotation-layer-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 22px;
+  color: var(--color-semantic-text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
 }
 
-.annotation-layer-trigger.MuiButton-root:hover {
-  border-color: var(--color-primitive-blue-800);
-  background: var(--color-primitive-blue-800);
-  color: var(--color-primitive-neutral-50);
+.annotation-layer-trigger input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
 }
 
-.annotation-layer-trigger.MuiButton-root[aria-pressed="true"] {
-  border-color: var(--color-primitive-blue-800);
-  background: var(--color-primitive-blue-800);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primitive-blue-700) 26%, transparent), var(--elevation-raised);
+.annotation-layer-checkbox {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
 }
 
-.annotation-layer-trigger.MuiButton-root.annotation-layer-trigger--inline {
-  position: static;
-}
+.annotation-layer-checkbox .MuiSvgIcon-root { font-size: 16px; visibility: hidden; }
+.annotation-layer-trigger input:checked + .annotation-layer-checkbox .MuiSvgIcon-root { visibility: visible; }
+.annotation-layer-trigger:has(input:focus-visible) { outline: 2px solid currentColor; outline-offset: -4px; }
 
 .annotation-layer {
   position: fixed;
@@ -116,18 +121,6 @@
 
 .annotation-popover-title { font-size: 14px; font-weight: 700; line-height: 1.35; }
 .annotation-popover-note { font-size: 13px; line-height: 1.55; color: var(--color-semantic-text-primary); white-space: pre-line; }
-
-@media (max-width: 420px) {
-  .annotation-layer-trigger.MuiButton-root {
-    right: 16px;
-    bottom: 16px;
-    width: 48px;
-    min-width: 48px;
-    padding: 0;
-  }
-  .annotation-layer-trigger .MuiButton-startIcon { margin: 0; }
-  .annotation-layer-trigger-label { display: none; }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .annotation-marker { transition: none; }

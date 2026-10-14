@@ -1,0 +1,42 @@
+.resources-panel { display: grid; gap: 32px; }
+.resources-intro { display: grid; gap: 8px; max-width: 64ch; }
+.resources-group-title.MuiTypography-root { margin-bottom: 16px; }
+.resources-featured { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.resource-feature.MuiButtonBase-root {
+  min-width: 0;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+  border-radius: 12px;
+  background: var(--color-semantic-surface-primary);
+  border: 1px solid var(--color-semantic-stroke-primary);
+  transition: background-color 140ms ease;
+}
+.resource-feature h4 { margin-top: 4px; }
+.resource-feature-footer { width: 100%; margin-top: auto; padding-top: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.resource-list { list-style: none; padding: 0; margin: 0; }
+.resource-list > li + li { border-top: 1px solid var(--color-semantic-stroke-primary-light); }
+.resource-row.MuiButtonBase-root { width: 100%; min-width: 0; display: flex; justify-content: space-between; gap: 16px; padding: 24px; text-align: left; border-radius: 12px; transition: background-color 140ms ease; }
+.resource-row-copy { min-width: 0; display: grid; gap: 6px; }
+.resource-row > .MuiSvgIcon-root { flex-shrink: 0; }
+.resource-feature.MuiButtonBase-root:hover { background: var(--color-semantic-surface-primary-dark); }
+.resource-row.MuiButtonBase-root:hover { background: var(--color-semantic-surface-primary-dark); }
+.resource-feature.MuiButtonBase-root:focus-visible,
+.resource-row.MuiButtonBase-root:focus-visible,
+.milestone-guide-action.MuiButton-root:focus-visible { outline: 2px solid var(--color-semantic-stroke-primary-dark); outline-offset: 2px; }
+.resources-panel .MuiTypography-root,
+.milestone-explanation-content .MuiTypography-root { text-wrap: pretty; }
+.milestone-explanation-content { display: grid; gap: 24px; }
+.milestone-explanation-section { display: grid; gap: 8px; }
+.milestone-guide-action.MuiButton-root { min-width: 0; margin-right: auto; text-align: left; }
+@media (max-width: 600px) {
+  .resources-featured { grid-template-columns: minmax(0, 1fr); }
+  .resource-feature.MuiButtonBase-root,
+  .resource-row.MuiButtonBase-root { padding: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .resources-panel .MuiButtonBase-root { transition: none; }
+}

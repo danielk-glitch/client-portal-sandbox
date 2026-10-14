@@ -1,6 +1,13 @@
-import type { Annotation } from '../components/AnnotationLayer'
+import type { Annotation } from './AnnotationLayer'
 
 export const sellerAnnotations: Annotation[] = [
+  {
+    id: 'listing-preparation',
+    target: '.listing-preparation',
+    audience: 'product',
+    title: 'Before listing goes live',
+    note: 'An informational note from the team, with a title and message agents can customize. It sits above activity and dates without a checklist or task action. Marketing results and showing feedback stay hidden before the listing is published.',
+  },
   {
     id: 'date-descriptions',
     target: '.upcoming-dates-card .portal-date-row:first-child',

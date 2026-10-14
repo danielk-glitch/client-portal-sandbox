@@ -1,0 +1,24 @@
+.documents-panel { display: grid; gap: 32px; }
+.document-group-title.MuiTypography-root { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.document-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; list-style: none; margin: 0; padding: 0; }
+.document-card.MuiPaper-root { position: relative; min-width: 0; overflow: hidden; border-radius: 10px; border-color: var(--color-semantic-stroke-primary-light); background: var(--color-semantic-surface-primary); }
+.document-card-preview.MuiButtonBase-root { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; text-align: left; color: var(--color-semantic-text-dark); }
+.document-thumbnail { position: relative; height: 224px; overflow: hidden; background: var(--color-semantic-surface-secondary); padding-top: 24px; }
+.document-thumbnail > img { display: block; width: auto; height: auto; max-width: calc(100% - 48px); max-height: calc(100% - 24px); margin: 0 auto; object-fit: contain; box-shadow: var(--elevation-document); }
+.document-sample-page { width: 288px; min-height: 400px; position: absolute; left: 50%; transform: translateX(-50%) scale(.72); transform-origin: top center; padding: 28px; background: var(--color-semantic-surface-primary); border: 1px solid var(--color-semantic-stroke-primary-light); border-radius: 2px; box-shadow: var(--elevation-document); color: var(--color-semantic-text-dark); }
+.document-sample-page p { margin: 0; text-wrap: pretty; }
+.document-sample-rule { height: 2px; background: var(--color-semantic-text-dark); margin-block: 16px; }
+.document-sample-details { display: grid; grid-template-columns: 1fr; gap: 4px; margin-top: 20px; }
+.document-sample-details > :nth-child(3) { margin-top: 12px; }
+.document-sample-lines { display: grid; gap: 8px; margin-top: 24px; }
+.document-sample-lines span { height: 4px; background: var(--color-semantic-stroke-primary-light); }
+.document-sample-lines span:last-child { width: 70%; }
+.document-card-pin.MuiIconButton-root { position: absolute; z-index: 1; top: 12px; right: 12px; }
+.document-card-copy { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 20px; }
+.document-card-copy h3 { margin: 0; text-wrap: pretty; }
+.document-card-meta { display: grid; gap: 4px; padding-top: 4px; color: var(--color-semantic-text-primary); font-variant-numeric: tabular-nums; }
+.document-card-preview:hover .document-thumbnail { background: var(--color-semantic-surface-secondary-dark); }
+.document-thumbnail { transition: background-color 140ms ease; }
+.document-card-preview.MuiButtonBase-root:focus-visible { outline: 2px solid var(--color-semantic-text-dark); outline-offset: -4px; }
+@media (max-width: 600px) { .document-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .document-thumbnail { transition: none; } }

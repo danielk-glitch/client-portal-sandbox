@@ -1,0 +1,9 @@
+.client-preview-banner { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 16px 32px; background: var(--color-semantic-surface-reverse-primary); color: var(--color-semantic-text-on-color-primary); }
+.client-preview-label { display: flex; align-items: center; gap: 12px; }
+.client-preview-label .MuiTypography-root { display: block; }
+.client-preview-label p, .client-preview-label .MuiTypography-bodySStandard { color: var(--color-semantic-text-on-color-light); }
+.client-preview-banner .MuiButton-root { color: var(--color-semantic-text-on-color-primary); flex-shrink: 0; }
+.resource-rich-content p { margin: 0 0 16px; }
+.resource-rich-content li { margin: 8px 0; }
+.resource-rich-content a { color: inherit; text-underline-offset: 4px; }
+@media(max-width:600px) { .client-preview-banner { padding: 16px; flex-wrap: wrap; gap: 12px; } }

@@ -1,0 +1,30 @@
+.place-sheet-root .MuiBackdrop-root {
+  background: color-mix(in oklch, var(--color-semantic-surface-reverse-primary) 48%, transparent);
+}
+.place-sheet-paper.MuiDrawer-paper {
+  left: 0;
+  right: 0;
+  width: min(1480px, calc(100vw - 48px));
+  height: calc(100dvh - 32px);
+  max-height: calc(100dvh - 32px);
+  margin-inline: auto;
+  overflow: hidden;
+  border-radius: 32px 32px 0 0;
+  color: var(--color-semantic-text-dark);
+  background: var(--color-semantic-surface-primary);
+  box-shadow: var(--elevation-hero);
+}
+.place-sheet-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.place-sheet-scroll::-webkit-scrollbar { display: none; }
+@media (max-width: 760px) {
+  .place-sheet-paper.MuiDrawer-paper { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .place-sheet-paper,
+  .place-sheet-paper * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}

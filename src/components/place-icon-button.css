@@ -1,0 +1,32 @@
+.place-icon-button.MuiIconButton-root {
+  width: 44px;
+  height: 44px;
+  color: var(--color-semantic-text-primary);
+  background: transparent;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.place-icon-button.MuiIconButton-root:hover,
+.place-icon-button.MuiIconButton-root[data-state="hover"] {
+  color: var(--color-semantic-text-dark);
+  background: var(--color-semantic-surface-secondary-dark);
+}
+
+.place-icon-button.MuiIconButton-root[aria-pressed="true"] {
+  color: var(--color-semantic-text-dark);
+}
+
+.place-icon-button.MuiIconButton-root:focus-visible,
+.place-icon-button.MuiIconButton-root[data-state="focus"] {
+  outline: 2px solid var(--color-semantic-stroke-primary-dark);
+  outline-offset: 2px;
+}
+
+.place-icon-button.MuiIconButton-root.Mui-disabled {
+  color: var(--color-semantic-text-disabled);
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .place-icon-button.MuiIconButton-root { transition: none; }
+}

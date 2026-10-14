@@ -2,11 +2,11 @@
 import { useEffect, useState } from 'react'
 import ArrowBackOutlined from '@mui/icons-material/ArrowBackOutlined'
 import ArrowForwardOutlined from '@mui/icons-material/ArrowForwardOutlined'
-import { brandAssets } from '../assets/brand'
-import { SegmentedSwitch, type SegmentedSwitchOption } from '../components/SegmentedSwitch'
-import { sampleSellerTransaction } from '../seller-portal/sellerTransaction'
-import { EmailPreview } from './EmailPreview'
-import { emailTemplates, type Audience, type EmailTemplate } from './emailTemplates'
+import { brandAssets } from '../../assets/brand'
+import { SegmentedSwitch, type SegmentedSwitchOption } from '../../components/SegmentedSwitch'
+import { sampleSellerTransaction } from '../../seller-portal/sellerTransaction'
+import { EmailPreview } from '../../email-templates/EmailPreview'
+import { emailTemplates, type Audience, type EmailTemplate } from '../../email-templates/emailTemplates'
 import './email-gallery.css'
 
 const agent = sampleSellerTransaction.team.find((member) => member.id === sampleSellerTransaction.teamBrand.leadAgentId)!

@@ -67,3 +67,10 @@ declare module '@mui/material/Typography' {
     metricS: true
   }
 }
+
+declare module '@mui/material/Button' {
+  interface ButtonPropsVariantOverrides {
+    onImagePrimary: true
+    onImageSecondary: true
+  }
+}

@@ -1,0 +1,26 @@
+.journey-view-trigger-text { overflow: hidden; text-overflow: ellipsis; }
+.feedback-toolbar-controls .journey-view-trigger .MuiButton-endIcon { margin: 0; }
+.feedback-toolbar-controls .journey-view-trigger .MuiButton-endIcon .MuiSvgIcon-root { font-size: 18px; }
+
+.journey-view-menu-paper.MuiPaper-root {
+  width: min(300px, calc(100vw - 32px));
+  border: 1px solid var(--color-semantic-stroke-primary-light);
+  border-radius: 14px;
+  background: var(--color-semantic-surface-primary);
+  box-shadow: var(--elevation-raised);
+}
+
+.journey-view-menu-paper .MuiMenuItem-root {
+  gap: 12px;
+  min-height: 72px;
+  padding: 12px 18px;
+  white-space: normal;
+}
+.journey-view-menu-paper .MuiListItemText-root { margin: 0; }
+.journey-view-description.MuiTypography-root { margin-top: 4px; }
+.journey-view-check { display: grid; place-items: center; flex: 0 0 20px; color: var(--color-semantic-text-primary); }
+
+@media (max-width: 600px) {
+  .journey-view-prefix { display: none; }
+  .feedback-toolbar-controls .journey-view-trigger { gap: 4px; min-width: 0; }
+}
