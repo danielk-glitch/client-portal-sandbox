@@ -26,6 +26,7 @@ import { brandAssets } from '../assets/brand'
 import { sampleSellerTransaction as transaction } from '../seller-portal/sellerTransaction'
 import { cleanResourceHtml, defaultDifferences, liveCount, loadTeamState, roleFromUrl, selectableResources, statusOf, teamPeople, teamStateKey, titleOf } from './teamData'
 import type { DefaultSelection, ResourceContent, TeamResource, TeamState, TransactionKind } from './teamData'
+import { ClientAccess } from './ClientAccess'
 import './team-portal.css'
 
 type SetState = (next: TeamState | ((previous: TeamState) => TeamState)) => void
@@ -45,9 +46,6 @@ function ResourceBody({ content }: { content: ResourceContent }) {
 }
 function SourceLabel({ resource }: { resource: TeamResource }) {
   return <Typography variant="bodySStandard" color="text.secondary">{resource.source === 'Team' ? 'Ben Kinney Team' : 'Provided by Brivity'}</Typography>
-}
-function ClientAccess() {
-  return <Box className="team-access-list">{transaction.viewers.map(viewer => <Box className="team-access-person" key={viewer.id}><Avatar src={viewer.photoUrl} alt={viewer.name} sx={{ width: 40, height: 40 }} /><Box><Typography variant="titleXS">{viewer.name}</Typography><Typography variant="bodySStandard" color="text.secondary">Portal access active</Typography></Box></Box>)}</Box>
 }
 function TransactionStrip() {
   return <Box className="team-transaction-strip"><img src={transaction.listing.photoUrl ?? undefined} alt="" /><Box><Typography variant="titleXS">128 Meadowbrook Lane</Typography><Typography variant="bodySStandard" color="text.secondary">Tim & Alex Bennett · Seller transaction</Typography></Box><Chip label="Under contract" size="small" variant="outlined" sx={{ ml: 'auto' }} /></Box>
@@ -96,7 +94,7 @@ export function TeamPortal() {
     </Box>
     <Box component="main" className="team-main"><Box className="team-breadcrumb"><Typography variant="labelS" color="text.secondary">TEAM WORKSPACE</Typography><Typography variant="labelS" color="text.secondary">/</Typography><Typography variant="labelS">{section}</Typography></Box>
       {isTransaction && <Box sx={{ mt: 3 }}><TransactionStrip /><Box component="nav" aria-label="Transaction views" className="team-transaction-nav"><a href="/team" aria-current={path === '/team' ? 'page' : undefined}>Overview</a><a href="/team/resources" aria-current={path === '/team/resources' ? 'page' : undefined}>Resources</a></Box></Box>}
-      {path === '/team' && <Overview state={state} />}
+      {path === '/team' && <Overview state={state} setState={setState} />}
       {path === '/team/resources' && <TransactionResources state={state} setState={setState} />}
       {path === '/team/library' && <ResourceLibrary state={state} setState={setState} updateResource={updateResource} />}
       {path === '/team/editor' && (state.role === 'admin' ? <ResourceEditor resource={selected} state={state} updateResource={updateResource} /> : <ReadOnlyResource resource={selected} />)}
@@ -114,7 +112,7 @@ function DefaultStatus({ state }: { state: TeamState }) {
   return <Typography variant="bodySStandard" color="text.secondary">{changes === 0 ? `Matches ${source}.` : `${plural(changes, 'change')} from ${source}.`}</Typography>
 }
 
-function Overview({ state }: { state: TeamState }) {
+function Overview({ state, setState }: { state: TeamState; setState: SetState }) {
   const visible = state.resources.filter(resource => state.visible.includes(resource.id) && resource.published)
   return <>
     <Heading title="Client experience" description="Check what Tim and Alex see, and choose the guidance that’s right for their sale." actions={<Button component="a" href="/team/preview" target="_blank" rel="noopener noreferrer" variant="contained" startIcon={<VisibilityOutlined />}>Preview client portal</Button>} />
@@ -129,7 +127,7 @@ function Overview({ state }: { state: TeamState }) {
         </Box>
       </Box>
       <Stack spacing={3}>
-        <Box className="team-panel"><Typography component="h2" variant="titleS" sx={{ mb: 3 }}>Client access</Typography><ClientAccess /></Box>
+        <Box className="team-panel"><Typography component="h2" variant="titleS" sx={{ mb: 3 }}>Client access</Typography><ClientAccess state={state} setState={setState} /></Box>
         <Box className="team-panel team-panel-white"><Typography component="h2" variant="titleS" sx={{ mb: 1.5 }}>Transaction work stays in Brivity</Typography><Typography variant="bodyMStandard" color="text.secondary">Dates, milestones, people, and tasks come from Brivity. Make changes there, then check the client view here.</Typography></Box>
       </Stack>
     </Box>

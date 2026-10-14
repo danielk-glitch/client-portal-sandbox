@@ -118,3 +118,35 @@ describe('Team defaults', () => {
     expect(loadTeamState().defaults.buyer?.visible).toContain('team-moving')
   })
 })
+
+describe('Client invites', () => {
+  it('sends nothing until an admin chooses Send, and includes the personal note', async () => {
+    renderAt('/team')
+    expect(screen.getByText('Not invited')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Invite' }))
+    expect(loadTeamState().invites['co-seller'].status).toBe('not-invited')
+    fireEvent.change(screen.getByRole('textbox', { name: 'Personal note (optional)' }), { target: { value: 'Excited to get started!' } })
+    expect(within(screen.getByRole('dialog')).getAllByText('Excited to get started!').length).toBeGreaterThan(0)
+    fireEvent.click(screen.getByRole('button', { name: 'Send invite' }))
+    const invite = loadTeamState().invites['co-seller']
+    expect(invite.status).toBe('invited')
+    expect(invite.note).toBe('Excited to get started!')
+    expect(await screen.findByRole('button', { name: 'Resend' })).toBeInTheDocument()
+  })
+
+  it('lets admins remove access after confirming', async () => {
+    renderAt('/team')
+    fireEvent.click(screen.getByRole('button', { name: 'More access options for Tim Bennett' }))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Remove access' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Remove access' }))
+    expect(loadTeamState().invites.seller.status).toBe('removed')
+    expect(await screen.findByRole('button', { name: 'Invite again' })).toBeInTheDocument()
+  })
+
+  it('shows invite status to members without controls', () => {
+    renderAt('/team?as=member')
+    expect(screen.getByText('Not invited')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Invite' })).not.toBeInTheDocument()
+    expect(screen.getByText('Admins send invites and manage access.')).toBeInTheDocument()
+  })
+})

@@ -13,7 +13,11 @@ export type TeamResource = {
 export type TransactionKind = 'buyer' | 'seller'
 export type DefaultSelection = { visible: string[]; updatedBy: string; updatedOn: string }
 export type TeamRole = 'admin' | 'member'
+export type InviteStatus = 'not-invited' | 'invited' | 'active' | 'removed'
+export type ClientInvite = { status: InviteStatus; updatedOn?: string; updatedBy?: string; note?: string }
+export const clientEmails: Record<string, string> = { seller: 'tim.bennett@example.com', 'co-seller': 'alex.bennett@example.com' }
 export type TeamState = {
+  invites: Record<string, ClientInvite>
   resources: TeamResource[]
   visible: string[]
   defaults: Record<TransactionKind, DefaultSelection | null>
@@ -21,6 +25,10 @@ export type TeamState = {
 }
 export const initialTeamState: TeamState = {
   role: 'admin',
+  invites: {
+    seller: { status: 'active', updatedOn: 'Sep 14, 2026', updatedBy: 'Avery Coleman' },
+    'co-seller': { status: 'not-invited' },
+  },
   defaults: {
     seller: { visible: ['disclosures', 'closing', 'team-welcome', 'team-moving'], updatedBy: 'Avery Coleman', updatedOn: 'Sep 30, 2026' },
     buyer: null,
@@ -47,13 +55,13 @@ export const initialTeamState: TeamState = {
   ],
 }
 
-export const teamStateKey = 'place-team-exploration-v2'
+export const teamStateKey = 'place-team-exploration-v3'
 export function loadTeamState(): TeamState {
   const saved = localStorage.getItem(teamStateKey)
   if (!saved) return initialTeamState
   try {
     const state = JSON.parse(saved) as TeamState
-    if (Array.isArray(state.resources) && Array.isArray(state.visible) && state.defaults && 'seller' in state.defaults && ['admin', 'member'].includes(state.role)) return state
+    if (Array.isArray(state.resources) && Array.isArray(state.visible) && state.defaults && 'seller' in state.defaults && !!state.invites && ['admin', 'member'].includes(state.role)) return state
   } catch {
     localStorage.removeItem(teamStateKey)
   }

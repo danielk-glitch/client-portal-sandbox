@@ -102,3 +102,12 @@
 .team-default-group > h3 { padding-top: 8px; }
 @media(max-width:1100px) { .team-library-table.member { grid-template-columns: minmax(0,2fr) 96px; } }
 @media(max-width:600px) { .team-library-table.member .team-library-action { grid-row: 1; } }
+.team-access-list { margin: 0; padding: 0; list-style: none; gap: 20px; }
+.team-access-person { align-items: flex-start; }
+.team-access-copy { display: grid; gap: 6px; min-width: 0; flex: 1; }
+.team-access-status { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.team-access-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.team-invite-chip.active { border-color: var(--color-semantic-text-success); color: var(--color-semantic-text-success); }
+.team-invite-chip.removed { color: var(--color-semantic-text-light); }
+.team-email-preview { border: 1px solid var(--color-semantic-stroke-primary-light); border-radius: 12px; overflow: hidden; background: var(--color-semantic-surface-primary-dark); }
+.team-email-subject { display: block; padding: 12px 16px; border-bottom: 1px solid var(--color-semantic-stroke-primary-light); background: var(--color-semantic-surface-primary); }

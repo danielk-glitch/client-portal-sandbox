@@ -67,10 +67,11 @@ function EmailFooter({ template }: { template: EmailTemplate }) {
   )
 }
 
-function InviteBody({ template }: { template: EmailTemplate }) {
+function InviteBody({ template, personalNote }: { template: EmailTemplate; personalNote?: string }) {
   return (
     <>
       <p className="email-intro">{template.intro}</p>
+      {personalNote?.trim() && <blockquote className="email-personal-note">{personalNote.trim()}</blockquote>}
       <EmailAction label={template.actionLabel} href={template.actionHref} />
       <div className="email-support-block">
         <span className="email-small-label">What you’ll find inside</span>
@@ -120,12 +121,12 @@ function ActivityBody({ template }: { template: EmailTemplate }) {
   )
 }
 
-export function EmailPreview({ template }: { template: EmailTemplate }) {
+export function EmailPreview({ template, personalNote }: { template: EmailTemplate; personalNote?: string }) {
   return (
     <article className="email-document" aria-label={`${template.title} email preview`} onClick={(event) => { if ((event.target as HTMLElement).closest('a')) event.preventDefault() }}>
       <EmailHeader template={template} />
       <EmailContentPane>
-        {template.kind === 'activity' ? <ActivityBody template={template} /> : <InviteBody template={template} />}
+        {template.kind === 'activity' ? <ActivityBody template={template} /> : <InviteBody template={template} personalNote={personalNote} />}
       </EmailContentPane>
       <EmailFooter template={template} />
     </article>
