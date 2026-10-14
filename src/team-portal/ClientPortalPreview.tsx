@@ -30,10 +30,12 @@ function clientResource(resource: TeamResource): TransactionResource {
 
 export function ClientPortalPreview({ buyerPortal }: { buyerPortal: ReactNode }) {
   const state = loadTeamState()
-  const buyer = new URLSearchParams(window.location.search).get('type') === 'buyer'
+  const params = new URLSearchParams(window.location.search)
+  const buyer = params.get('type') === 'buyer'
+  const embedded = params.get('embed') === '1'
   const resources = state.resources.filter(resource => resource.published && state.visible.includes(resource.id)).map(clientResource)
   return <Box className="client-preview-page">
-    <ClientPreviewBanner clientLabel={buyer ? 'Buyer portal' : 'Tim & Alex Bennett’s seller portal'} />
+    {!embedded && <ClientPreviewBanner clientLabel={buyer ? 'Buyer portal' : 'Tim & Alex Bennett’s seller portal'} />}
     {buyer ? buyerPortal : <SellerPortal transaction={{ ...futureSellerTransaction, resources }} marketingSnapshot={futureMarketingSnapshot} basePath="/team/preview" initialListingOpen={window.location.pathname.endsWith('/listing')} readOnly showReviewTools={false} />}
   </Box>
 }

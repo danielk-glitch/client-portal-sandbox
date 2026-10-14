@@ -72,6 +72,7 @@ const sellerViews: PrototypeView[] = [
   { label: 'Current Functionality', href: '/seller' },
   { label: 'Future v1', href: '/seller/future-v1' },
   { label: 'Alternate styling', href: '/seller/future-v1-polestar' },
+  { label: 'Timeline Exploration', href: '/seller/timeline-exploration' },
 ]
 
 const resources = [
@@ -101,6 +102,12 @@ function App() {
   }
   if (currentPath === '/seller/future-v1-polestar/listing') {
     return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} basePath="/seller/future-v1-polestar" visualTheme="polestar" initialListingOpen />
+  }
+  if (currentPath === '/seller/timeline-exploration') {
+    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} basePath="/seller/timeline-exploration" layout="timeline" />
+  }
+  if (currentPath === '/seller/timeline-exploration/listing') {
+    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} basePath="/seller/timeline-exploration" layout="timeline" initialListingOpen />
   }
   if (currentPath === '/components') return <ComponentGallery />
   if (currentPath === '/buyer') return <BuyerPortalPreview />

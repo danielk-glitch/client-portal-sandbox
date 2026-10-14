@@ -66,6 +66,8 @@ import {
 } from '../../transaction-portal/components'
 import type { TransactionDocument, TransactionResource } from '../../transaction-portal/types'
 import { sampleSellerTransaction } from '../../seller-portal/sellerTransaction'
+import { SellerTimeline } from '../../seller-portal/SellerTimeline'
+import { timelineResources, underContractTimeline } from '../../seller-portal/sellerTimelineData'
 import { EmailPreview } from '../../email-templates/EmailPreview'
 import { emailTemplates } from '../../email-templates/emailTemplates'
 
@@ -774,6 +776,14 @@ function PortalPatternsSection() {
                   {sample.timeline.slice(0, 3).map(event => <ActivityEventRow key={event.id} event={event} variant="compact" />)}
                 </Box>
               </PortalSection>
+            </Box>
+          </PortalPatternSample>
+          <PortalPatternSample title="Milestone timeline (exploration)">
+            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Timeline Exploration replaces upcoming dates and recent activity with four sale milestones. The tracker sits directly on the page: a full-bleed rail fades out at both edges and fills through finished milestones, then partway into the current one. Milestones act as tabs, with no boxes behind them. Hover lifts the dot, adds a soft halo, and reveals its date. Selected enlarges the dot with a white gap ring and shadow, draws a short underline, and a soft spotlight glides to it. The current stage carries a “Now” pill and a slow pulse. Below, items are plain action items, either open or checked: open first, then Done. The next step is an item type within the open list, with the only primary action. Future milestones stay readable, lock documents, and keep guides open. Below 900px, milestones stack along a vertical rail.</Typography>
+            <SellerTimeline layout="tracker" data={underContractTimeline} resources={timelineResources} documents={sample.documents} team={sample.team} onOpenResource={setResourcePreview} onOpenDocument={() => undefined} />
+            <Typography variant="labelS" color="text.secondary" sx={{ mt: 4, mb: 1, display: 'block' }}>Stacked layout · mobile</Typography>
+            <Box sx={{ maxWidth: 420 }}>
+              <SellerTimeline layout="stacked" data={underContractTimeline} resources={timelineResources} documents={sample.documents} team={sample.team} onOpenResource={setResourcePreview} onOpenDocument={() => undefined} />
             </Box>
           </PortalPatternSample>
           <PortalPatternSample title="Listing marketing snapshot">

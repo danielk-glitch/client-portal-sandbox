@@ -89,11 +89,11 @@ describe('Admin-managed library', () => {
 describe('Team defaults', () => {
   it('compares a transaction with the seller default and resets it', () => {
     renderAt('/team/resources')
-    expect(screen.getByText('2 changes from the default')).toBeInTheDocument()
+    expect(screen.getByText('2 changes from the seller default')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Reset' }))
     fireEvent.click(screen.getByRole('button', { name: 'Reset resources' }))
     expect([...loadTeamState().visible].sort()).toEqual([...initialTeamState.defaults.seller!.visible].sort())
-    expect(screen.getByText('Matches the default')).toBeInTheDocument()
+    expect(screen.getByText('Matches the seller default')).toBeInTheDocument()
   })
 
   it('lets admins save the current selection as the seller default', () => {
@@ -106,7 +106,7 @@ describe('Team defaults', () => {
   it('hides default saving from members', () => {
     renderAt('/team/resources?as=member')
     expect(screen.queryByRole('button', { name: /seller default/ })).not.toBeInTheDocument()
-    expect(screen.getByText('Admins manage team defaults.')).toBeInTheDocument()
+    expect(screen.getByText(/Admins manage team defaults/)).toBeInTheDocument()
   })
 
   it('sets up a buyer default from the defaults page', () => {
@@ -122,8 +122,8 @@ describe('Team defaults', () => {
 describe('Client invites', () => {
   it('sends nothing until an admin chooses Send, and includes the personal note', async () => {
     renderAt('/team')
-    expect(screen.getByText('Not invited')).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Invite' }))
+    expect(screen.getByText('Not invited · 1')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Invite Alex Bennett' }))
     expect(loadTeamState().invites['co-seller'].status).toBe('not-invited')
     fireEvent.change(screen.getByRole('textbox', { name: 'Personal note (optional)' }), { target: { value: 'Excited to get started!' } })
     expect(within(screen.getByRole('dialog')).getAllByText('Excited to get started!').length).toBeGreaterThan(0)
@@ -140,13 +140,25 @@ describe('Client invites', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: 'Remove access' }))
     fireEvent.click(screen.getByRole('button', { name: 'Remove access' }))
     expect(loadTeamState().invites.seller.status).toBe('removed')
-    expect(await screen.findByRole('button', { name: 'Invite again' })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Invite Tim Bennett' })).toHaveTextContent('Invite again')
   })
 
   it('shows invite status to members without controls', () => {
     renderAt('/team?as=member')
-    expect(screen.getByText('Not invited')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Invite' })).not.toBeInTheDocument()
+    expect(screen.getByText('Not invited · 1')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^Invite/ })).not.toBeInTheDocument()
     expect(screen.getByText('Admins send invites and manage access.')).toBeInTheDocument()
+  })
+
+  it('invites someone who is not on the Brivity transaction', async () => {
+    renderAt('/team')
+    fireEvent.click(screen.getByRole('button', { name: 'Invite a client' }))
+    fireEvent.change(screen.getByRole('textbox', { name: 'Full name' }), { target: { value: 'Jamie Bennett' } })
+    fireEvent.change(screen.getByRole('textbox', { name: 'Email' }), { target: { value: 'jamie@example.com' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Send invite' }))
+    const person = loadTeamState().clients.find(client => client.name === 'Jamie Bennett')
+    expect(person?.email).toBe('jamie@example.com')
+    expect(loadTeamState().invites[person!.id].status).toBe('invited')
+    expect(await screen.findByText('Jamie Bennett')).toBeInTheDocument()
   })
 })

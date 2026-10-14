@@ -19,9 +19,11 @@ import FormatItalicOutlined from '@mui/icons-material/FormatItalicOutlined'
 import FormatListBulletedOutlined from '@mui/icons-material/FormatListBulletedOutlined'
 import LinkOutlined from '@mui/icons-material/LinkOutlined'
 import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined'
+import OpenInNewOutlined from '@mui/icons-material/OpenInNewOutlined'
 import { toast } from 'sonner'
 import { PlaceModal } from '../components/PlaceModal'
 import { SegmentedSwitch } from '../components/SegmentedSwitch'
+import { PortalSection } from '../transaction-portal/components'
 import { brandAssets } from '../assets/brand'
 import { sampleSellerTransaction as transaction } from '../seller-portal/sellerTransaction'
 import { cleanResourceHtml, defaultDifferences, liveCount, loadTeamState, roleFromUrl, selectableResources, statusOf, teamPeople, teamStateKey, titleOf } from './teamData'
@@ -46,9 +48,6 @@ function ResourceBody({ content }: { content: ResourceContent }) {
 }
 function SourceLabel({ resource }: { resource: TeamResource }) {
   return <Typography variant="bodySStandard" color="text.secondary">{resource.source === 'Team' ? 'Ben Kinney Team' : 'Provided by Brivity'}</Typography>
-}
-function TransactionStrip() {
-  return <Box className="team-transaction-strip"><img src={transaction.listing.photoUrl ?? undefined} alt="" /><Box><Typography variant="titleXS">128 Meadowbrook Lane</Typography><Typography variant="bodySStandard" color="text.secondary">Tim & Alex Bennett · Seller transaction</Typography></Box><Chip label="Under contract" size="small" variant="outlined" sx={{ ml: 'auto' }} /></Box>
 }
 function ResourceNameList({ ids, state }: { ids: string[]; state: TeamState }) {
   return <Box component="ul" className="team-name-list">{ids.map(id => <Typography component="li" variant="bodySStandard" key={id}>{titleOf(state.resources.find(resource => resource.id === id)!)}</Typography>)}</Box>
@@ -93,9 +92,7 @@ export function TeamPortal() {
       <Box className="team-sidebar-bottom"><Typography variant="bodySStandard" color="text.secondary">Ben Kinney Team</Typography><Typography variant="labelS" color="text.secondary" sx={{ mt: 1 }}>Powered by PLACE</Typography></Box>
     </Box>
     <Box component="main" className="team-main"><Box className="team-breadcrumb"><Typography variant="labelS" color="text.secondary">TEAM WORKSPACE</Typography><Typography variant="labelS" color="text.secondary">/</Typography><Typography variant="labelS">{section}</Typography></Box>
-      {isTransaction && <Box sx={{ mt: 3 }}><TransactionStrip /><Box component="nav" aria-label="Transaction views" className="team-transaction-nav"><a href="/team" aria-current={path === '/team' ? 'page' : undefined}>Overview</a><a href="/team/resources" aria-current={path === '/team/resources' ? 'page' : undefined}>Resources</a></Box></Box>}
-      {path === '/team' && <Overview state={state} setState={setState} />}
-      {path === '/team/resources' && <TransactionResources state={state} setState={setState} />}
+      {isTransaction && <TransactionPage state={state} setState={setState} />}
       {path === '/team/library' && <ResourceLibrary state={state} setState={setState} updateResource={updateResource} />}
       {path === '/team/editor' && (state.role === 'admin' ? <ResourceEditor resource={selected} state={state} updateResource={updateResource} /> : <ReadOnlyResource resource={selected} />)}
       {path === '/team/defaults' && <TeamDefaults state={state} setState={setState} />}
@@ -104,37 +101,25 @@ export function TeamPortal() {
   </Box>
 }
 
-function DefaultStatus({ state }: { state: TeamState }) {
-  const selection = state.defaults.seller
-  const { shown, hidden } = defaultDifferences(state, selection ?? { visible: brivityBasics(state), updatedBy: '', updatedOn: '' })
-  const changes = shown.length + hidden.length
-  const source = selection ? 'the team seller default' : 'Brivity’s basics'
-  return <Typography variant="bodySStandard" color="text.secondary">{changes === 0 ? `Matches ${source}.` : `${plural(changes, 'change')} from ${source}.`}</Typography>
-}
-
-function Overview({ state, setState }: { state: TeamState; setState: SetState }) {
-  const visible = state.resources.filter(resource => state.visible.includes(resource.id) && resource.published)
-  return <>
-    <Heading title="Client experience" description="Check what Tim and Alex see, and choose the guidance that’s right for their sale." actions={<Button component="a" href="/team/preview" target="_blank" rel="noopener noreferrer" variant="contained" startIcon={<VisibilityOutlined />}>Preview client portal</Button>} />
-    <Box className="team-split">
-      <Box>
-        <img className="team-hero-photo" src={transaction.listing.photoUrl ?? undefined} alt="The Bennett home in its wooded setting" />
-        <Box className="team-facts"><Box><Typography variant="labelM" color="text.secondary">Clients</Typography><Typography variant="titleXS">Tim & Alex Bennett</Typography></Box><Box><Typography variant="labelM" color="text.secondary">Stage</Typography><Typography variant="titleXS">Under contract</Typography></Box><Box><Typography variant="labelM" color="text.secondary">Guidance shared</Typography><Typography variant="titleXS">{plural(visible.length, 'resource')}</Typography></Box></Box>
-        <Box className="team-panel">
-          <Box className="team-panel-heading"><Box className="team-panel-heading-copy"><Typography component="h2" variant="titleS">Visible to Tim and Alex</Typography><DefaultStatus state={state} /></Box><Button component="a" href="/team/resources" endIcon={<ArrowForwardOutlined />}>Manage</Button></Box>
-          {visible.length === 0 && <Typography variant="bodyMStandard" color="text.secondary" className="team-row">No resources are visible yet.</Typography>}
-          {visible.map(resource => <Box className="team-row" key={resource.id}><Box className="team-row-icon"><MenuBookOutlined fontSize="small" /><Box className="team-row-copy"><Typography variant="titleXS">{resource.published?.title}</Typography><SourceLabel resource={resource} /></Box></Box></Box>)}
-        </Box>
-      </Box>
-      <Stack spacing={3}>
-        <Box className="team-panel"><Typography component="h2" variant="titleS" sx={{ mb: 3 }}>Client access</Typography><ClientAccess state={state} setState={setState} /></Box>
-        <Box className="team-panel team-panel-white"><Typography component="h2" variant="titleS" sx={{ mb: 1.5 }}>Transaction work stays in Brivity</Typography><Typography variant="bodyMStandard" color="text.secondary">Dates, milestones, people, and tasks come from Brivity. Make changes there, then check the client view here.</Typography></Box>
-      </Stack>
+function PreviewCard({ state }: { state: TeamState }) {
+  const frame = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(0.4)
+  useEffect(() => {
+    const element = frame.current
+    if (!element || typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(([entry]) => setScale(entry.contentRect.width / 1280))
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
+  return <a className="team-preview-card" href="/team/preview" target="_blank" rel="noopener noreferrer" aria-label="Open Tim and Alex’s client view in a new tab">
+    <Box ref={frame} className="team-preview-frame" aria-hidden="true">
+      <iframe key={state.visible.join('|')} src="/team/preview?embed=1" title="Client view snapshot" tabIndex={-1} style={{ transform: `scale(${scale})` }} />
     </Box>
-  </>
+    <Box className="team-preview-hover" aria-hidden="true"><Typography variant="labelM">Open client view</Typography><OpenInNewOutlined fontSize="small" /></Box>
+  </a>
 }
 
-function TransactionResources({ state, setState }: { state: TeamState; setState: SetState }) {
+function TransactionPage({ state, setState }: { state: TeamState; setState: SetState }) {
   const [guide, setGuide] = useState<ResourceContent | null>(null)
   const [saveOpen, setSaveOpen] = useState(false)
   const [resetOpen, setResetOpen] = useState(false)
@@ -148,6 +133,7 @@ function TransactionResources({ state, setState }: { state: TeamState; setState:
   const savedVisible = new Set(baseline.visible)
   const toSave = selectableResources(state).filter(resource => state.visible.includes(resource.id)).map(resource => resource.id)
   const saveChanges = defaultDifferences({ ...state, visible: toSave }, selection)
+  useEffect(() => { if (window.location.pathname.startsWith('/team/resources')) document.getElementById('resources')?.scrollIntoView?.() }, [])
   function toggle(resource: TeamResource) {
     const showing = state.visible.includes(resource.id)
     setState(previous => ({ ...previous, visible: showing ? previous.visible.filter(id => id !== resource.id) : [...previous.visible, resource.id], resources: !showing && resource.source === 'Team' && resource.linked === 0 ? previous.resources.map(item => item.id === resource.id ? { ...item, linked: 1 } : item) : previous.resources }))
@@ -166,31 +152,37 @@ function TransactionResources({ state, setState }: { state: TeamState; setState:
     toast.success('Seller default saved. New seller transactions will start here.')
   }
   return <>
-    <Heading title="Transaction resources" description="Visibility changes apply right away to Tim and Alex’s portal. The materials themselves live in your team library." actions={<Button component="a" href="/team/preview" target="_blank" rel="noopener noreferrer" startIcon={<VisibilityOutlined />}>Preview client portal</Button>} />
-    <Box className="team-split">
-      <Box>{(['Brivity', 'Team'] as const).map(source => <Box key={source} sx={{ mb: 5 }}>
-        <Box className="team-panel-heading"><Box className="team-panel-heading-copy"><Typography component="h2" variant="titleS">{source === 'Brivity' ? 'Transaction basics' : 'From your team'}</Typography><Typography variant="bodySStandard" color="text.secondary">{source === 'Brivity' ? 'Guides provided and maintained by Brivity.' : 'Published materials from the Ben Kinney Team library.'}</Typography></Box>{source === 'Team' && <Button component="a" href="/team/library">Open library</Button>}</Box>
-        <Box component="ul" className="team-resource-list">{available.filter(resource => resource.source === source).map(resource => {
-          const showing = state.visible.includes(resource.id)
-          const differs = !resource.archived && showing !== savedVisible.has(resource.id)
-          return <Box component="li" className="team-row" key={resource.id}>
-            <Box className="team-row-copy"><Typography variant="titleXS">{resource.published?.title}</Typography><Typography variant="bodySStandard" color="text.secondary">{resource.published?.summary}</Typography><Box className="team-row-meta"><Typography variant="labelS">{showing ? 'Visible to clients' : 'Hidden from clients'}</Typography>{differs && <Typography variant="labelS" color="text.secondary">· Changed from default</Typography>}{resource.archived && <Typography variant="labelS" color="text.secondary">· Archived</Typography>}</Box></Box>
-            <Box className="team-row-actions"><IconButton aria-label={`Preview ${resource.published?.title}`} onClick={() => setGuide(resource.published)}><VisibilityOutlined fontSize="small" /></IconButton><Switch checked={showing} onChange={() => toggle(resource)} slotProps={{ input: { 'aria-label': `Show ${resource.published?.title} to clients` } }} color="primary" /></Box>
-          </Box>
-        })}</Box>
-      </Box>)}</Box>
-      <Stack spacing={3}>
-        <Box className="team-panel"><Typography variant="metricM">{visibleCount}</Typography><Typography component="h2" variant="titleXS" sx={{ mt: 1, mb: 2 }}>{visibleCount === 1 ? 'resource' : 'resources'} visible to clients</Typography><Typography variant="bodySStandard" color="text.secondary">Only published materials can appear in the client portal.</Typography></Box>
-        <Box className="team-panel team-panel-white">
-          <Typography component="h2" variant="titleS" sx={{ mb: 1.5 }}>Seller default</Typography>
-          <Typography variant="bodyMStandard" color="text.secondary">{selection ? 'This transaction started from your team’s seller default.' : 'Your team hasn’t saved a seller default, so this transaction started with Brivity’s basics.'}</Typography>
-          <Box className="team-default-status"><Typography variant="titleXS">{changes === 0 ? 'Matches the default' : `${plural(changes, 'change')} from the default`}</Typography>{changes > 0 && <Button size="small" startIcon={<RestartAltOutlined />} onClick={() => setResetOpen(true)}>Reset</Button>}</Box>
-          {isAdmin
-            ? <><Button variant="outlined" fullWidth sx={{ mt: 3 }} onClick={() => setSaveOpen(true)} disabled={!!selection && saveChanges.shown.length + saveChanges.hidden.length === 0}>{selection ? 'Update seller default' : 'Save as seller default'}</Button><Typography variant="bodySStandard" color="text.secondary" sx={{ mt: 2 }}>Only new seller transactions use it. Existing ones keep their choices.</Typography></>
-            : <Typography variant="bodySStandard" color="text.secondary" sx={{ mt: 3 }}>Admins manage team defaults.</Typography>}
-          <Button component="a" href="/team/defaults" endIcon={<ArrowForwardOutlined />} sx={{ mt: 2, ml: -1 }}>View team defaults</Button>
+    <Box className="team-txn-header">
+      <Box className="team-txn-title">
+        <Typography variant="labelS" color="text.secondary" className="team-eyebrow">Seller transaction</Typography>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}><Chip label="Under contract" size="small" icon={<HomeOutlined />} className="status-chip" /></Stack>
+        <Typography component="h1" variant="displayS">128 Meadowbrook Lane</Typography>
+        <Typography variant="bodyMStandard" color="text.secondary">Tim & Alex Bennett · Kalispell, MT 59901</Typography>
+      </Box>
+      <Button component="a" href="/team/preview" target="_blank" rel="noopener noreferrer" variant="contained" size="large" startIcon={<VisibilityOutlined />} endIcon={<OpenInNewOutlined />}>Preview client view</Button>
+    </Box>
+    <Box className="team-split team-txn-top">
+      <PortalSection prominent title="What Tim and Alex see" subtitle="Their seller portal right now. Opens in a new tab."><PreviewCard state={state} /></PortalSection>
+      <ClientAccess state={state} setState={setState} />
+    </Box>
+    <Box id="resources" className="team-txn-resources">
+      <PortalSection prominent title="Resources clients see" subtitle={`${plural(visibleCount, 'resource')} visible · changes apply right away`} action={<Button component="a" href="/team/library" size="small">Open library</Button>}>
+        <Box className="team-default-bar">
+          <Box><Typography variant="titleXS">{changes === 0 ? `Matches the ${selection ? 'seller default' : 'Brivity basics'}` : `${plural(changes, 'change')} from the ${selection ? 'seller default' : 'Brivity basics'}`}</Typography><Typography variant="bodySStandard" color="text.secondary">{isAdmin ? 'New seller transactions start from the team default.' : 'Admins manage team defaults.'} <a href="/team/defaults">View defaults</a></Typography></Box>
+          <Stack direction="row" spacing={1}>{changes > 0 && <Button size="small" startIcon={<RestartAltOutlined />} onClick={() => setResetOpen(true)}>Reset</Button>}{isAdmin && <Button size="small" variant="outlined" onClick={() => setSaveOpen(true)} disabled={!!selection && saveChanges.shown.length + saveChanges.hidden.length === 0}>{selection ? 'Update seller default' : 'Save as seller default'}</Button>}</Stack>
         </Box>
-      </Stack>
+        {(['Brivity', 'Team'] as const).map(source => <Box key={source} className="team-resource-group">
+          <Typography component="h3" variant="labelS" color="text.secondary" className="team-access-group">{source === 'Brivity' ? 'Transaction basics · from Brivity' : 'From your team library'}</Typography>
+          <Box component="ul" className="team-resource-list">{available.filter(resource => resource.source === source).map(resource => {
+            const showing = state.visible.includes(resource.id)
+            const differs = !resource.archived && showing !== savedVisible.has(resource.id)
+            return <Box component="li" className={`team-row${showing ? '' : ' is-hidden'}`} key={resource.id}>
+              <Box className="team-row-copy"><Typography variant="titleXS">{resource.published?.title}</Typography><Typography variant="bodySStandard" color="text.secondary">{resource.published?.summary}</Typography>{(differs || resource.archived) && <Box className="team-row-meta">{differs && <Typography variant="labelS" color="text.secondary">Changed from default</Typography>}{resource.archived && <Typography variant="labelS" color="text.secondary">Archived</Typography>}</Box>}</Box>
+              <Box className="team-row-actions"><Typography variant="labelS" color={showing ? 'text.primary' : 'text.secondary'} className="team-visibility-label">{showing ? 'Visible' : 'Hidden'}</Typography><IconButton aria-label={`Preview ${resource.published?.title}`} onClick={() => setGuide(resource.published)}><VisibilityOutlined fontSize="small" /></IconButton><Switch checked={showing} onChange={() => toggle(resource)} slotProps={{ input: { 'aria-label': `Show ${resource.published?.title} to clients` } }} color="primary" /></Box>
+            </Box>
+          })}</Box>
+        </Box>)}
+      </PortalSection>
     </Box>
     <PlaceModal open={saveOpen} onClose={() => setSaveOpen(false)} title={selection ? 'Update the seller default?' : 'Save as the seller default?'} description="New seller transactions will start with this selection. Existing transactions keep their current choices." actions={<><Button onClick={() => setSaveOpen(false)}>Cancel</Button><Button variant="contained" onClick={saveDefault}>{selection ? 'Update default' : 'Save default'}</Button></>}>
       <Stack spacing={3}>{selection ? <><Typography variant="bodyMStandard">Changes from the current default, saved {selection.updatedOn} by {selection.updatedBy}:</Typography><ChangeSummary shown={saveChanges.shown} hidden={saveChanges.hidden} state={state} /></> : <><Typography variant="bodyMStandard">{plural(toSave.length, 'resource')} will start visible:</Typography><ResourceNameList ids={toSave} state={state} /></>}</Stack>

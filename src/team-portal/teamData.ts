@@ -1,5 +1,6 @@
 export { cleanResourceHtml } from '../transaction-portal/resourceContent'
 import { sellerResources } from '../seller-portal/sellerResources'
+import { sampleSellerTransaction } from '../seller-portal/sellerTransaction'
 
 export type ResourceContent = { title: string; summary: string; html: string }
 export type TeamResource = {
@@ -15,8 +16,11 @@ export type DefaultSelection = { visible: string[]; updatedBy: string; updatedOn
 export type TeamRole = 'admin' | 'member'
 export type InviteStatus = 'not-invited' | 'invited' | 'active' | 'removed'
 export type ClientInvite = { status: InviteStatus; updatedOn?: string; updatedBy?: string; note?: string }
-export const clientEmails: Record<string, string> = { seller: 'tim.bennett@example.com', 'co-seller': 'alex.bennett@example.com' }
+/** People who can view the client portal. Brivity collaborators appear automatically; others are added by inviting them. */
+export type ClientPerson = { id: string; name: string; email: string; role: string; photoUrl?: string; source: 'Brivity' | 'Invited' }
+const clientEmails: Record<string, string> = { seller: 'tim.bennett@example.com', 'co-seller': 'alex.bennett@example.com' }
 export type TeamState = {
+  clients: ClientPerson[]
   invites: Record<string, ClientInvite>
   resources: TeamResource[]
   visible: string[]
@@ -25,6 +29,7 @@ export type TeamState = {
 }
 export const initialTeamState: TeamState = {
   role: 'admin',
+  clients: sampleSellerTransaction.viewers.map(viewer => ({ id: viewer.id, name: viewer.name, email: clientEmails[viewer.id] ?? '', role: viewer.role, photoUrl: viewer.photoUrl, source: 'Brivity' as const })),
   invites: {
     seller: { status: 'active', updatedOn: 'Sep 14, 2026', updatedBy: 'Avery Coleman' },
     'co-seller': { status: 'not-invited' },
@@ -55,13 +60,13 @@ export const initialTeamState: TeamState = {
   ],
 }
 
-export const teamStateKey = 'place-team-exploration-v3'
+export const teamStateKey = 'place-team-exploration-v4'
 export function loadTeamState(): TeamState {
   const saved = localStorage.getItem(teamStateKey)
   if (!saved) return initialTeamState
   try {
     const state = JSON.parse(saved) as TeamState
-    if (Array.isArray(state.resources) && Array.isArray(state.visible) && state.defaults && 'seller' in state.defaults && !!state.invites && ['admin', 'member'].includes(state.role)) return state
+    if (Array.isArray(state.resources) && Array.isArray(state.visible) && state.defaults && 'seller' in state.defaults && !!state.invites && Array.isArray(state.clients) && ['admin', 'member'].includes(state.role)) return state
   } catch {
     localStorage.removeItem(teamStateKey)
   }

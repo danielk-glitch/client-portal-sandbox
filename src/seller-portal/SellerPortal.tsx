@@ -59,6 +59,8 @@ import { CardActionButton } from '../components/CardActionButton'
 import { ListingPreparation } from './ListingPreparation'
 import { createBeforeListingTransaction, readSellerJourneyView, type SellerJourneyView } from '../internal/review/sellerJourneyViews'
 import { SellerReviewTools } from '../internal/review/SellerReviewTools'
+import { SellerTimeline } from './SellerTimeline'
+import { beforeListingTimeline, timelineResources, underContractTimeline } from './sellerTimelineData'
 import './seller-portal.css'
 import './seller-polestar.css'
 
@@ -70,6 +72,8 @@ type SellerPortalProps = {
   visualTheme?: 'polestar'
   readOnly?: boolean
   showReviewTools?: boolean
+  /** 'timeline' swaps the dates + activity overview for the milestone timeline exploration. */
+  layout?: 'dashboard' | 'timeline'
 }
 
 export type PortalTab = 'activity' | 'tasks' | 'notes' | 'documents' | 'resources'
@@ -82,10 +86,14 @@ export const portalTabs: Array<{ id: PortalTab; label: string }> = [
   { id: 'resources', label: 'Resources' },
 ]
 
-export function SellerPortal({ transaction: baseTransaction = sampleSellerTransaction, marketingSnapshot, initialListingOpen = false, basePath = '/seller', visualTheme, readOnly = false, showReviewTools = true }: SellerPortalProps) {
+export function SellerPortal({ transaction: baseTransaction = sampleSellerTransaction, marketingSnapshot, initialListingOpen = false, basePath = '/seller', visualTheme, readOnly = false, showReviewTools = true, layout = 'dashboard' }: SellerPortalProps) {
+  const timelineLayout = layout === 'timeline'
   const [journeyView, setJourneyView] = useState(() => readSellerJourneyView(window.location.search))
   const beforeListing = journeyView === 'before-listing'
-  const transaction = useMemo(() => beforeListing ? createBeforeListingTransaction(baseTransaction) : baseTransaction, [beforeListing, baseTransaction])
+  const transaction = useMemo(() => {
+    const journeyTransaction = beforeListing ? createBeforeListingTransaction(baseTransaction) : baseTransaction
+    return timelineLayout ? { ...journeyTransaction, resources: timelineResources } : journeyTransaction
+  }, [beforeListing, baseTransaction, timelineLayout])
   const availableTabs = portalTabs.filter((tab) => tab.id !== 'resources' || Boolean(transaction.resources?.length))
   const [selectedResource, setSelectedResource] = useState<TransactionResource | null>(null)
   const portalRef = useRef<HTMLDivElement>(null)
@@ -133,7 +141,7 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
     if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
     const blocks = portalRef.current?.querySelectorAll<HTMLElement>(
-      '.portal-main > .listing-overview, .priority-grid > .portal-section, .priority-grid > .upcoming-dates-card, .portal-main > .marketing-snapshot, .transaction-lower-grid > .people-section, .transaction-lower-grid > .transaction-sections, .portal-footer',
+      '.portal-main > .listing-overview, .portal-main > .seller-timeline, .priority-grid > .portal-section, .priority-grid > .upcoming-dates-card, .portal-main > .marketing-snapshot, .transaction-lower-grid > .people-section, .transaction-lower-grid > .transaction-sections, .portal-footer',
     )
     if (!blocks) return
 
@@ -309,7 +317,17 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
 
         {beforeListing && transaction.clientMessage && <ListingPreparation message={transaction.clientMessage} />}
 
-        <Box className="priority-grid" aria-label="Current transaction activity">
+        {timelineLayout ? (
+          <SellerTimeline
+            data={beforeListing ? beforeListingTimeline : underContractTimeline}
+            resources={transaction.resources ?? []}
+            documents={transaction.documents}
+            team={transaction.team}
+            onOpenResource={setSelectedResource}
+            onOpenDocument={setSelectedDocument}
+            onOpenMarketing={!beforeListing && marketingSnapshot ? () => setMarketingDashboardSection('overview') : undefined}
+          />
+        ) : <Box className="priority-grid" aria-label="Current transaction activity">
           <UpcomingDatesPanel dates={transaction.upcomingDates} resources={transaction.resources} onSeeAll={() => setDatesDrawerOpen(true)} onReadGuide={openMilestoneGuide} />
           <PortalSection
             title="Recent activity"
@@ -318,7 +336,7 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
           >
             <TimelineEventsList events={transaction.timeline.slice(0, 3)} />
           </PortalSection>
-        </Box>
+        </Box>}
 
         {!beforeListing && (marketingSnapshot && marketingLayout === 'views' && marketingSnapshot.insights ? (
           <AdvertisingSnapshot

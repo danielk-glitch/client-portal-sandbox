@@ -6,9 +6,9 @@ product prototypes use browser-local sample data. the sandbox index links to the
 
 | route | purpose |
 | --- | --- |
-| `/team` | transaction client experience overview and portal preview |
+| `/team` | one transaction page, ordered by team priority: what the client sees (preview card plus a button that opens the full view), client access and invites, then resource visibility and the seller default |
 | `/team/preview` | actual latest seller portal with a read-only preview banner |
-| `/team/resources` | transaction visibility and saving selections as defaults |
+| `/team/resources` | same page, scrolled to resources (kept for older links) |
 | `/team/library` | shared team materials. admins create, edit, archive, and delete; members browse published resources |
 | `/team/defaults` | buyer and seller defaults. admins edit or remove them; members view them |
 | `/team/editor?id=team-welcome` | rich-text authoring, draft preview, saving, and publishing confirmation; accessed through the library |
@@ -25,13 +25,13 @@ seller preview renders `SellerPortal` with the same future transaction and marke
 
 - the sample account is an admin (Avery Coleman). add `?as=member` to any team url to switch to the member view (Morgan Ellis, tc); `?as=admin` switches back. the choice persists.
 - admins alone create, edit, publish, archive, and delete library resources, and save defaults. anyone on the transaction can change visibility.
-- client access on the transaction overview: admins invite, resend, or remove access per client. nothing is sent until they choose send. the dialog previews the seller invite email with an optional personal note. members see status only. sample: tim is active, alex not invited.
+- client access, grouped active / invited / not invited. only invited people and brivity collaborators are listed. admins invite brivity collaborators per row, or anyone by name and email through the invite button. nothing is sent until they choose send. the dialog previews the seller invite email with an optional personal note. members see status only.
 - publishing updates every transaction where the resource is live and preserves visibility.
 - deleting a published resource shows how many transactions it is live in, offers archive instead, and removes it from every transaction and default.
 - archived resources stay in the transactions where they are live (still a proposal) and are skipped when a default is applied.
 - transaction resources compare the current selection with the seller default, mark changed rows, and offer reset. admins can update the default from there.
 - with no saved default, new transactions start with brivity basics visible and team resources hidden (a prototype assumption).
-- sample changes persist under `place-team-exploration-v3`; this is not authentication or production permission enforcement.
+- sample changes persist under `place-team-exploration-v4`; this is not authentication or production permission enforcement.
 
 ## internal documentation canvas
 

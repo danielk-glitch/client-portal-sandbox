@@ -1,0 +1,532 @@
+/* Seller timeline · open-canvas milestone tracker with a vertical mobile rail */
+
+.seller-timeline {
+  --timeline-ink: var(--color-semantic-surface-reverse-primary);
+  --timeline-halo: color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 8%, transparent);
+  --timeline-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --timeline-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  margin-top: 56px;
+}
+
+.seller-timeline .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.seller-timeline-title.MuiTypography-root { margin-bottom: 8px; }
+
+/* ---------- Tracker ---------- */
+
+.timeline-tracker {
+  --col: calc(100% / var(--timeline-columns));
+  --rail-y: 76px; /* padding 28 + "Now" row 26 + half the 44px marker box */
+  --edge-fade: min(180px, 12vw);
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: repeat(var(--timeline-columns), minmax(0, 1fr));
+  padding: 28px 0 8px;
+}
+
+/* Full-bleed track that fades into the page at both edges. */
+.timeline-rail,
+.timeline-rail-fill {
+  position: absolute;
+  z-index: -1;
+  top: calc(var(--rail-y) - 1px);
+  left: calc(50% - 50vw);
+  height: 2px;
+  pointer-events: none;
+}
+
+.timeline-rail {
+  width: 100vw;
+  background: var(--color-semantic-stroke-primary-light);
+  mask-image: linear-gradient(90deg, transparent, #000 var(--edge-fade), #000 calc(100% - var(--edge-fade)), transparent);
+}
+
+/* Progress: from the left edge, through finished milestones, partway into the current one. */
+.timeline-rail-fill {
+  width: calc(50vw - 50% + var(--col) / 2 + var(--timeline-progress) * (100% - var(--col)));
+  background: var(--timeline-ink);
+  mask-image: linear-gradient(90deg, transparent, #000 var(--edge-fade), #000 calc(100% - 24px), transparent);
+  transition: width 900ms var(--timeline-ease);
+}
+
+/* Soft light that glides to the selected milestone. */
+.timeline-spotlight {
+  position: absolute;
+  z-index: -2;
+  top: calc(var(--rail-y) - 70px);
+  left: calc(var(--col) * (var(--timeline-selected) + 0.5));
+  width: min(240px, var(--col));
+  height: 180px;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 7%, transparent), transparent);
+  pointer-events: none;
+  transition: left 620ms var(--timeline-spring);
+}
+
+.timeline-node.MuiButtonBase-root {
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  padding: 0 8px 16px;
+  text-align: center;
+  color: var(--color-semantic-text-light);
+  background: none;
+}
+
+.timeline-node:focus-visible { outline: none; }
+
+.timeline-node:focus-visible .timeline-marker {
+  outline: 2px solid var(--color-semantic-stroke-primary-darkest);
+  outline-offset: 6px;
+  border-radius: 50%;
+}
+
+.timeline-now {
+  height: 18px;
+  margin-bottom: 8px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.625rem;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-semantic-text-on-color-primary);
+  background: var(--timeline-ink);
+}
+
+.timeline-now:empty { visibility: hidden; }
+
+.timeline-node-label.MuiTypography-root {
+  margin-top: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-semantic-text-light);
+  transition: color 200ms ease, letter-spacing 300ms var(--timeline-ease);
+}
+
+.timeline-node--complete .timeline-node-label.MuiTypography-root,
+.timeline-node--current .timeline-node-label.MuiTypography-root { color: var(--color-semantic-text-primary); }
+
+.timeline-node-caption.MuiTypography-root {
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-semantic-text-light);
+  opacity: 0;
+  translate: 0 -4px;
+  transition: opacity 220ms ease, translate 320ms var(--timeline-ease);
+}
+
+/* Selected label gets a short underline that draws in from the center. */
+.timeline-node.MuiButtonBase-root::after {
+  width: 24px;
+  height: 2px;
+  margin-top: 12px;
+  content: '';
+  border-radius: 2px;
+  background: var(--timeline-ink);
+  scale: 0 1;
+  transition: scale 360ms var(--timeline-spring);
+}
+
+.timeline-node.is-selected .timeline-node-label.MuiTypography-root { color: var(--color-semantic-text-dark); letter-spacing: 0.14em; }
+.timeline-node.is-selected .timeline-node-caption.MuiTypography-root { opacity: 1; translate: 0 0; }
+.timeline-node.is-selected::after { scale: 1 1; }
+
+.timeline-node:hover .timeline-node-label.MuiTypography-root { color: var(--color-semantic-text-dark); }
+.timeline-node:hover .timeline-node-caption.MuiTypography-root { opacity: 1; translate: 0 0; }
+
+/* ---------- Markers ---------- */
+
+.timeline-marker {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+}
+
+/* The visible dot. Everything scales from here. */
+.timeline-marker::before {
+  position: absolute;
+  inset: 8px;
+  content: '';
+  border-radius: 50%;
+  background: var(--color-semantic-surface-primary);
+  box-shadow: inset 0 0 0 1.5px var(--color-semantic-stroke-primary), 0 0 0 0 var(--timeline-halo);
+  transition: scale 420ms var(--timeline-spring), box-shadow 300ms ease, background-color 200ms ease;
+}
+
+.timeline-marker > * { position: relative; transition: scale 420ms var(--timeline-spring); }
+.timeline-marker svg { width: 16px; height: 16px; }
+
+.timeline-marker-number {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-semantic-text-light);
+}
+
+.timeline-marker--complete { color: var(--color-semantic-text-on-color-primary); }
+.timeline-marker--complete::before { background: var(--timeline-ink); box-shadow: 0 0 0 0 var(--timeline-halo); }
+
+.timeline-marker--current::before { box-shadow: inset 0 0 0 2px var(--timeline-ink), 0 0 0 0 var(--timeline-halo); }
+
+.timeline-marker-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--timeline-ink);
+}
+
+/* Live pulse on the current stage. */
+.timeline-marker--current::after {
+  position: absolute;
+  inset: 8px;
+  content: '';
+  border-radius: 50%;
+  border: 2px solid var(--timeline-ink);
+  opacity: 0;
+  animation: timeline-pulse 2.8s var(--timeline-ease) infinite;
+  pointer-events: none;
+}
+
+@keyframes timeline-pulse {
+  0% { opacity: 0.35; scale: 1; }
+  70%, 100% { opacity: 0; scale: 2; }
+}
+
+/* Hover: lift and a soft halo. */
+.timeline-node:hover .timeline-marker::before,
+.timeline-node:hover .timeline-marker > * { scale: 1.12; }
+.timeline-node:hover .timeline-marker::before { box-shadow: inset 0 0 0 1.5px var(--color-semantic-stroke-primary-dark), 0 0 0 7px var(--timeline-halo); }
+.timeline-node--complete:hover .timeline-marker::before { box-shadow: 0 0 0 7px var(--timeline-halo); }
+.timeline-node--current:hover .timeline-marker::before { box-shadow: inset 0 0 0 2px var(--timeline-ink), 0 0 0 7px var(--timeline-halo); }
+.timeline-node:active .timeline-marker::before,
+.timeline-node:active .timeline-marker > * { scale: 1.02; transition-duration: 120ms; }
+
+/* Selected: larger dot, layered halo, raised shadow. */
+.timeline-node.is-selected .timeline-marker::before,
+.timeline-node.is-selected .timeline-marker > * { scale: 1.3; }
+.timeline-node.is-selected .timeline-marker::before {
+  box-shadow:
+    inset 0 0 0 1.5px var(--color-semantic-stroke-primary-darkest),
+    0 0 0 5px var(--color-semantic-surface-primary),
+    0 0 0 6px var(--color-semantic-stroke-primary-light),
+    0 10px 24px -8px color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 35%, transparent);
+}
+.timeline-node--complete.is-selected .timeline-marker::before,
+.timeline-node--current.is-selected .timeline-marker::before {
+  box-shadow:
+    inset 0 0 0 2px var(--timeline-ink),
+    0 0 0 5px var(--color-semantic-surface-primary),
+    0 0 0 6px var(--color-semantic-stroke-primary-light),
+    0 10px 24px -8px color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 35%, transparent);
+}
+.timeline-node.is-selected .timeline-marker-number { color: var(--color-semantic-text-dark); }
+
+/* ---------- Panel ---------- */
+
+.timeline-panel {
+  margin-top: 32px;
+  animation: timeline-panel-in 360ms var(--timeline-ease);
+}
+
+@keyframes timeline-panel-in {
+  from { opacity: 0; translate: 0 8px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+.milestone-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr);
+  gap: 72px;
+  align-items: start;
+}
+
+.milestone-main { min-width: 0; display: grid; gap: 20px; }
+
+.milestone-heading { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+
+.milestone-dates.MuiTypography-root { font-variant-numeric: tabular-nums; }
+
+.milestone-locked-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-semantic-text-light);
+}
+
+.milestone-locked-note svg { width: 16px; height: 16px; flex: none; }
+
+.milestone-group-title.MuiTypography-root {
+  display: block;
+  margin: 0 0 4px 12px;
+  color: var(--color-semantic-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.milestone-done { display: grid; gap: 4px; padding-top: 8px; }
+
+/* ---------- Action items ---------- */
+
+.milestone-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.step-row.MuiButtonBase-root {
+  width: 100%;
+  min-height: 56px;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 20px;
+  align-items: start;
+  gap: 16px;
+  padding: 12px;
+  border-radius: 12px;
+  text-align: left;
+  color: inherit;
+  transition: background-color 160ms ease;
+}
+
+.step-row:hover { background: var(--color-semantic-surface-primary-dark); }
+.step-row:focus-visible { outline: 2px solid var(--color-semantic-stroke-primary-darkest); outline-offset: 2px; }
+
+.step-check {
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--color-semantic-stroke-primary);
+  transition: box-shadow 160ms ease;
+}
+
+.step-row:hover .step-check:not(.step-check--done) { box-shadow: inset 0 0 0 1.5px var(--color-semantic-stroke-primary-darkest); }
+
+.step-check--done {
+  color: var(--color-semantic-text-on-color-primary);
+  background: var(--timeline-ink);
+  box-shadow: none;
+}
+
+.step-check svg { width: 15px; height: 15px; }
+
+.step-body { min-width: 0; display: grid; gap: 4px; }
+
+.step-item--done .step-title.MuiTypography-root { color: var(--color-semantic-text-primary); }
+
+.step-meta.MuiTypography-root {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.step-avatar.MuiAvatar-root { width: 18px; height: 18px; }
+
+.timeline-chevron {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  color: var(--color-semantic-text-light);
+  transition: rotate 240ms var(--timeline-ease);
+}
+
+.is-expanded > .step-row .timeline-chevron,
+.is-open > .timeline-stack-header .timeline-chevron { rotate: 180deg; }
+
+.step-detail {
+  display: grid;
+  gap: 12px;
+  padding: 0 12px 16px 50px;
+}
+
+.step-detail[hidden] { display: none; }
+.step-detail .MuiTypography-root { max-width: 60ch; }
+
+/* Next step: an item type, not a separate module. */
+.step-item--featured {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 16px;
+  margin-bottom: 6px;
+  padding: 20px 12px 22px;
+  border-radius: 14px;
+  background: var(--color-semantic-surface-primary-dark);
+  box-shadow: inset 0 0 0 1px var(--color-semantic-stroke-primary-lightest);
+}
+
+.step-item--featured .step-check {
+  margin-top: 22px;
+  box-shadow: inset 0 0 0 2px var(--timeline-ink);
+}
+
+.step-eyebrow.MuiTypography-root {
+  color: var(--color-semantic-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.step-item--featured .step-title.MuiTypography-root { font-size: 1.125rem; }
+
+.step-detail-copy.MuiTypography-root { max-width: 60ch; margin-top: 4px; }
+
+.step-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 4px; }
+.step-item--featured .step-actions { padding-top: 12px; }
+
+.step-action,
+.step-action.MuiButtonBase-root {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 12px;
+  border: 1px solid var(--color-semantic-stroke-primary-light);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--color-semantic-text-dark);
+  background: var(--color-semantic-surface-primary);
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.step-action.MuiButtonBase-root:hover { background: var(--color-semantic-surface-primary-dark); border-color: var(--color-semantic-stroke-primary); }
+.step-action.MuiButtonBase-root:focus-visible { outline: 2px solid var(--color-semantic-stroke-primary-darkest); outline-offset: 2px; }
+.step-action svg { width: 16px; height: 16px; }
+
+.step-action--locked {
+  color: var(--color-semantic-text-light);
+  border-style: dashed;
+  background: transparent;
+}
+
+/* ---------- Resources ---------- */
+
+.milestone-aside { min-width: 0; display: grid; gap: 4px; padding-top: 44px; }
+
+.milestone-aside .milestone-group-title.MuiTypography-root { margin-left: 0; }
+
+.milestone-guide-list { margin: 0; padding: 0; list-style: none; display: grid; }
+
+.milestone-guide-list > li + li { border-top: 1px solid var(--color-semantic-stroke-primary-lightest); }
+
+.milestone-guide.MuiButtonBase-root {
+  width: 100%;
+  min-height: 52px;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  text-align: left;
+  color: var(--color-semantic-text-dark);
+}
+
+.milestone-guide > svg:first-child { width: 20px; height: 20px; color: var(--color-semantic-text-light); }
+
+.milestone-guide-copy.MuiTypography-root { min-width: 0; }
+
+.milestone-guide-arrow {
+  width: 18px;
+  height: 18px;
+  color: var(--color-semantic-text-light);
+  transition: translate 200ms var(--timeline-ease), color 160ms ease;
+}
+
+.milestone-guide:hover .milestone-guide-arrow { translate: 3px 0; color: var(--color-semantic-text-dark); }
+.milestone-guide:focus-visible { outline: 2px solid var(--color-semantic-stroke-primary-darkest); outline-offset: 2px; border-radius: 8px; }
+
+/* ---------- Stacked (mobile): vertical rail ---------- */
+
+.timeline-stack {
+  position: relative;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+}
+
+.timeline-stack::before {
+  position: absolute;
+  top: -24px;
+  bottom: -24px;
+  left: 21px;
+  width: 2px;
+  content: '';
+  background: var(--color-semantic-stroke-primary-light);
+  mask-image: linear-gradient(180deg, transparent, #000 48px, #000 calc(100% - 48px), transparent);
+}
+
+.timeline-stack-item { position: relative; }
+
+.timeline-stack-header.MuiButtonBase-root {
+  width: 100%;
+  min-height: 60px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  text-align: left;
+  color: inherit;
+}
+
+.timeline-stack-header:focus-visible { outline: none; }
+.timeline-stack-header:focus-visible .timeline-marker { outline: 2px solid var(--color-semantic-stroke-primary-darkest); outline-offset: 4px; border-radius: 50%; }
+
+.timeline-stack-heading { display: flex; align-items: center; gap: 10px; }
+
+.timeline-stack-item--upcoming .timeline-stack-heading .MuiTypography-root { color: var(--color-semantic-text-primary); }
+
+.timeline-now--inline { margin: 0; }
+
+.timeline-stack-item.is-open .timeline-marker::before,
+.timeline-stack-item.is-open .timeline-marker > * { scale: 1.15; }
+
+.timeline-stack-body {
+  padding: 4px 0 24px 56px;
+  animation: timeline-panel-in 260ms var(--timeline-ease);
+}
+
+.milestone-content--compact { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+.milestone-content--compact .milestone-aside { padding-top: 0; }
+.milestone-content--compact .step-row.MuiButtonBase-root,
+.milestone-content--compact .step-item--featured { padding-inline: 10px; }
+.milestone-content--compact .step-detail { padding-left: 48px; padding-right: 0; }
+
+/* ---------- Responsive + preferences ---------- */
+
+@media (max-width: 1199.95px) {
+  .milestone-content:not(.milestone-content--compact) { gap: 40px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timeline-panel,
+  .timeline-stack-body,
+  .timeline-marker--current::after { animation: none; }
+  .timeline-rail-fill,
+  .timeline-spotlight,
+  .timeline-marker::before,
+  .timeline-marker > *,
+  .timeline-node::after,
+  .timeline-node-caption,
+  .timeline-chevron,
+  .milestone-guide-arrow { transition: none; }
+}
