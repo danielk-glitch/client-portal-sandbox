@@ -6,7 +6,7 @@ product prototypes use browser-local sample data. the sandbox index links to the
 
 | route | purpose |
 | --- | --- |
-| `/team` | one transaction page, ordered by team priority: what the client sees (preview card that opens the full view) and client access, then manage upcoming dates, then manage client resources |
+| `/team` | one transaction page, ordered by team priority: what the client sees (preview card that opens the full view) and portal access, then manage upcoming dates, then manage client resources |
 | `/team/preview` | actual latest seller portal with a read-only preview banner |
 | `/team/resources` | same page, scrolled to resources (kept for older links) |
 | `/team/library` | shared team materials. admins create, edit, archive, and delete; members browse published resources |
@@ -25,7 +25,7 @@ seller preview renders `SellerPortal` with the same future transaction and marke
 
 - the sample account is an admin (Avery Coleman). add `?as=member` to any team url to switch to the member view (Morgan Ellis, tc); `?as=admin` switches back. the choice persists.
 - admins alone create, edit, publish, archive, and delete library resources, and save defaults. anyone on the transaction can change visibility.
-- client access has team and viewers tabs, like the seller portal. team lists the brivity transaction team (read-only). viewers lists only people who were invited (no pre-filled invitees): active, invite sent, or access removed. admins invite anyone by email through the invite button. nothing is sent until they choose send. the dialog previews the seller invite email with an optional personal note. members see status only.
+- portal access has team and viewers tabs, like the seller portal. team lists the brivity transaction team (read-only). viewers lists only people who were invited (no pre-filled invitees): active, invite sent, or access removed. admins invite anyone by email through the invite button. nothing is sent until they choose send. the dialog previews the seller invite email with an optional personal note. members see status only.
 - upcoming dates: edit title, date, short description, "what this means", "how to prepare", and any number of attached resources. changes flow into the client preview. attaching a hidden resource offers to make it visible; dates show a warning when their resource is hidden.
 - publishing updates every transaction where the resource is live and preserves visibility.
 - deleting a published resource shows how many transactions it is live in, offers archive instead, and removes it from every transaction and default.

@@ -72,7 +72,7 @@ export function ClientAccess({ state, setState }: { state: TeamState; setState: 
     setRemoving(null)
   }
 
-  return <PortalSection prominent title="Client access" subtitle={isAdmin ? undefined : 'Admins send invites and manage access.'} action={isAdmin ? <Button size="small" variant="contained" startIcon={<AddOutlined />} onClick={() => open(null)} aria-label="Invite a client">Invite</Button> : undefined}>
+  return <PortalSection prominent title="Portal access" subtitle={isAdmin ? undefined : 'Admins send invites and manage access.'} action={isAdmin ? <Button size="small" variant="contained" startIcon={<AddOutlined />} onClick={() => open(null)} aria-label="Invite a client">Invite</Button> : undefined}>
     <Tabs value={tab} onChange={(_, value) => setTab(value)} aria-label="Who can see this portal" className="team-access-tabs">
       <Tab value="team" label={`Team · ${transaction.team.length}`} id="access-tab-team" aria-controls="access-panel-team" />
       <Tab value="viewers" label={`Viewers · ${viewers.length}`} id="access-tab-viewers" aria-controls="access-panel-viewers" />
