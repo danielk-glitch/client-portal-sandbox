@@ -1,0 +1,148 @@
+/**
+ * Buyer guides. In V1 these render as documents tagged "Resource" (see documentLibrary.ts).
+ * "Your first 10 days" is the lead guide: the first-10-days block links to it while the inspection period is on.
+ */
+import type { TransactionResource } from '../transaction-portal/types'
+
+export const buyerResources: TransactionResource[] = [
+  {
+    id: 'first-10-days',
+    title: 'Your first 10 days under contract',
+    shortTitle: 'First 10 days',
+    summary: 'Earnest money, the inspection, and repair requests. The deadlines that matter most.',
+    readingTime: '4 min read',
+    relevance: 'Useful now',
+    sections: [
+      { title: 'Why these days matter', body: 'The first 10 days after your contract is signed are the busiest of the whole purchase. Three things happen fast: your earnest money is due, your inspection happens, and you negotiate any repairs. Each one has a deadline in your contract.' },
+      { title: 'Days 1 to 3: earnest money', points: ['Your deposit is due within three days.', 'Call the title company at a number you look up yourself to confirm wiring instructions.', 'Missing this deadline can put you in breach of contract.'] },
+      { title: 'Days 4 to 5: the inspection', points: ['Read the seller’s disclosure first and note your questions.', 'Go to the end of the inspection to hear the findings in person.', 'The report usually arrives within 24 hours.'] },
+      { title: 'Days 6 to 7: repair requests', points: ['Focus on safety issues and expensive systems, not cosmetic items.', 'You can ask for repairs, a credit, or a lower price.', 'Avery writes the request and negotiates for you.'] },
+      { title: 'Day 10: the inspection period ends', body: 'Until 5:00 PM on the last day, you can cancel for any inspection reason and get your earnest money back. After that, backing out can cost you your deposit. If you have doubts, tell Avery before the deadline, not after.' },
+    ],
+    questions: ['Is my earnest money refundable?', 'What should I ask the seller to fix?', 'What happens if we can’t agree on repairs?'],
+  },
+  {
+    id: 'buyer-earnest-money',
+    title: 'How earnest money works',
+    shortTitle: 'Earnest money',
+    summary: 'Where your deposit goes, when it’s due, and when it’s at risk.',
+    readingTime: '2 min read',
+    relevance: 'Useful now',
+    sections: [
+      { title: 'What it is', body: 'Earnest money is a good-faith deposit that shows the seller you’re serious. A neutral title company holds it, and it counts toward your down payment at closing.' },
+      { title: 'When it’s at risk', points: ['If you miss the deposit deadline.', 'If you cancel after your inspection period ends, for inspection reasons.', 'If you cancel after loan commitment, for financing reasons.'] },
+      { title: 'Sending it safely', body: 'Always confirm wiring instructions by phone, using a number you find yourself. Scammers send fake instructions that look real. A quick call is the best protection.' },
+    ],
+    questions: ['How much is my deposit?', 'Who is holding it?', 'When would I get it back?'],
+  },
+  {
+    id: 'buyer-inspection',
+    title: 'Getting the most from your inspection',
+    shortTitle: 'Inspection guide',
+    summary: 'What the inspector checks, and how to read the report without panicking.',
+    readingTime: '3 min read',
+    relevance: 'Useful now',
+    sections: [
+      { title: 'What gets checked', body: 'Your inspector looks at the roof, foundation, structure, plumbing, electrical, heating and cooling, and major appliances. They point out safety issues, things near the end of their life, and normal wear.' },
+      { title: 'On the day', points: ['Come for the last 30 minutes, when the inspector walks you through findings.', 'Ask which issues are urgent and which can wait.', 'Ask about the age of the roof, furnace, and water heater.'] },
+      { title: 'Reading the report', body: 'Every report has a long list. Most of it is maintenance. Focus on safety, water, structure, and anything expensive. Avery will help you sort it.' },
+    ],
+    questions: ['Should we get a sewer scope or radon test?', 'Which findings are worth negotiating?', 'Can the inspector come back for a re-check?'],
+  },
+  {
+    id: 'repair-requests',
+    title: 'Asking for repairs',
+    shortTitle: 'Repair requests',
+    summary: 'Repairs, credits, or a lower price, and how the seller can respond.',
+    readingTime: '2 min read',
+    relevance: 'Useful now',
+    sections: [
+      { title: 'Your options', points: ['Ask the seller to make repairs before closing.', 'Ask for a credit toward your closing costs.', 'Ask for a lower price.', 'Accept the home as is.'] },
+      { title: 'What’s reasonable', body: 'Sellers usually respond best to requests about safety, water, structure, and major systems. Long lists of small items can slow things down. Avery will recommend what to include.' },
+      { title: 'The seller’s answer', body: 'The seller can agree, counter, or decline. Anything you agree on becomes a signed amendment to your contract, and it must be signed before your inspection period ends.' },
+    ],
+    questions: ['Is a credit better than a repair?', 'What if the seller says no?', 'Who checks that repairs were done?'],
+  },
+  {
+    id: 'buyer-appraisal',
+    title: 'What the appraisal means for you',
+    shortTitle: 'Appraisal',
+    summary: 'Why your lender checks the home’s value, and what happens if it comes in low.',
+    readingTime: '2 min read',
+    relevance: 'Coming up',
+    sections: [
+      { title: 'Why it happens', body: 'Your lender won’t lend more than the home is worth. An independent appraiser compares the home with recent nearby sales to confirm its value.' },
+      { title: 'If it comes in low', points: ['Ask the seller to lower the price.', 'Cover the difference with more cash.', 'Meet in the middle.', 'Avery will walk you through the options in your contract.'] },
+    ],
+    questions: ['Do I get a copy of the appraisal?', 'What if the value is lower than our price?'],
+  },
+  {
+    id: 'loan-commitment',
+    title: 'Loan commitment, explained',
+    shortTitle: 'Loan commitment',
+    summary: 'Your lender’s final yes, and how to protect it until closing.',
+    readingTime: '2 min read',
+    relevance: 'Coming up',
+    sections: [
+      { title: 'What it is', body: 'Loan commitment is your lender’s final approval after reviewing your finances, the appraisal, and the title. Once you have it, your financing contingency ends.' },
+      { title: 'Protect your approval', points: ['Don’t make big purchases or open new credit.', 'Don’t change or quit your job.', 'Don’t move large sums of money without telling your lender.', 'Answer your lender’s requests quickly.'] },
+    ],
+    questions: ['Can my approval change after commitment?', 'What if my lender needs more time?'],
+  },
+  {
+    id: 'buyer-closing',
+    title: 'Closing day for buyers',
+    shortTitle: 'Closing day',
+    summary: 'Your Closing Disclosure, your funds, the walkthrough, and signing.',
+    readingTime: '4 min read',
+    relevance: 'Coming up',
+    sections: [
+      { title: 'Three business days before', body: 'Your lender sends your Closing Disclosure. It shows your final rate, monthly payment, and cash to close. Compare it with your Loan Estimate and ask about anything that changed.' },
+      { title: 'The day before', points: ['Send your closing funds, after confirming instructions by phone.', 'Do your final walkthrough with Avery.', 'Confirm the signing time and who needs to be there.'] },
+      { title: 'At the table', points: ['Bring a government photo ID for each buyer.', 'Plan for about an hour.', 'Ask the closer to explain anything you don’t understand before you sign.'] },
+      { title: 'When the home is yours', body: 'The sale is complete once the deed records with the county, usually the same afternoon. Avery hands over the keys then.' },
+    ],
+    questions: ['How much do I bring to closing?', 'Can I sign early or remotely?', 'When do I get the keys?'],
+  },
+  {
+    id: 'wire-safety',
+    title: 'Sending money safely',
+    shortTitle: 'Wire safety',
+    summary: 'Wire fraud targets home buyers. One phone call protects you.',
+    readingTime: '1 min read',
+    relevance: 'Good to know',
+    sections: [
+      { title: 'The rule', body: 'Before you wire any money, call the title company at a number you look up yourself and confirm the instructions out loud. Never rely on wiring instructions from an email or text alone, even if it looks like it’s from your agent.' },
+      { title: 'Warning signs', points: ['Instructions that changed at the last minute.', 'Urgent pressure to send money right now.', 'An email address that’s slightly different from usual.'] },
+    ],
+    questions: ['What’s the title company’s verified number?', 'What do I do if I think I’ve been targeted?'],
+  },
+  {
+    id: 'moving-in',
+    title: 'Moving into your new home',
+    shortTitle: 'Moving in',
+    summary: 'Keys, utilities, and your first-week checklist.',
+    readingTime: '3 min read',
+    relevance: 'Coming up',
+    sections: [
+      { title: 'Before closing day', points: ['Book movers for the afternoon of closing or later.', 'Schedule utilities to start in your name on closing day.', 'Forward your mail with USPS.'] },
+      { title: 'Your first week', points: ['Change the locks and reset garage and gate codes.', 'Find the water shutoff and the breaker panel.', 'Test smoke and carbon monoxide detectors.', 'Update your address with your bank, employer, and DMV.'] },
+    ],
+    questions: ['When can movers arrive?', 'Who are the utility providers?', 'Where are the manuals and warranties?'],
+  },
+  {
+    id: 'after-closing',
+    title: 'Your first months as a homeowner',
+    shortTitle: 'After closing',
+    summary: 'Your deed, your first payment, taxes, and what to keep.',
+    readingTime: '3 min read',
+    relevance: 'Good to know',
+    sections: [
+      { title: 'Your recorded deed', body: 'The county mails your deed once it’s recorded, usually four to eight weeks after closing. It’s your proof of ownership.' },
+      { title: 'Your first mortgage payment', body: 'There’s no payment the month after closing, because interest is paid in arrears. Your lender will send payment details before your first due date.' },
+      { title: 'Taxes and insurance', body: 'If you have an escrow account, your lender pays property taxes and homeowners insurance for you. Watch for your first escrow statement.' },
+      { title: 'What to keep', points: ['Your Closing Disclosure: you’ll need it at tax time.', 'Your recorded deed.', 'Your home warranty and appliance manuals.', 'Receipts for improvements you make.'] },
+    ],
+    questions: ['Can I deduct anything from closing?', 'When does my escrow get reviewed?'],
+  },
+]

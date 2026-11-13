@@ -1,0 +1,113 @@
+/* Two deliberately different hero compositions, isolated from the current seller portal. */
+/* design-build · self-critique: Clarity5 Warmth5 Restraint5 Craft4 Variety5 SlopFree5 */
+.hero-preview { padding-bottom: 80px; }
+.hero-experiment {
+  --hero-ink: var(--color-semantic-text-dark);
+  --hero-soft: var(--color-semantic-text-primary);
+  --hero-rule: var(--color-semantic-stroke-primary-lightest);
+}
+.hero-experiment--editorial { background: var(--color-semantic-surface-primary); color: var(--hero-ink); }
+.hero-experiment--private {
+  --hero-ink: var(--color-semantic-text-on-color-primary);
+  --hero-soft: var(--color-primitive-neutral-300);
+  --hero-rule: var(--color-primitive-neutral-700);
+}
+.hero-experiment h1 { color: var(--hero-ink); text-wrap: balance; max-width: 15ch; }
+.hero-experiment .hero-kicker { margin: 0; color: var(--hero-soft); text-transform: uppercase; letter-spacing: 0.14em; }
+.hero-location.MuiTypography-root { color: var(--hero-soft); margin: 12px 0 0; }
+.hero-home-photo.MuiButtonBase-root { display: block; position: relative; min-width: 0; width: 100%; overflow: hidden; border-radius: var(--radius-m); background: var(--color-semantic-surface-secondary); }
+.hero-home-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 58%; outline: 1px solid oklch(0 0 0 / 0.1); outline-offset: -1px; }
+.hero-photo-link { position: absolute; bottom: 20px; right: 20px; display: inline-flex; align-items: center; gap: 16px; min-height: 44px; padding: 12px 18px; border-radius: var(--radius-pill); background: var(--color-semantic-surface-primary); color: var(--color-semantic-text-dark); font-size: 0.875rem; font-weight: 500; box-shadow: var(--elevation-2); transition: background-color 160ms ease-out; }
+.hero-photo-link svg { width: 18px; height: 18px; }
+.hero-home-photo:focus-visible { outline: 2px solid var(--hero-ink); outline-offset: 4px; }
+.hero-signature { min-width: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 24px; }
+.hero-agent { display: flex; align-items: center; min-width: 0; gap: 16px; }
+.hero-agent .agent-identity-label { color: var(--hero-soft); }
+.hero-agent .agent-identity-name { color: var(--hero-ink); }
+.hero-brand { --partner-team-width: 96px; --partner-brokerage-width: 76px; }
+.hero-brand .partner-brand-lockup { gap: 12px; }
+.hero-brand .partner-brand-divider { height: 28px; }
+.hero-next-step.MuiButtonBase-root { color: var(--hero-ink); display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 24px; padding: 16px 0; text-align: left; border-radius: 0; border-block: 1px solid var(--hero-rule); }
+.hero-next-copy { display: grid; gap: 8px; }
+.hero-next-step > svg { width: 20px; height: 20px; flex-shrink: 0; transition: transform 160ms ease-out; }
+.hero-next-step:focus-visible { outline: 2px solid var(--hero-ink); outline-offset: 4px; border-radius: var(--radius-2xs); }
+.hero-experiment button, .hero-experiment a { touch-action: manipulation; }
+
+/* Light editorial: a large photograph and an information column, with an agent signature. */
+.hero-editorial.MuiContainer-root { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: stretch; gap: 64px; padding-block: 48px; }
+.hero-editorial .hero-home-photo { min-height: 440px; }
+.hero-editorial-copy { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; padding-block: 8px; }
+.hero-editorial-copy h1 { margin-top: 20px; max-width: none; }
+.hero-editorial-status { display: flex; align-items: center; gap: 32px; margin-block: 28px; }
+.hero-countdown { display: flex; align-items: center; gap: 12px; color: var(--hero-ink); font-variant-numeric: tabular-nums; }
+.hero-countdown .MuiTypography-displayL { font-size: 3.5rem; line-height: 1; letter-spacing: -0.04em; }
+.hero-countdown .MuiTypography-bodySStandard { color: var(--hero-soft); }
+.hero-closing-date { display: grid; gap: 8px; padding-left: 32px; border-left: 1px solid var(--hero-rule); }
+.hero-editorial .hero-signature { margin-top: 28px; gap: 20px; }
+.hero-editorial .hero-agent { width: 100%; justify-content: space-between; }
+.hero-editorial .hero-brand { margin-left: 60px; }
+.hero-experiment--editorial .tf-c2-tracker.MuiContainer-root { background: var(--color-semantic-surface-reverse-primary); padding-top: 4px; }
+
+/* Private client: a wide photographic band, with property and countdown above it. */
+.hero-private.MuiContainer-root { padding-top: 40px; padding-bottom: 20px; }
+.hero-private-top { display: flex; justify-content: space-between; align-items: center; gap: 40px; margin-bottom: 32px; }
+.hero-private-address { min-width: 0; }
+.hero-private-address h1 { margin-top: 16px; max-width: 22ch; }
+.hero-private .hero-home-photo { height: 360px; border-radius: var(--radius-m); }
+.hero-private .hero-home-photo img { object-position: 50% 35%; outline-color: oklch(1 0 0 / 0.1); }
+.hero-private-countdown { display: flex; align-items: center; gap: 20px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.hero-private-countdown .hero-private-number { font-size: 6rem; line-height: 0.9; letter-spacing: -0.06em; font-weight: 400; }
+.hero-private-countdown .hero-location { margin-top: 8px; }
+.hero-private-bottom { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: center; gap: 48px; padding-top: 24px; }
+.hero-private .hero-signature { gap: 24px; }
+.hero-private .hero-agent .portal-person-actions a { color: var(--hero-ink); }
+.hero-private .hero-brand { padding: 10px 14px; border-radius: var(--radius-s); background: var(--color-semantic-surface-primary); }
+.hero-private .hero-next-step { border-top: 0; border-bottom: 0; border-left: 1px solid var(--hero-rule); padding-left: 32px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-home-photo:hover .hero-photo-link { background: var(--color-semantic-surface-secondary); }
+  .hero-next-step:hover > svg { transform: translateX(4px); }
+}
+@media (max-width: 1279.95px) {
+  .hero-editorial.MuiContainer-root { gap: 40px; }
+  .hero-private-countdown .hero-private-number { font-size: 5rem; }
+  .hero-private-bottom { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .hero-private .hero-signature { justify-content: space-between; }
+  .hero-private .hero-next-step { border-left: 0; border-top: 1px solid var(--hero-rule); padding-left: 0; }
+}
+@media (max-width: 899.95px) {
+  .hero-editorial.MuiContainer-root { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-block: 32px; }
+  .hero-editorial .hero-home-photo { min-height: 0; height: auto; aspect-ratio: 16 / 10; }
+  .hero-editorial-copy { padding: 0; }
+  .hero-editorial-copy h1 { max-width: 22ch; }
+  .hero-editorial .hero-signature { width: 100%; justify-content: space-between; }
+  .hero-editorial .hero-agent { width: auto; }
+  .hero-editorial .hero-brand { margin-left: 0; }
+  .hero-private-top { align-items: flex-start; }
+  .hero-private-address h1 { font-size: 2.25rem; max-width: none; }
+  .hero-private-countdown { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .hero-private-countdown .hero-private-number { font-size: 4.5rem; }
+}
+@media (max-width: 599.95px) {
+  .hero-editorial.MuiContainer-root { padding-top: 24px; gap: 24px; }
+  .hero-editorial h1, .hero-private-address h1 { font-size: 2rem; line-height: 1.15; max-width: none; }
+  .hero-home-photo.MuiButtonBase-root { border-radius: var(--radius-m); }
+  .hero-photo-link { bottom: 12px; right: 12px; }
+  .hero-editorial-copy h1 { margin-top: 16px; max-width: none; }
+  .hero-editorial-status { gap: 24px; margin-block: 24px; }
+  .hero-closing-date { padding-left: 24px; }
+  .hero-editorial .hero-signature { gap: 20px; }
+  .hero-editorial .hero-agent { width: 100%; }
+  .hero-editorial .hero-brand { margin-left: 60px; }
+  .hero-private.MuiContainer-root { padding-top: 28px; }
+  .hero-private-top { display: block; margin-bottom: 24px; }
+  .hero-private-countdown { flex-direction: row; align-items: center; margin-top: 24px; gap: 16px; }
+  .hero-private-countdown .hero-private-number { font-size: 4.5rem; }
+  .hero-private .hero-home-photo { height: auto; aspect-ratio: 16 / 10; border-radius: var(--radius-m); }
+  .hero-private .hero-signature { justify-content: flex-start; gap: 20px; }
+  .hero-private .hero-agent { justify-content: space-between; width: 100%; }
+  .hero-private .hero-brand { margin-left: 60px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-experiment *, .hero-experiment *::before, .hero-experiment *::after { transition: none !important; }
+}

@@ -1,0 +1,224 @@
+/* Client account pages: the transactions index and the profile. See TransactionsIndex.tsx and ClientProfile.tsx. */
+.client-account {
+  min-height: 100vh;
+  color: var(--color-semantic-text-dark);
+  background: var(--color-semantic-surface-primary);
+}
+
+.client-account-main.MuiContainer-root {
+  max-width: 1040px;
+  padding-inline: var(--space-24);
+  padding-block: var(--space-64) var(--gap-zone);
+}
+
+.client-account-main--narrow.MuiContainer-root { max-width: 760px; }
+
+.client-account-title.MuiTypography-root { margin-bottom: var(--gap-section); text-wrap: balance; }
+
+.client-account-group + .client-account-group { margin-top: var(--gap-section); }
+
+.ti-muted.MuiTypography-root { color: var(--color-semantic-text-primary); }
+.ti-light.MuiTypography-root { color: var(--color-semantic-text-light); }
+
+/* ---------- In progress: one photo card per deal ---------- */
+.ti-card-list {
+  margin: var(--gap-stack) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--gap-card);
+}
+
+.ti-card-link.MuiButtonBase-root {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  align-items: stretch;
+  text-align: left;
+  color: inherit;
+  text-decoration: none;
+}
+
+.ti-card-link.MuiButtonBase-root:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+  border-radius: var(--radius-m);
+}
+
+.ti-card-photo {
+  min-height: 100%;
+  overflow: hidden;
+  background: var(--color-semantic-surface-secondary);
+}
+
+.ti-card-photo img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: scale var(--motion-reveal);
+}
+
+.ti-card:hover .ti-card-photo img { scale: 1.02; }
+
+.ti-card-body {
+  min-width: 0;
+  padding: var(--padding-card);
+  display: grid;
+  gap: var(--space-24);
+}
+
+.ti-card-eyebrow {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  margin-bottom: var(--space-8);
+}
+
+.ti-card-head-copy, .ti-next-copy { display: grid; }
+.ti-next-copy { gap: var(--space-2); }
+.ti-card-address.MuiTypography-root { margin-bottom: var(--space-4); }
+
+/* Stage: four quiet marks, the reached ones dark. Then the stage by name. */
+.ti-stage { display: grid; gap: var(--space-8); }
+
+.ti-stage-track {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.ti-stage-mark {
+  height: 4px;
+  border-radius: var(--radius-2xs);
+  background: var(--color-semantic-stroke-primary-light);
+}
+
+.ti-stage-mark.is-reached { background: var(--color-semantic-surface-reverse-primary); }
+
+.ti-stage-name { color: var(--color-semantic-text-dark); }
+
+.ti-next {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-16);
+}
+
+.ti-card-foot {
+  padding-top: var(--space-20);
+  border-top: 1px solid var(--color-semantic-stroke-primary-light);
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.ti-agent-avatar.MuiAvatar-root {
+  width: 36px;
+  height: 36px;
+  font: var(--type-label-s);
+  color: var(--color-semantic-text-primary);
+  background: var(--color-semantic-surface-secondary);
+}
+
+.ti-agent-copy { display: grid; min-width: 0; }
+
+.ti-chevron.MuiSvgIcon-root {
+  font-size: 24px;
+  color: var(--color-semantic-text-primary);
+  transition: translate var(--motion-hover);
+}
+
+.ti-card:hover .ti-chevron,
+.ti-row:hover .ti-chevron { translate: 2px 0; }
+
+/* ---------- Past: quiet rows ---------- */
+.ti-row-list {
+  margin: var(--gap-stack) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ti-row-list > li + li { border-top: 1px solid var(--color-semantic-stroke-primary-light); }
+
+.ti-row.MuiButtonBase-root {
+  width: calc(100% + var(--row-hover-bleed) * 2);
+  margin-inline: calc(var(--row-hover-bleed) * -1);
+  padding: var(--padding-row-block) var(--row-hover-bleed);
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-16);
+  border-radius: var(--radius-s);
+  text-align: left;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color var(--motion-hover);
+}
+
+.ti-row.MuiButtonBase-root:hover { background: var(--color-semantic-surface-primary-dark); }
+.ti-row.MuiButtonBase-root:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+.ti-row-copy { display: grid; gap: var(--space-4); min-width: 0; }
+
+/* ---------- Profile ---------- */
+.cp-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-16);
+}
+
+.cp-identity {
+  margin-block: var(--space-32) var(--gap-section);
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+}
+
+.cp-avatar.MuiAvatar-root {
+  width: 56px;
+  height: 56px;
+  font: var(--type-label-m);
+  color: var(--color-semantic-text-primary);
+  background: var(--color-semantic-surface-secondary);
+}
+
+.cp-cards { display: grid; gap: var(--gap-card); }
+
+.cp-facts { margin-top: var(--space-8); }
+
+.cp-setting-list { margin: var(--space-8) 0 0; padding: 0; list-style: none; }
+.cp-setting-list > li + li { border-top: 1px solid var(--color-semantic-stroke-primary-light); }
+
+.cp-setting {
+  padding-block: var(--padding-row-block);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-16);
+}
+
+.cp-setting:last-child { padding-bottom: 0; }
+.cp-setting label { display: block; margin-bottom: var(--space-4); cursor: pointer; }
+
+.cp-form { display: grid; gap: var(--space-20); padding-top: var(--space-4); }
+
+.cp-sign-out.MuiButton-root { margin-top: var(--gap-section); }
+
+@media (max-width: 767.95px) {
+  .ti-card-link.MuiButtonBase-root { grid-template-columns: 1fr; }
+  .ti-card-photo { aspect-ratio: 16 / 10; }
+}
+
+@media (max-width: 599.95px) {
+  .client-account-main.MuiContainer-root { padding-inline: var(--space-20); padding-top: var(--space-40); }
+  .cp-avatar.MuiAvatar-root { width: 48px; height: 48px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ti-card-photo img, .ti-chevron.MuiSvgIcon-root, .ti-row.MuiButtonBase-root { transition: none; }
+  .ti-card:hover .ti-card-photo img { scale: none; }
+}

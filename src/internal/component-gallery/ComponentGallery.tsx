@@ -1,16 +1,16 @@
 /* design-build · self-critique: Clarity5 Warmth4 Restraint5 Craft4 Variety3 SlopFree5 */
 import { toast } from 'sonner'
-import '../../../public/team/flow-map-button.css'
-import { ClientPreviewBanner } from '../../team-portal/ClientPortalPreview'
-import { TeamResourceSwitchSample } from '../../team-portal/TeamPortal'
 import { useState } from 'react'
 import {
-  Avatar,
+  Autocomplete,
   Box,
   Button,
+  Checkbox,
   Chip,
+  Collapse,
   Container,
   FormControl,
+  FormControlLabel,
   IconButton,
   InputLabel,
   ListItemIcon,
@@ -18,10 +18,14 @@ import {
   Menu,
   MenuItem,
   Paper,
+  Radio,
+  RadioGroup,
   Select,
   Stack,
+  Switch,
   Tab,
   Tabs,
+  TextField,
   Typography,
 } from '@mui/material'
 import type { ButtonProps } from '@mui/material/Button'
@@ -38,67 +42,64 @@ import ArrowBackOutlined from '@mui/icons-material/ArrowBackOutlined'
 import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined'
 import PushPin from '@mui/icons-material/PushPin'
 import PhoneOutlined from '@mui/icons-material/PhoneOutlined'
-import { brandAssets } from '../../assets/brand'
 import { PlaceIconButton } from '../../components/PlaceIconButton'
-import { CardActionButton } from '../../components/CardActionButton'
-import { PortalOutlineTag } from '../../components/PortalOutlineTag'
+import { Eyebrow } from '../../components/Eyebrow'
+import { DisclosureButton } from '../../components/DisclosureButton'
+import { PlaceCard } from '../../components/PlaceCard'
+import { PlaceTag } from '../../components/PlaceTag'
+import { FilterPills } from '../../components/FilterPills'
+import { SectionLabel } from '../../components/SectionLabel'
+import { TextLink } from '../../components/TextLink'
+import { FactList } from '../../components/FactList'
+import { HeadlineStat, Stat } from '../../components/Stat'
 import { PlaceModal, placeModalWidths, type PlaceModalSize } from '../../components/PlaceModal'
 import { SegmentedSwitch, type SegmentedSwitchOption } from '../../components/SegmentedSwitch'
 import { typographyTokens } from '../../design-tokens'
+import { breakpoints } from '../../system-tokens'
+import { PortalSectionHeader } from '../../components/PortalSection'
+import { PortalIconBadge } from '../../components/PortalIconBadge'
+import { AgentIdentity } from '../../components/AgentIdentity'
+import { PartnerBrandLockup } from '../../components/PartnerBrandLockup'
+import CalendarTodayOutlined from '@mui/icons-material/CalendarTodayOutlined'
 import { ListingDetailsSheet } from '../../seller-portal/ListingDetailsSheet'
-import { ListingOverview } from '../../seller-portal/ListingOverview'
-import { ListingPreparation } from '../../seller-portal/ListingPreparation'
-import { createBeforeListingTransaction } from '../review/sellerJourneyViews'
-import { portalTabs, type PortalTab } from '../../seller-portal/SellerPortal'
-import { MarketingSnapshot } from '../../seller-portal/MarketingSnapshot'
-import { AdvertisingSnapshot } from '../../seller-portal/AdvertisingSnapshot'
-import { marketingFeedbackLayouts, type MarketingFeedbackLayout } from '../../seller-portal/marketingFeedbackLayouts'
-import { MarketingDashboardSheet, type MarketingDashboardSection } from '../../seller-portal/MarketingDashboardSheet'
-import { futureMarketingSnapshot, futureSellerTransaction } from '../../seller-portal/futureSellerTransaction'
-import {
-  ResourcesPanel,
-  ResourceGuideSheet,
-  ActivityEventRow,
-  ActivityPanel,
-  AdvertisingRow,
-  DateEventList,
-  DateEventRow,
-  DetailGrid,
-  DocumentsPanel,
-  PeopleSection,
-  PartnerBrandLockup,
-  PortalIconBadge,
-  PortalFooter,
-  PortalSection,
-  ShowingFeedbackRow,
-  TaskRow,
-  TeamNoteCard,
-  TransactionRowList,
-  type PeopleTab,
-} from '../../transaction-portal/components'
-import type { TransactionDocument, TransactionResource } from '../../transaction-portal/types'
 import { sampleSellerTransaction } from '../../seller-portal/sellerTransaction'
-import { SellerTimeline } from '../../seller-portal/SellerTimeline'
-import { timelineResources, underContractTimeline } from '../../seller-portal/sellerTimelineData'
 import { EmailPreview } from '../../email-templates/EmailPreview'
 import { emailTemplates } from '../../email-templates/emailTemplates'
 
 const sections = [
   { id: 'typography', name: 'Typography' },
   { id: 'colors', name: 'Colors' },
+  { id: 'radius', name: 'Corner radius' },
+  { id: 'elevation', name: 'Elevation' },
+  { id: 'spacing', name: 'Spacing' },
+  { id: 'focus-motion', name: 'Focus and motion' },
+  { id: 'breakpoints', name: 'Breakpoints' },
   { id: 'button', name: 'Button' },
   { id: 'icon-button', name: 'Icon button' },
   { id: 'chip', name: 'Chip' },
   { id: 'segmented-switch', name: 'Segmented switch' },
+  { id: 'tabs', name: 'Tabs' },
+  { id: 'card', name: 'Card' },
+  { id: 'card-header', name: 'Card header' },
   { id: 'paper', name: 'Paper' },
   { id: 'modal', name: 'Modal' },
   { id: 'sheet', name: 'Sheet' },
   { id: 'toast', name: 'Toast' },
   { id: 'menu', name: 'Menu' },
+  { id: 'form-controls', name: 'Form controls' },
+  { id: 'eyebrow', name: 'Eyebrow' },
+  { id: 'section-label', name: 'Section label' },
+  { id: 'text-link', name: 'Text link' },
+  { id: 'disclosure', name: 'Disclosure button' },
+  { id: 'tag', name: 'Tag' },
+  { id: 'filter-pills', name: 'Filter pills' },
+  { id: 'stat', name: 'Stat' },
+  { id: 'fact-list', name: 'Fact list' },
+  { id: 'icon-badge', name: 'Icon badge' },
+  { id: 'agent-identity', name: 'Agent identity' },
+  { id: 'brand-lockup', name: 'Brand lockup' },
   { id: 'listing-sheet', name: 'Listing sheet' },
-  { id: 'portal-patterns', name: 'Portal patterns' },
   { id: 'email-blocks', name: 'Email blocks' },
-  { id: 'team-resources', name: 'Team resources' },
 ] as const
 
 const modalSizes = Object.keys(placeModalWidths) as PlaceModalSize[]
@@ -111,7 +112,7 @@ const typographyGroups: { name: string; variants: (keyof typeof typographyTokens
     variants: ['bodyLStandard', 'bodyMStandard', 'bodySStandard', 'bodyMCompact', 'bodySCompact'],
     sample: 'Everything you need to know, clearly in one place.',
   },
-  { name: 'Label', variants: ['labelM', 'labelS'], sample: 'Next step' },
+  { name: 'Label', variants: ['labelM', 'labelS', 'labelXS'], sample: 'Next step' },
   { name: 'Metric', variants: ['metricL', 'metricM', 'metricS'], sample: '$825,000' },
 ]
 
@@ -148,7 +149,6 @@ const baseColorTokens = ['base-black', 'base-white'] as const
 
 function Section({
   id,
-  number,
   title,
   description,
   source,
@@ -156,13 +156,14 @@ function Section({
   children,
 }: {
   id: string
-  number: string
   title: string
   description: string
   source: string
   kind?: 'Foundation' | 'Component'
   children: ReactNode
 }) {
+  // Numbers follow the nav order, so adding a section never means renumbering by hand.
+  const number = String(sections.findIndex((section) => section.id === id) + 1).padStart(2, '0')
   return (
     <Box component="section" id={id} aria-labelledby={`${id}-title`} sx={{ scrollMarginTop: 32, py: { xs: 5, md: 7 }, borderTop: 1, borderColor: 'divider' }}>
       <Box sx={{ mb: 4 }}>
@@ -216,12 +217,12 @@ function ButtonSection() {
   const tryAction = () => setClicks(value => value + 1)
 
   return (
-    <Section id="button" number="03" title="Button"
+    <Section id="button" title="Button"
       description="Five shared variants use the PLACE pill radius, typography, padding, and 44px minimum height. Photo actions use the same variants here and in the listing header."
       source="Theme: MuiButton · src/theme.ts · src/mui.d.ts">
       <Typography component="h3" variant="titleXS" sx={{ mb: 2 }}>Variants and states</Typography>
-      <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 3 }}>
-        Each row shows an enabled, disabled, and loading button. Hover, press, or use Tab to inspect the actual interaction styles on enabled samples. These are live components, without simulated state overrides.
+      <Typography component="p" variant="bodySStandard" color="text.secondary" sx={{ mb: 3 }}>
+        Each row shows an enabled, disabled, and loading button. Hover, press, or use Tab to inspect the actual interaction styles on enabled samples. These are live components, without simulated state overrides. Pressing scales a button down to 98% and fills it with a light gray ripple (a step darker than hover, never heavy). The same press feel applies to icon buttons, tabs, and menu items.
       </Typography>
       <SpecimenList>
         {buttonVariants.map(({ label, variant, onImage }) => (
@@ -243,17 +244,9 @@ function ButtonSection() {
         <Specimen label="Listing outlined / contextual treatment">
           <Button variant="outlined" className="listing-copy-link" onClick={tryAction}>Copy link</Button>
         </Specimen>
-        <Specimen label="Card action / CardActionButton">
-          <Paper variant="outlined" sx={{ width: '100%', p: { xs: 2, sm: 3 } }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-              <Typography variant="titleS">Recent activity</Typography>
-              <CardActionButton onClick={tryAction}>See all</CardActionButton>
-            </Box>
-          </Paper>
-        </Specimen>
         <Specimen label="Sizes / small, medium, large">
           <Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
-            {([{ size: 'small', height: 44 }, { size: 'medium', height: 48 }, { size: 'large', height: 56 }] as const).map(({ size, height }) => (
+            {([{ size: 'small', height: '36 (44 touch)' }, { size: 'medium', height: 48 }, { size: 'large', height: 56 }] as const).map(({ size, height }) => (
               <Stack key={size} spacing={1} sx={{ alignItems: 'center' }}>
                 <Button size={size} variant="outlined" onClick={tryAction}>Continue</Button>
                 <Typography variant="labelS" color="text.secondary">{size} · {height}px</Typography>
@@ -278,18 +271,52 @@ function ButtonSection() {
 function ChipSection() {
   const [selected, setSelected] = useState(false)
   return (
-    <Section id="chip" number="05" title="Chip"
-      description="Chip variants share PLACE small-label typography. PortalOutlineTag is a separate 30px outlined treatment used for publication and task due dates."
-      source="Theme: MuiChip · PortalOutlineTag">
+    <Section id="chip" title="Chip"
+      description="Chips are MUI's interactive pills (filters, removable selections). For a static label on a row, card, or photo, use PlaceTag in Shared components."
+      source="Theme: MuiChip">
       <SpecimenList>
         <Specimen label="Filled / medium"><Chip label="In progress" /></Specimen>
         <Specimen label="Outlined / medium"><Chip label="In progress" variant="outlined" /></Specimen>
         <Specimen label="Small / filled and outlined"><Stack direction="row" spacing={1}><Chip label="In progress" size="small" /><Chip label="In progress" size="small" variant="outlined" /></Stack></Specimen>
-        <Specimen label="Portal outlined / publication and due date"><Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}><PortalOutlineTag label="Published" /><PortalOutlineTag label="Due 10/08/2026" /></Stack></Specimen>
         <Specimen label="Clickable / live interaction">
           <Chip label={selected ? 'Selected' : 'Filter'} variant="outlined" clickable aria-pressed={selected} onClick={() => setSelected(value => !value)} />
         </Specimen>
         <Specimen label="Disabled / filled and outlined"><Stack direction="row" spacing={1}><Chip label="Filter" disabled /><Chip label="Filter" variant="outlined" disabled /></Stack></Specimen>
+      </SpecimenList>
+    </Section>
+  )
+}
+
+/* Tabs sit on white in the product, so the specimens use a white tile; the gray specimen fill would hide the hover. */
+function TabStrip({ children }: { children: ReactNode }) {
+  return <Box sx={{ width: '100%', px: 'var(--space-24)', borderRadius: 'var(--radius-s)', bgcolor: 'var(--color-semantic-surface-primary)' }}>{children}</Box>
+}
+
+function TabsSection() {
+  const [tab, setTab] = useState('timeline')
+  const tabs = [['timeline', 'Timeline'], ['documents', 'Documents'], ['notes', 'Notes'], ['people', 'People']] as const
+  return (
+    <Section id="tabs" title="Tabs"
+      description="Switches between sections of one page. Every tab bar uses the theme style: labelM labels, text-primary at rest and text-dark when selected or hovered, a 2px text-dark indicator under the selected label. Each tab has 12px of padding so the hover fill (surface-secondary, radius xs, 44px tall, ending 2px above the indicator) has room around the label; the bar pulls out by the same 12px, so labels line up with the content edge. A hairline under the bar is inset by that bleed. No ripple: pressing darkens the fill instead."
+      source="MuiTabs, MuiTab · src/theme.ts">
+      <SpecimenList>
+        <Specimen label="Default / interactive">
+          <TabStrip>
+            <Tabs value={tab} onChange={(_, value: string) => setTab(value)} variant="scrollable" scrollButtons={false} aria-label="Gallery tabs">
+              {tabs.map(([value, label]) => <Tab key={value} value={value} label={label} />)}
+            </Tabs>
+          </TabStrip>
+        </Specimen>
+        <Specimen label="Hover / Pressed / Focus (forced)">
+          <TabStrip>
+            <Tabs value="timeline" aria-label="Gallery tab states">
+              <Tab value="timeline" label="Selected" />
+              <Tab value="hover" label="Hover" sx={{ color: 'text.primary', '&::before': { bgcolor: 'var(--color-semantic-surface-secondary)' } }} />
+              <Tab value="pressed" label="Pressed" sx={{ color: 'text.primary', '&::before': { bgcolor: 'var(--color-semantic-surface-secondary-dark)' } }} />
+              <Tab value="focus" label="Focus" sx={{ outline: 'var(--focus-ring)', outlineOffset: -2, borderRadius: 'var(--radius-xs)' }} />
+            </Tabs>
+          </TabStrip>
+        </Specimen>
       </SpecimenList>
     </Section>
   )
@@ -309,7 +336,6 @@ function SegmentedSwitchSection() {
   return (
     <Section
       id="segmented-switch"
-      number="06"
       title="Segmented switch"
       description="A compact control for moving between a few parallel views within the same page."
       source="SegmentedSwitch · src/components/SegmentedSwitch.tsx"
@@ -328,7 +354,7 @@ function SegmentedSwitchSection() {
           <SegmentedSwitch options={audienceOptions} defaultValue="seller" disabled aria-label="Unavailable client view" />
         </Specimen>
       </SpecimenList>
-      <Typography variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
+      <Typography component="p" variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
         Use for two or three related views, not page navigation. The selected option is pressed; inactive options gain a quiet hover fill and every option has a visible keyboard focus state.
       </Typography>
     </Section>
@@ -341,7 +367,6 @@ function IconButtonSection() {
   return (
     <Section
       id="icon-button"
-      number="04"
       title="Icon button"
       description="Quiet icon buttons keep secondary actions available without competing with primary actions."
       source="PlaceIconButton · shared PLACE icon control"
@@ -369,22 +394,21 @@ function PaperSection() {
   return (
     <Section
       id="paper"
-      number="07"
       title="Paper"
-      description="Paper provides the quiet surface behind grouped content. The outlined variant uses the system hairline border."
+      description="Raw MUI Paper, for surfaces that are not cards (overlays build on it). For any card, use PlaceCard above. The outlined variant uses the system hairline."
       source="Theme: MuiPaper · src/theme.ts"
     >
       <SpecimenList>
         <Specimen label="Default / flat">
           <Paper elevation={0} sx={{ width: '100%', p: 4 }}>
             <Typography variant="titleXS" sx={{ display: 'block' }}>Transaction summary</Typography>
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mt: 1 }}>A calm surface for related information.</Typography>
+            <Typography component="p" variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mt: 1 }}>A calm surface for related information.</Typography>
           </Paper>
         </Specimen>
         <Specimen label="Outlined">
           <Paper variant="outlined" sx={{ width: '100%', p: 4 }}>
             <Typography variant="titleXS" sx={{ display: 'block' }}>Transaction summary</Typography>
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mt: 1 }}>A hairline marks the surface boundary.</Typography>
+            <Typography component="p" variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mt: 1 }}>A hairline marks the surface boundary.</Typography>
           </Paper>
         </Specimen>
       </SpecimenList>
@@ -402,7 +426,6 @@ function ModalSection() {
   return (
     <Section
       id="modal"
-      number="08"
       title="Modal"
       description="A focused overlay built on MUI Dialog, with five predictable widths and one consistent PLACE surface."
       source="PlaceModal · src/components/PlaceModal.tsx"
@@ -417,7 +440,7 @@ function ModalSection() {
           <Button variant="outlined" onClick={() => { setMinimal(true); setActiveSize('s') }}>Open content-only modal</Button>
         </Specimen>
       </SpecimenList>
-      <Typography variant="bodySStandard" color="text.secondary" sx={{ mt: 2 }}>All five sizes share the same header, close control, and surface. Description and footer actions are optional content slots. Use Escape, the backdrop, or the close button to dismiss the sample.</Typography>
+      <Typography component="p" variant="bodySStandard" color="text.secondary" sx={{ mt: 2 }}>All five sizes share the same header, close control, and surface. Description and footer actions are optional content slots. Use Escape, the backdrop, or the close button to dismiss the sample.</Typography>
       <PlaceModal
         open={activeSize !== null}
         onClose={() => setActiveSize(null)}
@@ -442,9 +465,9 @@ function ModalSection() {
 function SheetSection() {
   const [open, setOpen] = useState(false)
   return (
-    <Section id="sheet" number="09" title="Sheet" description="PlaceSheet is the shared bottom-sheet surface used by listing details and resource guides. It has one responsive width, rather than the five modal sizes." source="PlaceSheet · src/components/PlaceSheet.tsx · src/components/place-sheet.css">
+    <Section id="sheet" title="Sheet" description="PlaceSheet is the shared bottom-sheet surface used by listing details, resource guides, the marketing dashboard, and transaction dates. It has one responsive width, rather than the five modal sizes. Narrow content, such as transaction dates, sits in a centered 720px reading column inside the sheet." source="PlaceSheet · src/components/PlaceSheet.tsx · src/components/place-sheet.css">
       <Specimen label="Default / responsive bottom sheet"><Button variant="outlined" onClick={() => setOpen(true)}>Open sheet</Button></Specimen>
-      <Typography variant="bodySStandard" color="text.secondary" sx={{ mt: 2 }}>The sheet uses the shared rounded top corners, scrim, and scrolling surface. Escape, the backdrop, or the close control dismiss it and return focus to its trigger. Reduced motion removes the opening transition.</Typography>
+      <Typography component="p" variant="bodySStandard" color="text.secondary" sx={{ mt: 2 }}>The sheet uses the shared rounded top corners, scrim, and scrolling surface. Escape, the backdrop, or the close control dismiss it and return focus to its trigger. Reduced motion removes the opening transition.</Typography>
       <PlaceSheet open={open} onClose={() => setOpen(false)} label="Sheet preview">
         <Box sx={{ p: { xs: 3, sm: 4 } }}>
           <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
@@ -458,11 +481,47 @@ function SheetSection() {
   )
 }
 
+function FormControlsSection() {
+  const [name, setName] = useState('Deposit due')
+  const [status, setStatus] = useState('Published')
+  const [tags, setTags] = useState<string[]>(['Earnest money guide'])
+  const [checked, setChecked] = useState(true)
+  const [choice, setChoice] = useState('first-party')
+  const [on, setOn] = useState(true)
+  return (
+    <Section
+      id="form-controls"
+      title="Form controls"
+      description="Every text field, select, autocomplete, checkbox, radio, and switch takes its PLACE styling from the theme, so plain MUI components are already on brand. Labels sit above the field in labelM, never floating inside the border. Fields are 48px tall (44px with size small) with a 12px radius and a stroke-primary border; hover darkens the border, and focus switches it to text-dark with a soft 3px ring. Helper and error text sit 6px below in labelS. Input text stays 16px, so phones never zoom in."
+      source="MuiTextField, MuiInputLabel, MuiOutlinedInput, MuiFormHelperText, MuiSelect, MuiAutocomplete, MuiCheckbox, MuiRadio, MuiSwitch · src/theme.ts · src/components/controlIcons.tsx"
+    >
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' }, gap: 3, maxWidth: 840 }}>
+        <TextField label="Title" value={name} onChange={event => setName(event.target.value)} helperText="Shown under the date in the client’s list." fullWidth />
+        <TextField label="Email" placeholder="name@example.com" required fullWidth />
+        <TextField label="Date" type="date" defaultValue="2026-10-05" fullWidth />
+        <TextField label="Contact details" value="tim@example.com" disabled helperText="Disabled: details come from Brivity." fullWidth />
+        <TextField label="Email" value="tim@" error helperText="Enter a full email address." fullWidth />
+        <TextField label="Search team resources" size="small" fullWidth />
+        <FormControl fullWidth><InputLabel id="gallery-form-select">Show</InputLabel><Select labelId="gallery-form-select" label="Show" value={status} onChange={event => setStatus(event.target.value)}>{['All resources', 'Published', 'Drafts', 'Archived'].map(option => <MenuItem key={option} value={option}>{option}</MenuItem>)}</Select></FormControl>
+        <Autocomplete multiple options={['Earnest money guide', 'Appraisal guide', 'Closing day guide']} value={tags} onChange={(_, value) => setTags(value)} renderInput={params => <TextField {...params} label="Attached resources" />} />
+        <TextField label="Personal note" multiline minRows={3} placeholder="A few words for your client…" fullWidth sx={{ gridColumn: { md: '1 / -1' } }} />
+      </Box>
+      <Typography component="p" variant="bodySStandard" color="text.secondary" sx={{ mt: 4, mb: 1 }}>Checkboxes and radios are 20px drawn marks: a 6px-radius square or a circle with a 1.5px stroke-primary-dark border, filled with the reverse surface when selected. They keep a 44px hit area, skip the ripple, and show a 2px ring on keyboard focus. The switch is a 44 × 24 pill with the thumb inside the track, dark when on.</Typography>
+      <SpecimenList>
+        <Specimen label="Checkbox"><FormControlLabel control={<Checkbox checked={checked} onChange={event => setChecked(event.target.checked)} />} label="Also show it to clients" /></Specimen>
+        <Specimen label="Checkbox / disabled"><FormControlLabel control={<Checkbox disabled />} label="Unavailable" /><FormControlLabel control={<Checkbox disabled checked />} label="Locked on" /></Specimen>
+        <Specimen label="Radio group"><RadioGroup value={choice} onChange={event => setChoice(event.target.value)}><FormControlLabel value="first-party" control={<Radio />} label="First Party" /><FormControlLabel value="idx" control={<Radio />} label="IDX MVP" /></RadioGroup></Specimen>
+        <Specimen label="Switch"><Switch checked={on} onChange={event => setOn(event.target.checked)} slotProps={{ input: { 'aria-label': 'Visible to clients' } }} /><Switch disabled slotProps={{ input: { 'aria-label': 'Disabled switch' } }} /></Specimen>
+      </SpecimenList>
+    </Section>
+  )
+}
+
 function MenuSection() {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
   const [status, setStatus] = useState('All resources')
   return (
-    <Section id="menu" number="17" title="Menu" description="The PLACE menu styles every overflow (···) menu and Select dropdown: rounded 12px surface, light stroke, document shadow, labelM items with an 8px hover fill. Destructive items add the is-destructive class and always open a confirmation dialog." source="MuiMenu, MuiMenuItem, MuiListItemIcon · src/theme.ts">
+    <Section id="menu" title="Menu" description="The PLACE menu styles every overflow (···) menu and Select dropdown: radius s surface, light stroke, elevation 2, labelM items with a radius xs hover fill. Destructive items add the is-destructive class and always open a confirmation dialog." source="MuiMenu, MuiMenuItem, MuiListItemIcon · src/theme.ts">
       <SpecimenList>
         <Specimen label="Overflow menu"><IconButton aria-label="More actions" aria-haspopup="menu" onClick={event => setAnchor(event.currentTarget)}><MoreHorizOutlined /></IconButton>
           <Menu anchorEl={anchor} open={!!anchor} onClose={() => setAnchor(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} transformOrigin={{ vertical: 'top', horizontal: 'right' }}>
@@ -473,20 +532,20 @@ function MenuSection() {
         </Specimen>
         <Specimen label="Select dropdown"><FormControl size="small" sx={{ minWidth: 200 }}><InputLabel id="gallery-menu-select">Show</InputLabel><Select labelId="gallery-menu-select" label="Show" value={status} onChange={event => setStatus(event.target.value)}>{['All resources', 'Published', 'Drafts', 'Archived'].map(value => <MenuItem key={value} value={value}>{value}</MenuItem>)}</Select></FormControl></Specimen>
       </SpecimenList>
-      <Typography variant="bodySStandard" color="text.secondary" sx={{ mt: 2 }}>Use a menu only for two or more actions. A single action, like removing someone’s portal access, should be a visible button instead.</Typography>
+      <Typography component="p" variant="bodySStandard" color="text.secondary" sx={{ mt: 2 }}>Use a menu only for two or more actions. A single action, like removing someone’s portal access, should be a visible button instead.</Typography>
     </Section>
   )
 }
 
 function ToastSection() {
   return (
-    <Section id="toast" number="10" title="Toast" description="One shared Sonner toaster appears at the top center with a dark neutral background and light text." source="PlaceToaster · src/components/PlaceToaster.tsx">
+    <Section id="toast" title="Toast" description="One shared Sonner toaster appears at the top center with a dark neutral background and light text." source="PlaceToaster · src/components/PlaceToaster.tsx">
       <SpecimenList>
         <Specimen label="Success"><Button variant="outlined" onClick={() => toast.success('Listing link copied')}>Preview success</Button></Specimen>
         <Specimen label="Error"><Button variant="outlined" onClick={() => toast.error('Couldn’t copy the link. Please try again.')}>Preview error</Button></Specimen>
         <Specimen label="Informational"><Button variant="outlined" onClick={() => toast('Your team shared an update')}>Preview message</Button></Specimen>
       </SpecimenList>
-      <Typography variant="bodySStandard" color="text.secondary" sx={{ mt: 2 }}>These buttons trigger the production toaster. Toasts announce the result without moving focus; reduced motion removes transitions. Success and error use distinct icons on the same neutral surface.</Typography>
+      <Typography component="p" variant="bodySStandard" color="text.secondary" sx={{ mt: 2 }}>These buttons trigger the production toaster. Toasts announce the result without moving focus, and show a close (x) button on hover or keyboard focus; reduced motion removes transitions. Success and error use distinct icons on the same neutral surface.</Typography>
     </Section>
   )
 }
@@ -495,10 +554,9 @@ function TypographySection() {
   return (
     <Section
       id="typography"
-      number="01"
       title="Typography"
-      description="Seventeen Manrope roles are available as named MUI Typography variants. Each sample below renders with the actual token."
-      source="Tokens: src/design-tokens.ts · src/mui.d.ts"
+      description="Eighteen Manrope roles, available as named MUI Typography variants and as CSS variables. In CSS write font: var(--type-label-s) with letter-spacing: var(--type-label-s-tracking); never type a font size by hand. labelXS (11px) is only for counts beside a label and tiny markers. Uppercase labels use --tracking-uppercase."
+      source="Values: src/design-tokens.css (--type-*) · MUI variants: src/design-tokens.ts · src/mui.d.ts"
       kind="Foundation"
     >
       <Stack spacing={4}>
@@ -522,7 +580,7 @@ function TypographySection() {
 
 function primitiveReference(variable: string, value: string, styles: CSSStyleDeclaration) {
   if (variable === '--color-semantic-surface-glass') {
-    return document.documentElement.dataset.colorMode === 'goth' ? 'neutral-900 / 94%' : 'base-white / 94%'
+    return 'base-white / 94%'
   }
 
   for (const family of primitiveColorFamilies) {
@@ -556,7 +614,6 @@ function ColorsSection() {
   return (
     <Section
       id="colors"
-      number="02"
       title="Colors"
       description="PLACE color tokens pair semantic roles with a compact set of primitive scales. Semantic swatches show their primitive reference in the current color mode."
       source="Tokens: src/design-tokens.css · Light and Goth modes"
@@ -612,15 +669,14 @@ function ListingSheetSection() {
   return (
     <Section
       id="listing-sheet"
-      number="11"
       title="Listing sheet"
       description="A centered listing sheet with a photo grid, full photo feed, structured home details, and an interactive location map."
       source="Seller portal · ListingDetailsSheet"
     >
-      <Typography variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+      <Typography component="p" variant="bodySStandard" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
         The MLS number sits above the address with standard label spacing. Status, publication, and source tags sit 12px below the price. The description fills the available width and sits 8px below its heading. Highlight labels use the medium size, while Financial details and Listing information share a row above the map on wide screens. The agent footer uses horizontal dividers like the main portal footer.
       </Typography>
-      <Box sx={{ maxWidth: 640, overflow: 'hidden', borderRadius: '32px 32px 0 0', bgcolor: 'background.paper', boxShadow: 'var(--elevation-raised)' }}>
+      <Box sx={{ maxWidth: 640, overflow: 'hidden', borderRadius: '32px 32px 0 0', bgcolor: 'background.paper', boxShadow: 'var(--elevation-1)' }}>
         <Box sx={{ height: 230, display: 'grid', gridTemplateColumns: '2fr 1fr', gridTemplateRows: 'repeat(2, minmax(0, 1fr))', gap: 1, overflow: 'hidden' }}>
           {listing.photos.slice(0, 3).map((photo, index) => (
             <Box
@@ -647,280 +703,365 @@ function ListingSheetSection() {
   )
 }
 
-function PortalPatternSample({ title, children }: { title: string; children: ReactNode }) {
+function EyebrowSection() {
   return (
-    <Box>
-      <Typography component="h3" variant="titleXS" sx={{ mb: 2 }}>{title}</Typography>
-      {children}
-    </Box>
+    <Section id="eyebrow" title="Eyebrow" description="The small uppercase label that sits above a title." source="Eyebrow · src/components/Eyebrow.tsx · src/components/eyebrow.css">
+              <Typography component="p" variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Eyebrow is the small uppercase label above a title: labelS, uppercase, 0.08em tracking, and the text-primary color. Use it for “Seller transaction”, “Your home”, MLS numbers, and guide labels. Contexts may change its color, such as text-light on the property card. The centered timeline eyebrow keeps a wider 0.16em tracking because it sits over a full-bleed tracker.</Typography>
+              <Stack spacing={1}>
+                <Eyebrow>Seller transaction</Eyebrow>
+                <Eyebrow>MLS # 00001428</Eyebrow>
+              </Stack>
+    </Section>
   )
 }
 
-function PortalPatternsSection() {
-  const [peopleTab, setPeopleTab] = useState<PeopleTab>('team')
-  const [resourcePreview, setResourcePreview] = useState<TransactionResource | null>(null)
-  const [sellerTab, setSellerTab] = useState<PortalTab>('activity')
-  const [feedbackLayout, setFeedbackLayout] = useState<MarketingFeedbackLayout>('editorial')
-  const [marketingDashboardSection, setMarketingDashboardSection] = useState<MarketingDashboardSection | null>(null)
-  const [previewDocument, setPreviewDocument] = useState<TransactionDocument | null>(null)
-  const [listingPreviewOpen, setListingPreviewOpen] = useState(false)
-  const sample = sampleSellerTransaction
-
+function StatSection() {
   return (
-    <Section
-      id="portal-patterns"
-      number="12"
-      title="Portal patterns"
-      description="Shared transaction components for seller views and future buyer views. Open this group to inspect the working samples."
-      source="Transaction portal · src/transaction-portal/components"
-    >
-      <Box component="details" sx={{ borderTop: 1, borderBottom: 1, borderColor: 'divider', py: 2, '& summary': { cursor: 'pointer', typography: 'labelM', py: 1, '&:focus-visible': { outline: '2px solid var(--color-semantic-stroke-primary-dark)', outlineOffset: 3 } } }}>
-        <Box component="summary">Show portal components</Box>
-      <Stack spacing={5} sx={{ pt: 4 }}>
-          <Typography variant="bodySStandard" color="text.secondary">
-            On the seller page, the listing header and main blocks fade upward by 8px as they first enter view. Paired cards follow 55ms apart. The entrance plays once, stays off tab changes, and is removed for reduced motion.
-          </Typography>
-          <PortalPatternSample title="Portal top bar">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Use the supplied PLACE wordmark beside Client portal. The top bar shares the page content’s 1480px max width and side padding so the logo and account align with the sections below. On narrow screens, show the wordmark without the subtitle so both sides have room.</Typography>
-            <Box component="header" className="portal-topbar">
-              <Container maxWidth="xl" className="portal-topbar-inner">
-                <Box component="a" href="/" className="portal-brand-link" aria-label="PLACE client portal home">
-                  <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-                    <Box component="img" src={brandAssets.place.wordmarkDefault} alt="" className="place-wordmark" />
-                    <Box className="topbar-divider" />
-                    <Typography variant="bodySStandard" color="text.secondary" className="portal-brand-label">Client portal</Typography>
-                  </Stack>
-                </Box>
-                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                  <Avatar className="account-avatar">TB</Avatar>
-                  <Box className="account-name">
-                    <Typography variant="labelM">Tim Bennett</Typography>
-                    <Typography variant="labelS" color="text.secondary">Seller</Typography>
-                  </Box>
-                </Stack>
-              </Container>
-            </Box>
-          </PortalPatternSample>
-          <PortalPatternSample title="Compact card listing header">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>The Card variant places the address, statuses, agent row, and partner logos in a compact photo-led header. First Party opens the existing preview; IDX MVP uses the same external actions as the light split headers.</Typography>
-            <ListingOverview transaction={sample} onSeeListing={() => setListingPreviewOpen(true)} variant="card" listingLink="idx-mvp" />
-          </PortalPatternSample>
-          <PortalPatternSample title="Full-width listing header">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>The taller dark header fades the house photo behind the address and listing action, with the agent card at the far right. The compact card keeps its agent row and logos inside the header.</Typography>
-            <Box sx={{ overflow: 'hidden', borderRadius: 2, '& .listing-overview--full.MuiPaper-root': { width: '100%', marginLeft: 0 }, '& .listing-overview--full .listing-summary': { marginLeft: 24 } }}>
-              <ListingOverview
-                transaction={sample}
-                onSeeListing={() => setListingPreviewOpen(true)}
-                variant="full"
-              />
-            </Box>
-            <ListingDetailsSheet open={listingPreviewOpen} onClose={() => setListingPreviewOpen(false)} transaction={sample} />
-          </PortalPatternSample>
-          <PortalPatternSample title="Light split listing header">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>The top-aligned light split option. The house photo sits beside the listing information with rounded corners. The listing action sits 16px from the photo edges on small screens. At stacked widths, the copy uses a 32px side inset to align with the cards below. The status chip uses extra space before its icon for optical balance. Agent details appear below a divider in the copy column; phone and email stay side by side until narrow mobile widths. Only the values are links, and they darken and reveal an up-right arrow on hover or keyboard focus. Partner logos stay out of this header.</Typography>
-            <Box sx={{ overflow: 'hidden', borderRadius: 2, '& .listing-overview--light.MuiPaper-root': { width: '100%', marginLeft: 0 } }}>
-              <ListingOverview transaction={sample} onSeeListing={() => setListingPreviewOpen(true)} variant="light" />
-            </Box>
-          </PortalPatternSample>
-          <PortalPatternSample title="Bottom-aligned light listing header">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>The seller page default. The team and brokerage lockup sits at the top of the copy column. Listing status, address, and agent details have a 32px inset from the photo’s edges. The agent uses the same call and email icon buttons as the footer. Compare this with the standard Light split option in the seller design panel.</Typography>
-            <Box sx={{ overflow: 'hidden', borderRadius: 2, '& .listing-overview--light-bottom.MuiPaper-root': { width: '100%', marginLeft: 0 } }}>
-              <ListingOverview transaction={sample} onSeeListing={() => setListingPreviewOpen(true)} variant="light-bottom" />
-            </Box>
-          </PortalPatternSample>
-          <PortalPatternSample title="IDX MVP listing actions">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Header listing link defaults to First Party, which opens the listing preview. IDX MVP places an On Image Secondary Copy link button to the left of See Listing. The up-right arrow marks the external destination, which opens in a new tab. Copy link copies the same URL and shows a Sonner confirmation only after copying succeeds; a failed copy shows an error. Both actions keep visible keyboard focus and 44px touch targets.</Typography>
-            <Box sx={{ overflow: 'hidden', borderRadius: 2, '& .listing-overview--light.MuiPaper-root': { width: '100%', marginLeft: 0 } }}>
-              <ListingOverview transaction={sample} onSeeListing={() => setListingPreviewOpen(true)} variant="light-bottom" listingLink="idx-mvp" />
-            </Box>
-          </PortalPatternSample>
-          <PortalPatternSample title="Listing photo unavailable">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>When a listing has no photo, the shared placeholder keeps the header and listing action available. This is a content state of the Card variant.</Typography>
-            <ListingOverview transaction={{ ...sample, listing: { ...sample.listing, photoUrl: null } }} onSeeListing={() => setListingPreviewOpen(true)} variant="card" />
-          </PortalPatternSample>
-          <PortalPatternSample title="Unpublished listing preview">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>An unpublished listing uses Preview listing and opens the first-party preview even when IDX MVP is selected. Copy link and the external destination become available after publication.</Typography>
-            <ListingOverview transaction={{ ...sample, listing: { ...sample.listing, published: false } }} onSeeListing={() => setListingPreviewOpen(true)} variant="card" listingLink="idx-mvp" />
-          </PortalPatternSample>
-          <PortalPatternSample title="Before listing · preparation">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Use the compact No listing header before a listing is available. It shares the Light split header’s column proportions, content inset, and responsive stacking. Larger team and brokerage logos replace the photo on the right and align with the bottom of the agent row. The header retains the address, status, and agent contacts, with no listing preview action. On smaller screens, the logos sit above the property details. A dark gray note from the team sits above activity and dates with no extra top margin, customizable title and message text, and no checklist or action. Marketing is hidden until the listing is live. The Under contract view retains its selected header layout.</Typography>
-            <Box sx={{ overflow: 'hidden', '& .listing-overview--no-listing.MuiPaper-root': { width: '100%', marginLeft: 0 } }}>
-              <ListingOverview transaction={createBeforeListingTransaction(sample)} onSeeListing={() => setListingPreviewOpen(true)} variant="no-listing" listingLink="idx-mvp" />
-            </Box>
-            <ListingPreparation message={createBeforeListingTransaction(sample).clientMessage!} />
-            <Button component="a" href="/seller/future-v1?view=before-listing" variant="text" sx={{ mt: 2 }}>Open before-listing view</Button>
-          </PortalPatternSample>
-          <PortalPatternSample title="Icon badge">
-            <Stack direction="row" spacing={3} sx={{ alignItems: 'center' }}>
-              <Stack spacing={1} sx={{ alignItems: 'center' }}>
-                <PortalIconBadge size="s"><DescriptionOutlined /></PortalIconBadge>
-                <Typography variant="labelS" color="text.secondary">S · 32px</Typography>
+    <Section id="stat" title="Stat" description="Numbers with a label: a headline figure for a card and smaller supporting figures." source="Stat, HeadlineStat · src/components/Stat.tsx · src/components/stat.css">
+              <Typography component="p" variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>HeadlineStat leads a card: a labelM label, a displayL number, and optional context. Stat is the supporting number: metricM with a bodyS label directly below. Numbers use tabular figures so columns line up. The listing views snapshot and the marketing dashboard both use these.</Typography>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={6} sx={{ alignItems: { sm: 'flex-end' } }}>
+                <HeadlineStat label="Total listing views" value="8,746" context="Across listing sites" />
+                <Stat value="2,378" label="Unique visitors" />
+                <Stat value="42" label="Saves" />
               </Stack>
-              <Stack spacing={1} sx={{ alignItems: 'center' }}>
-                <PortalIconBadge><DescriptionOutlined /></PortalIconBadge>
-                <Typography variant="labelS" color="text.secondary">M · 44px</Typography>
+    </Section>
+  )
+}
+
+function FactListSection() {
+  return (
+    <Section id="fact-list" title="Fact list" description="Label and value pairs, in a grid or in rows." source="FactList · src/components/FactList.tsx · src/components/fact-list.css">
+              <Typography component="p" variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>FactList shows label and value pairs. The grid layout stacks a labelS label over a labelM value in two columns; the property card and timeline item modal use it. The rows layout puts a bodyS label on the left and the value on the right, one pair per line; listing details use it, with an optional second column that collapses below 760px. Parents set spacing and surfaces with their own class.</Typography>
+              <Stack spacing={4} sx={{ maxWidth: 560 }}>
+                <FactList facts={[{ label: 'Status', value: 'Under contract' }, { label: 'MLS number', value: '00001428' }]} />
+                <FactList layout="rows" facts={[{ label: 'Property type', value: 'Single-family home' }, { label: 'Year built', value: '2003' }, { label: 'Square feet', value: '3,952 sq ft' }]} />
               </Stack>
-              <Stack spacing={1} sx={{ alignItems: 'center' }}>
-                <PortalIconBadge size="l"><DescriptionOutlined /></PortalIconBadge>
-                <Typography variant="labelS" color="text.secondary">L · 48px</Typography>
-              </Stack>
-            </Stack>
-          </PortalPatternSample>
-          <PortalPatternSample title="People section and rows">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
-              Your Team and Viewers each fill half the tab bar. Both lists begin 30px below the tabs, with no extra viewer description. On the seller page, People and transaction sections sit 40px apart. Tabs change the visible panel and support keyboard navigation.
-            </Typography>
-            <Box sx={{ maxWidth: 460 }}>
-              <PeopleSection team={sample.team.slice(0, 3)} viewers={sample.viewers} value={peopleTab} onChange={setPeopleTab} />
-            </Box>
-          </PortalPatternSample>
-          <PortalPatternSample title="Seller section tabs">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
-              Activity, Tasks, Notes, and Documents make up the original seller page tab row. Future v1 adds Resources, with stage-relevant guides. Tabs scroll on smaller screens and support keyboard navigation. Listing details live in See Listing.
-            </Typography>
-            <Box component="nav" aria-label="Transaction sections" className="portal-section-nav">
-              <Tabs value={sellerTab} onChange={(_, value: PortalTab) => setSellerTab(value)} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile aria-label="Transaction information">
-                {portalTabs.map((tab) => <Tab key={tab.id} value={tab.id} label={tab.label} />)}
-              </Tabs>
-            </Box>
-          </PortalPatternSample>
-          <PortalPatternSample title="Team and brokerage logos">
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, p: 3, borderRadius: 2, bgcolor: 'var(--color-semantic-surface-primary-darkest)' }}>
-              <Box><Typography variant="labelS" sx={{ mb: 1, display: 'block' }}>Team and brokerage</Typography><PartnerBrandLockup brand={sample.teamBrand} /></Box>
-              <Box><Typography variant="labelS" sx={{ mb: 1, display: 'block' }}>Team only</Typography><PartnerBrandLockup brand={{ ...sample.teamBrand, brokerage: undefined }} /></Box>
-            </Box>
-          </PortalPatternSample>
-          <PortalPatternSample title="Portal footer">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>At stacked widths, center the agent group and partner branding as separate rows.</Typography>
-            <PortalFooter agent={sample.team.find((member) => member.id === sample.teamBrand.leadAgentId)} brand={sample.teamBrand} />
-          </PortalPatternSample>
-          <PortalPatternSample title="Upcoming dates and recent activity">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Lead with upcoming dates in the wider desktop column and first on mobile. Match the card heights when they sit side by side, using the taller card’s natural height without stretching the row spacing. Stacked cards follow their own content height. Give the dates 24px below the header divider, 64px date markers with room around the month and day, and 28px between rows. The date row opens an explanation modal; the right-aligned guide chip opens the resource independently. On phones, the chip moves below the description. Use the compact activity variant with 32px icons, 16px row padding, and attribution alongside the timestamp.</Typography>
-            <Box className="priority-grid" sx={{ mt: 0 }}>
-              <Box className="upcoming-dates-card">
-                <PortalSection title="Upcoming dates" prominent>
-                  <DateEventList>
-                    {[...futureSellerTransaction.upcomingDates].sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3).map(date => <DateEventRow key={date.id} {...date} resources={(date.guidance?.resourceIds ?? []).map(id => futureSellerTransaction.resources?.find(resource => resource.id === id)).filter((resource): resource is TransactionResource => !!resource)} onReadResource={setResourcePreview} guidance={date.guidance} />)}
-                  </DateEventList>
-                </PortalSection>
-              </Box>
-              <PortalSection title="Recent activity" prominent>
-                <Box component="ol" className="activity-event-list">
-                  {sample.timeline.slice(0, 3).map(event => <ActivityEventRow key={event.id} event={event} variant="compact" />)}
-                </Box>
-              </PortalSection>
-            </Box>
-          </PortalPatternSample>
-          <PortalPatternSample title="Milestone timeline (exploration)">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Timeline Exploration replaces upcoming dates and recent activity with four sale milestones, under a centered uppercase “Transaction timeline” eyebrow. Two transitions from the hero: a hairline divider (default) or a dark band that sits behind both the tracker and its list, with the listing performance card rising to overlap its bottom edge; switch them in the design panel. Rows carry 24px by 28px of padding, and the hover fill spans the whole padded row. The full-bleed rail fades out at both edges and fills through finished milestones, partway into the current one. Hover lifts the dot and reveals its date. On select, a white glint runs along the rail to the new milestone; when it lands, a glow blooms behind the dot, the dot enlarges, and an underline draws in. The current stage carries a “Now” pill and a slow pulse. Below, one list holds four item types, each with one icon: Action (you do it), Date (scheduled by your team or the buyer’s side), Document (to review or sign), and Resource (a guide to read). Rows reuse the dates pattern: thumbnail, title, summary, owner, and a resource chip on the right. Only Date items get the date thumbnail. Documents and resources show their icon on its own, with no fill. Date thumbnails have no fill and a hairline stroke, so all four types carry roughly equal weight. Actions show a check circle the seller can tick: it fills with a spring pop, the title strikes through, then the item settles into Done and the milestone progress updates. Unchecking moves it back. Actions in future milestones are disabled. Clicking a row opens a modal with type, timing, owner, status, and the one relevant action. Done items move to a Done group; only actions show a check, since dates and documents have no done mark of their own. Future milestones lock documents. A “Hide details” pill under the tracker collapses the list so only the tracker shows; picking a milestone reopens it. In the dark band, the collapsed state keeps enough bottom padding for the listing performance card to overlap. Below 900px, milestones stack along a vertical rail. On the 2 column page the timeline uses a card treatment: contained, left-aligned eyebrow with a countdown headline (“31 days until closing”), and a rail that fades at the card edges instead of the viewport.</Typography>
-            <SellerTimeline layout="tracker" data={underContractTimeline} resources={timelineResources} documents={sample.documents} team={sample.team} onOpenResource={setResourcePreview} onOpenDocument={() => undefined} />
-            <Typography variant="labelS" color="text.secondary" sx={{ mt: 4, mb: 1, display: 'block' }}>Stacked layout · mobile</Typography>
-            <Box sx={{ maxWidth: 420 }}>
-              <SellerTimeline layout="stacked" data={underContractTimeline} resources={timelineResources} documents={sample.documents} team={sample.team} onOpenResource={setResourcePreview} onOpenDocument={() => undefined} />
-            </Box>
-          </PortalPatternSample>
-          <PortalPatternSample title="Listing marketing snapshot">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
-              Channel labels use the medium body size on desktop and the small body size on tablet and mobile. On mobile, each channel places its label 18px above the count, with the unit aligned to the count baseline. The dashboard action stays beside the heading until narrow phone widths. Editorial showing feedback is the default; Current, Side rail, and Note remain available in the design panel. Its divider matches the metric separators: left of feedback on desktop, above it with more space when stacked. Each layout puts the hearts above the quote, the source and date below it, and Showing feedback beside the carousel controls. The main dashboard action opens the full marketing view.
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }} aria-label="Showing feedback layouts">
-              {marketingFeedbackLayouts.map((layout) => (
-                <Button key={layout.id} size="small" variant={feedbackLayout === layout.id ? 'contained' : 'outlined'} onClick={() => setFeedbackLayout(layout.id)}>
-                  {layout.label}
-                </Button>
-              ))}
-            </Box>
-            <MarketingSnapshot data={futureMarketingSnapshot} feedback={sample.feedback} feedbackLayout={feedbackLayout} onOpenDashboard={() => setMarketingDashboardSection('overview')} />
-            <MarketingDashboardSheet open={marketingDashboardSection !== null} onClose={() => setMarketingDashboardSection(null)} initialSection={marketingDashboardSection ?? 'overview'} transaction={futureSellerTransaction} data={futureMarketingSnapshot} />
-          </PortalPatternSample>
-          <PortalPatternSample title="Listing views snapshot">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
-              An alternate seller view led by total listing views and a quiet 14-day trend. Unique visitors, saves, and shares support the main number; social reach and showing feedback stay visible at a lower level. Sample figures are illustrative. Select Listing views in the seller design panel to see it in context.
-            </Typography>
-            {futureMarketingSnapshot.insights && (
-              <AdvertisingSnapshot data={futureMarketingSnapshot.insights} feedback={sample.feedback} onOpenDashboard={() => setMarketingDashboardSection('overview')} />
-            )}
-          </PortalPatternSample>
-          <PortalPatternSample title="Transaction Resources and guide reader">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Future v1 leads with guides that are useful at the current stage, followed by upcoming and reference topics. Featured icons sit directly on the card surface. Featured cards and guide rows share 24px padding, reduced to 20px on mobile. Each full-row or card button opens a readable guide with preparation steps and questions to ask an agent. The reader shares the listing details bottom sheet, with an editorial title, section navigation, numbered preparation advice, and a question section. A hamburger opens the full resource library inside the sheet and highlights the current guide; selecting another guide closes the menu and starts reading at the top. The contents list collapses on mobile so reading starts sooner. It supports Escape and returns focus to the trigger.</Typography>
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Featured cards use a primary surface fill with a stroke-primary border. Featured cards and guide rows use the primary-dark surface token on hover.</Typography>
-            <ResourcesPanel resources={futureSellerTransaction.resources!} onOpen={setResourcePreview} />
-            <ResourceGuideSheet resource={resourcePreview} resources={futureSellerTransaction.resources ?? []} onSelectResource={setResourcePreview} onClose={() => setResourcePreview(null)} />
-          </PortalPatternSample>
-          <PortalPatternSample title="Contextual milestone guidance">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Keep dates scannable. The round month/day bubble is the shared DateStamp component (64px). The team workspace renders this same DateEventRow in team mode: onEdit makes the row open the editor, trailing adds an Edit action, and notes adds team-only warnings under the row. Team rows pass only client-visible resources, so the chip matches the client view. With one attached resource, the chip prefixes its label with “Resource: ”; with two or more, the chip reads “2 resources” and opens the date’s explanation, which lists each resource under “Helpful resources”. The single-resource chip uses the guide’s optional shortTitle, and opens the full guide; its accessible label retains the full title. The whole date row is a keyboard-accessible button that opens a PLACE small modal with the explanation and preparation advice. The row and resource chip use the primary-dark surface token for their hover fill. The resource chip is a separate button on the right, so opening the guide does not also open the explanation. The modal pairs “What it means” and “What you need to do” headings using titleXS. An outlined button labeled “Resource: ” followed by the guide’s short title sits on the left of the footer and opens the resource reader after closing the modal; the primary Done action sits on the right and closes the modal. On phones, the resource chip moves below the description, keeping the entire date row available as the explanation trigger. The modal supports Escape, focus return, and reduced motion. Use this optional guidance in the upcoming dates card and full dates drawer.</Typography>
-            <DateEventList>
-              {futureSellerTransaction.upcomingDates.slice(2, 4).map((date) => <DateEventRow key={date.id} {...date} resources={(date.guidance?.resourceIds ?? []).map(id => futureSellerTransaction.resources?.find(resource => resource.id === id)).filter((resource): resource is TransactionResource => !!resource)} onReadResource={setResourcePreview} guidance={date.guidance} />)}
-            </DateEventList>
-          </PortalPatternSample>
-          <PortalPatternSample title="Date event rows">
-            <Box sx={{ maxWidth: 600 }}>
-              <DateEventList>
-                <DateEventRow {...sample.upcomingDates[0]} />
-                <DateEventRow date="2026-09-14" title={sample.timeline[0].title} description={sample.timeline[0].description}>
-                  {sample.timeline[0].actor} · 10:42 AM
-                </DateEventRow>
-              </DateEventList>
-            </Box>
-          </PortalPatternSample>
-          <PortalPatternSample title="Activity event rows">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
-              Standard rows align the timestamp with the title and keep the actor below the description. Use compact rows in overview cards: 32px icons, 16px row padding, and the actor and timestamp together beneath the description. Keep the standard variant for full activity history.
-            </Typography>
-            <Box component="ol" className="activity-event-list" sx={{ maxWidth: 760 }}>
-              {sample.timeline.slice(0, 2).map(event => <ActivityEventRow key={event.id} event={event} />)}
-            </Box>
-          </PortalPatternSample>
-          <PortalPatternSample title="Compact activity event rows">
-            <Box component="ol" className="activity-event-list" sx={{ maxWidth: 440 }}>
-              {sample.timeline.slice(0, 3).map(event => <ActivityEventRow key={event.id} event={event} variant="compact" />)}
-            </Box>
-          </PortalPatternSample>
-          <PortalPatternSample title="Paginated activity history">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
-              Tab content uses the same horizontal inset as its tab labels. List tabs show up to 10 rows per page, then reveal page controls and a visible range count. This future seller sample has 21 activity updates across three pages; the Recent activity card stays limited to three.
-            </Typography>
-            <Box sx={{ maxWidth: 760, border: 1, borderColor: 'divider', borderRadius: 2 }}>
-              <ActivityPanel events={futureSellerTransaction.timeline} />
-            </Box>
-          </PortalPatternSample>
-          <PortalPatternSample title="Task row">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Place the due-date tag with the task title. When space is tight, it wraps within that heading row before the description.</Typography>
-            <TransactionRowList><TaskRow task={sample.tasks[0]} /></TransactionRowList>
-          </PortalPatternSample>
-          <PortalPatternSample title="Advertising row">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>
-              Give the attribution line 6px of space below the update title and use the lighter text color.
-            </Typography>
-            <Typography variant="labelS">Standard / icon, attribution, and separate date</Typography>
-            <TransactionRowList><AdvertisingRow event={sample.advertising[0]} /></TransactionRowList>
-            <Typography variant="labelS" sx={{ mt: 2, display: 'block' }}>Compact / attribution and date below the update</Typography>
-            <TransactionRowList><AdvertisingRow event={sample.advertising[0]} compact /></TransactionRowList>
-          </PortalPatternSample>
-          <PortalPatternSample title="Showing feedback row">
-            <TransactionRowList><ShowingFeedbackRow feedback={sample.feedback[0]} /></TransactionRowList>
-          </PortalPatternSample>
-          <PortalPatternSample title="Team note card">
-            <TeamNoteCard note={sample.notes[0]} />
-          </PortalPatternSample>
-          <PortalPatternSample title="Document cards and pinning">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Document cards show a thumbnail with a subtle paper shadow, a title, an upload date, a byline, and an always-visible PlaceIconButton pin control. A filled pin marks a pinned document; the button stays borderless and uses the shared hover and keyboard-focus treatment. The entire card opens the document; categories, signature status, and a separate Preview action are omitted. Filled pins indicate pinned documents, which stay above the remaining paginated cards. Pins are remembered for this viewer and transaction in this browser. Supply thumbnailUrl for a real preview image; documents without one show a sample page built from their metadata.</Typography>
-            <DocumentsPanel documents={sample.documents} storageKey="place-document-pins:gallery" onOpen={setPreviewDocument} />
-            <Typography variant="labelM" sx={{ display: 'block', mt: 4, mb: 2 }}>Read-only client preview</Typography>
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>Pass readOnly to disable pin changes while keeping document previews available.</Typography>
-            <DocumentsPanel documents={sample.documents.slice(0, 2)} storageKey="place-document-pins:gallery-preview" onOpen={setPreviewDocument} readOnly />
-          </PortalPatternSample>
-          <PortalPatternSample title="Detail grid and section">
-            <Typography variant="bodySStandard" color="text.secondary" sx={{ mb: 2 }}>The standard section uses titleXS; the activity and dates examples above use the prominent titleS option. Subtitle and header action are optional slots.</Typography>
-            <PortalSection title="Transaction details" subtitle="Your current sale" action={<CardActionButton onClick={() => setListingPreviewOpen(true)}>See listing</CardActionButton>}>
-              <DetailGrid rows={[{ label: 'Status', value: sample.listing.status }, { label: 'MLS number', value: sample.listing.mlsNumber }]} />
-            </PortalSection>
-          </PortalPatternSample>
-        </Stack>
+    </Section>
+  )
+}
+
+
+/* ---------- Shape and space foundations: src/system-tokens.css ---------- */
+
+const radiusTiers = [
+  { token: '2xs', px: 4, use: 'Marks only: progress bars, tiny indicators' },
+  { token: 'xs', px: 8, use: 'Hover and selected fills in lists, menu items' },
+  { token: 's', px: 12, use: 'Inputs, menus, popovers, tooltips, image tiles in cards, row hover' },
+  { token: 'm', px: 20, use: 'Every card' },
+  { token: 'l', px: 28, use: 'Overlays: modals, sheets, the full timeline' },
+  { token: 'pill', px: 999, use: 'Buttons, tags, chips, segmented switches' },
+  { token: 'circle', px: 0, use: 'Avatars, date stamps, icon badges, icon buttons' },
+] as const
+
+function RadiusSection() {
+  return (
+    <Section id="radius" kind="Foundation" title="Corner radius"
+      description="Five tiers plus pill and circle. Pick the tier by what the surface is, never by its size: every card is m, every overlay is l. Never write a raw radius value."
+      source="--radius-* · src/system-tokens.css · radius in src/system-tokens.ts">
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', sm: 'repeat(4, minmax(0, 1fr))' }, gap: 2 }}>
+        {radiusTiers.map((tier) => (
+          <Box key={tier.token} sx={{ display: 'grid', gap: 1 }}>
+            <Box sx={{ height: 88, bgcolor: 'var(--color-semantic-surface-primary)', boxShadow: 'inset 0 0 0 1px var(--color-semantic-stroke-primary)', borderRadius: `var(--radius-${tier.token})`, ...(tier.token === 'circle' ? { width: 88 } : {}) }} />
+            <Typography variant="labelM">--radius-{tier.token}{tier.token !== 'circle' && tier.token !== 'pill' ? ` · ${tier.px}px` : ''}</Typography>
+            <Typography variant="labelS" color="text.secondary">{tier.use}</Typography>
+          </Box>
+        ))}
       </Box>
-      <PlaceModal open={previewDocument !== null} onClose={() => setPreviewDocument(null)} size="s" title={previewDocument?.name ?? 'Document preview'} closeLabel="Close document preview">
-        <Typography variant="bodyMStandard">{previewDocument?.summary}</Typography>
-      </PlaceModal>
+    </Section>
+  )
+}
+
+const elevationLevels = [
+  { token: '--elevation-0', name: '0 · Flat', use: 'Sits on the canvas. Separated by spacing or a hairline.' },
+  { token: '--elevation-1', name: '1 · Rest', use: 'Cards on the page canvas. PlaceCard uses this.' },
+  { token: '--elevation-2', name: '2 · Floating', use: 'Above content while scrolling or acting: sticky header, menus, popovers, an interactive card on hover.' },
+  { token: '--elevation-3', name: '3 · Overlay', use: 'Modals, sheets, and the full timeline.' },
+  { token: '--elevation-3-on-photo', name: '3 · On photo', use: 'A surface placed on photography, such as the hero agent card.' },
+] as const
+
+function ElevationSection() {
+  return (
+    <Section id="elevation" kind="Foundation" title="Elevation"
+      description="Four levels. A surface uses one separation method: a shadow, a hairline, or a tonal fill. Cards never combine a stroke with a shadow. Add a hairline only to an interactive outlined control or a surface on a photo."
+      source="--elevation-* · src/system-tokens.css · elevation in src/system-tokens.ts">
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' }, gap: 3, p: { xs: 2, sm: 4 }, bgcolor: 'var(--color-semantic-surface-primary)' }}>
+        {elevationLevels.map((level) => (
+          <Box key={level.token} sx={{ display: 'grid', gap: 0.75, p: 3, borderRadius: 'var(--radius-m)', bgcolor: 'var(--color-semantic-surface-primary)', boxShadow: `var(${level.token})`, ...(level.token.endsWith('on-photo') ? { outline: '1px dashed var(--color-semantic-stroke-primary)' } : {}) }}>
+            <Typography variant="titleXS">{level.name}</Typography>
+            <Typography variant="labelS" color="text.secondary">{level.token}</Typography>
+            <Typography variant="bodySStandard" color="text.secondary">{level.use}</Typography>
+          </Box>
+        ))}
+      </Box>
+    </Section>
+  )
+}
+
+const spaceSteps = [2, 4, 6, 8, 12, 16, 20, 24, 28, 32, 40, 48, 56, 64, 80] as const
+const spaceRoles = [
+  { token: '--padding-card', value: '32 · 20 on phones', use: 'Inside every card' },
+  { token: '--padding-overlay', value: '32 · 20 on phones', use: 'Inside modals and sheets' },
+  { token: '--padding-row-block', value: '20', use: 'Above and below each list row' },
+  { token: '--row-hover-bleed', value: '12', use: 'How far a row hover reaches past the column' },
+  { token: '--gap-stack', value: '16', use: 'Section label to its content' },
+  { token: '--gap-card', value: '24', use: 'Between cards' },
+  { token: '--padding-panel-top', value: '32 · 24 on phones', use: 'Tab bar to the first thing in a tab panel' },
+  { token: '--gap-panel', value: '32 · 24 on phones', use: 'A tab panel’s intro or filters to its list' },
+  { token: '--gap-panel-group', value: '48 · 40 on phones', use: 'Between groups inside a tab panel' },
+  { token: '--gap-section', value: '64 · 48 on phones', use: 'Between sections in a zone' },
+  { token: '--gap-zone', value: '80 · 56 on phones', use: 'Between the page’s major zones' },
+] as const
+
+function SpacingSection() {
+  return (
+    <Section id="spacing" kind="Foundation" title="Spacing"
+      description="A 4px base on an 8px rhythm. Use the semantic roles first; fall back to the scale for anything inside a component. 6px is only for tight inline gaps such as metadata separators."
+      source="--space-*, --padding-*, --gap-* · src/system-tokens.css · space in src/system-tokens.ts">
+      <Box sx={{ display: 'grid', gap: 1, mb: 5 }}>
+        {spaceSteps.map((step) => (
+          <Box key={step} sx={{ display: 'grid', gridTemplateColumns: '96px minmax(0, 1fr)', alignItems: 'center', gap: 2 }}>
+            <Typography variant="labelS" color="text.secondary">--space-{step}</Typography>
+            <Box sx={{ width: `var(--space-${step})`, height: 12, borderRadius: 'var(--radius-2xs)', bgcolor: 'var(--color-semantic-surface-reverse-secondary)' }} />
+          </Box>
+        ))}
+      </Box>
+      <Box component="dl" sx={{ m: 0, display: 'grid' }}>
+        {spaceRoles.map((role) => (
+          <Box key={role.token} sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '200px 140px minmax(0, 1fr)' }, gap: { xs: 0.5, sm: 2 }, py: 1.5, borderTop: '1px solid var(--color-semantic-stroke-primary-light)' }}>
+            <Typography component="dt" variant="labelM">{role.token}</Typography>
+            <Typography component="dd" variant="labelS" color="text.secondary" sx={{ m: 0 }}>{role.value}</Typography>
+            <Typography component="dd" variant="bodySStandard" color="text.secondary" sx={{ m: 0 }}>{role.use}</Typography>
+          </Box>
+        ))}
+      </Box>
+    </Section>
+  )
+}
+
+const motionTokens = [
+  { token: '--motion-press', value: '120ms ease-out', use: 'Press scale on buttons and links' },
+  { token: '--motion-hover', value: '160ms ease', use: 'Hover and selection: fills, colors, borders, small icon nudges' },
+  { token: '--motion-reveal', value: '200ms ease', use: 'Something changing shape in place: a chevron turning, a card lifting' },
+  { token: '--motion-overlay', value: '240ms ease-out', use: 'Modals, sheets, and drawers entering' },
+] as const
+
+function FocusMotionSection() {
+  return (
+    <Section id="focus-motion" kind="Foundation" title="Focus and motion"
+      description="Every control shows the same keyboard focus ring: a 2px outline in stroke-primary-dark, 2px outside the control. Use --focus-ring-on-dark over photography and the dark timeline band. Motion uses four tokens that pair a duration with an easing; write transition: background-color var(--motion-hover). Every transition switches off under prefers-reduced-motion."
+      source="--focus-ring*, --motion-* · src/system-tokens.css · motionMs in src/system-tokens.ts">
+      <SpecimenList>
+        <Specimen label="Focus ring / --focus-ring">
+          <Button variant="outlined" sx={{ outline: 'var(--focus-ring)', outlineOffset: 'var(--focus-ring-offset)' }}>Add to calendar</Button>
+        </Specimen>
+        <Specimen label="On dark / --focus-ring-on-dark">
+          <Box sx={{ p: 2, borderRadius: 'var(--radius-s)', bgcolor: 'var(--color-semantic-surface-reverse-primary)', color: 'var(--color-primitive-base-white)' }}>
+            <TextLink tone="onDark">See the timeline</TextLink>
+          </Box>
+        </Specimen>
+      </SpecimenList>
+      <Box component="dl" sx={{ m: 0, mt: 4, display: 'grid' }}>
+        {motionTokens.map((motion) => (
+          <Box key={motion.token} sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '200px 140px minmax(0, 1fr)' }, gap: { xs: 0.5, sm: 2 }, py: 1.5, borderTop: '1px solid var(--color-semantic-stroke-primary-light)' }}>
+            <Typography component="dt" variant="labelM">{motion.token}</Typography>
+            <Typography component="dd" variant="labelS" color="text.secondary" sx={{ m: 0 }}>{motion.value}</Typography>
+            <Typography component="dd" variant="bodySStandard" color="text.secondary" sx={{ m: 0 }}>{motion.use}</Typography>
+          </Box>
+        ))}
+      </Box>
+    </Section>
+  )
+}
+
+const breakpointUses: Record<keyof typeof breakpoints, string> = {
+  smallPhone: 'Small phones. Tighten only what breaks.',
+  phone: 'Phones. Single column, card and overlay padding drop to 20.',
+  tablet: 'Small tablets. Sheets go full width, two-column lists stack.',
+  laptop: 'Narrow laptops. Side-by-side columns stack.',
+  desktop: 'The full desktop layout starts here.',
+  wide: 'Wide screens. Extra room for rails beside the main column.',
+}
+
+function BreakpointsSection() {
+  return (
+    <Section id="breakpoints" kind="Foundation" title="Breakpoints"
+      description="Six screen widths, and only these six. Write them as max-width 0.05px below the value, such as @media (max-width: 599.95px), so they line up with MUI. CSS can't read variables inside @media, so the values are fixed; in TypeScript use below('phone')."
+      source="src/system-tokens.css › Breakpoints · breakpoints, below() in src/system-tokens.ts">
+      <Box component="dl" sx={{ m: 0, display: 'grid' }}>
+        {(Object.keys(breakpoints) as (keyof typeof breakpoints)[]).map((name) => (
+          <Box key={name} sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '200px 140px minmax(0, 1fr)' }, gap: { xs: 0.5, sm: 2 }, py: 1.5, borderTop: '1px solid var(--color-semantic-stroke-primary-light)' }}>
+            <Typography component="dt" variant="labelM">{name}</Typography>
+            <Typography component="dd" variant="labelS" color="text.secondary" sx={{ m: 0 }}>below {breakpoints[name]}px</Typography>
+            <Typography component="dd" variant="bodySStandard" color="text.secondary" sx={{ m: 0 }}>{breakpointUses[name]}</Typography>
+          </Box>
+        ))}
+      </Box>
+    </Section>
+  )
+}
+
+function CardHeaderSection() {
+  return (
+    <Section id="card-header" title="Card header"
+      description="PortalSectionHeader is the title row at the top of a card: a titleXS title (titleS when prominent), an optional labelS subtitle, an optional action on the right, and a hairline below. PortalSection wraps it in a PlaceCard with the body underneath. Use SectionLabel for groups that sit on the page or inside a list instead."
+      source="PortalSection, PortalSectionHeader · src/components/PortalSection.tsx · src/components/portal-section.css">
+      <SpecimenList>
+        <Specimen label="Default / with action">
+          <PlaceCard sx={{ width: '100%' }}>
+            <PortalSectionHeader title="Listing performance" subtitle="Last 30 days" action={<TextLink>See all</TextLink>} />
+            <Typography component="p" variant="bodySStandard" color="text.secondary" sx={{ pt: 'var(--space-20)' }}>Card content starts 20px below the hairline.</Typography>
+          </PlaceCard>
+        </Specimen>
+        <Specimen label="Prominent">
+          <PlaceCard sx={{ width: '100%' }}>
+            <PortalSectionHeader title="Important notes" prominent />
+          </PlaceCard>
+        </Specimen>
+      </SpecimenList>
+    </Section>
+  )
+}
+
+function IconBadgeSection() {
+  return (
+    <Section id="icon-badge" title="Icon badge"
+      description="A round gray badge that leads a row or activity item with one icon. Decorative only: the row's text carries the meaning, so it is hidden from screen readers. Sizes: s 32px, m 44px (default), l 48px."
+      source="PortalIconBadge · src/components/PortalIconBadge.tsx · src/components/portal-icon-badge.css">
+      <Specimen label="s / m / l">
+        <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+          {(['s', 'm', 'l'] as const).map((size) => <PortalIconBadge key={size} size={size}><CalendarTodayOutlined /></PortalIconBadge>)}
+        </Stack>
+      </Specimen>
+    </Section>
+  )
+}
+
+function AgentIdentitySection() {
+  const agent = sampleSellerTransaction.team[0]
+  return (
+    <Section id="agent-identity" title="Agent identity"
+      description="The agent's photo, a small role line, and their name. Contact actions and the brand lockup sit beside it and are supplied by the parent. Sizes set the photo: s 44px, m 48px, l 56px, xl 64px; xl also uses the larger titleS name. Set eyebrow to show the role line as an uppercase Eyebrow."
+      source="AgentIdentity · src/components/AgentIdentity.tsx · src/components/agent-identity.css">
+      <SpecimenList>
+        <Specimen label="m (default)"><AgentIdentity agent={agent} /></Specimen>
+        <Specimen label="xl / eyebrow"><AgentIdentity agent={agent} size="xl" eyebrow /></Specimen>
+      </SpecimenList>
+    </Section>
+  )
+}
+
+function BrandLockupSection() {
+  return (
+    <Section id="brand-lockup" title="Brand lockup"
+      description="The partner's team logo, then the brokerage logo after a hairline when there is one. Use it wherever the partner is credited: portal header and footer, agent cards, listing details, and emails. Set the logo widths per placement with --partner-team-width and --partner-brokerage-width rather than restyling the images."
+      source="PartnerBrandLockup · src/components/PartnerBrandLockup.tsx · src/components/partner-brand-lockup.css">
+      <SpecimenList>
+        <Specimen label="Team and brokerage"><PartnerBrandLockup brand={sampleSellerTransaction.teamBrand} /></Specimen>
+        <Specimen label="Team only"><PartnerBrandLockup brand={{ name: sampleSellerTransaction.teamBrand.name, logoUrl: sampleSellerTransaction.teamBrand.logoUrl }} /></Specimen>
+      </SpecimenList>
+    </Section>
+  )
+}
+
+/* ---------- Shared components added in the consolidation pass ---------- */
+
+function CardSection() {
+  const [open, setOpen] = useState(false)
+  return (
+    <Section id="card" title="Card"
+      description="PlaceCard is the one card surface: white, radius m, elevation 1, no stroke, card padding inside. Card headers use PortalSectionHeader (title, optional action, hairline below). Never restyle a card's radius, shadow, or stroke locally."
+      source="PlaceCard · src/components/PlaceCard.tsx · src/components/place-card.css">
+      <SpecimenList>
+        <Specimen label="Default">
+          <PlaceCard sx={{ width: '100%' }}>
+            <Typography variant="titleS">Listing performance</Typography>
+            <Typography component="p" variant="bodySStandard" color="text.secondary" sx={{ mt: 1 }}>Content sits inside the card padding.</Typography>
+          </PlaceCard>
+        </Specimen>
+        <Specimen label="Flush / with a disclosure footer">
+          <PlaceCard padding="none" sx={{ width: '100%' }}>
+            <Box sx={{ p: 'var(--padding-card)' }}>
+              <Typography variant="titleS">Review and sign Form 17</Typography>
+              <Collapse in={open}><Typography component="p" variant="bodySStandard" color="text.secondary" sx={{ mt: 1 }}>The rest of the details appear in place.</Typography></Collapse>
+            </Box>
+            <DisclosureButton placement="cardFooter" open={open} onToggle={() => setOpen(!open)} showLabel="Show all details" hideLabel="Show less" />
+          </PlaceCard>
+        </Specimen>
+        <Specimen label="Interactive / hover lifts to elevation 2">
+          <PlaceCard interactive sx={{ width: '100%' }}>
+            <Typography variant="titleXS">Meeting note</Typography>
+            <Typography component="p" variant="bodySStandard" color="text.secondary" sx={{ mt: 1 }}>Use only when the whole card is one click target.</Typography>
+          </PlaceCard>
+        </Specimen>
+      </SpecimenList>
+    </Section>
+  )
+}
+
+function SectionLabelSection() {
+  return (
+    <Section id="section-label" title="Section label"
+      description="Names a list or group on the page or inside a list: “What’s coming up next”, “Dates”, “In progress”. Same type as Eyebrow. An optional count sits one step smaller on the baseline, and only when the number changes what the reader does. An optional action, such as a back link, sits on the same line."
+      source="SectionLabel · src/components/SectionLabel.tsx · src/components/section-label.css">
+      <SpecimenList>
+        <Specimen label="Default"><Box sx={{ width: '100%' }}><SectionLabel>Dates</SectionLabel></Box></Specimen>
+        <Specimen label="With a count"><Box sx={{ width: '100%' }}><SectionLabel count={3}>Pinned</SectionLabel></Box></Specimen>
+        <Specimen label="With an action"><Box sx={{ width: '100%' }}><SectionLabel action={<TextLink direction="back" onClick={() => {}}>Back to pending</TextLink>}>First up in closing</SectionLabel></Box></Specimen>
+      </SpecimenList>
+    </Section>
+  )
+}
+
+function TextLinkSection() {
+  return (
+    <Section id="text-link" title="Text link"
+      description="The one way to go somewhere: text plus an arrow. → opens another view, sheet, or modal, or jumps down the page. ← returns. ↗ is only for external links that open a new tab. It is a quiet text button: no fill at rest, a soft pill fill on hover, and the arrow nudges. 44px hit area."
+      source="TextLink · src/components/TextLink.tsx · src/components/text-link.css">
+      <SpecimenList>
+        <Specimen label="Forward"><TextLink onClick={() => {}}>View marketing dashboard</TextLink></Specimen>
+        <Specimen label="Back"><TextLink direction="back" onClick={() => {}}>Back to pending</TextLink></Specimen>
+        <Specimen label="External"><TextLink href="https://place.com">PLACE website</TextLink></Specimen>
+      </SpecimenList>
+    </Section>
+  )
+}
+
+function DisclosureSection() {
+  const [listOpen, setListOpen] = useState(false)
+  return (
+    <Section id="disclosure" title="Disclosure button"
+      description="The one way to show or hide more in place: text plus a chevron that turns when open. Under a list it sits flush left with the rows; as a card's last row it runs full width under a hairline. Never use an outlined pill or a TextLink for this."
+      source="DisclosureButton · src/components/DisclosureButton.tsx · src/components/disclosure-button.css">
+      <SpecimenList>
+        <Specimen label="List / with hidden count (card footer: see Card)"><Box sx={{ width: '100%', display: 'grid' }}><DisclosureButton open={listOpen} onToggle={() => setListOpen(!listOpen)} showLabel="Show done" hideLabel="Hide done" count={2} /></Box></Specimen>
+      </SpecimenList>
+    </Section>
+  )
+}
+
+function TagSection() {
+  return (
+    <Section id="tag" title="Tag"
+      description="A short, static label on a row, card, or photo. Quiet tags are a hairline pill on white, so they read on photography too. Strong tags are dark and mean the reader needs to act; use at most one per view. Tags are never buttons."
+      source="PlaceTag · src/components/PlaceTag.tsx · src/components/place-tag.css">
+      <SpecimenList>
+        <Specimen label="Quiet"><Stack direction="row" spacing={1}><PlaceTag>File</PlaceTag><PlaceTag>Resource</PlaceTag><PlaceTag>Price drop</PlaceTag></Stack></Specimen>
+        <Specimen label="Strong"><PlaceTag tone="strong">Needs your signature</PlaceTag></Specimen>
+      </SpecimenList>
+    </Section>
+  )
+}
+
+
+function FilterPillsSection() {
+  const [value, setValue] = useState<'open' | 'done'>('open')
+  return (
+    <Section id="filter-pills" title="Filter pills"
+      description="Narrows one list to a subset. Compact pills: outlined when off, dark when on, one always selected, the broadest option first and selected by default. No counts in the pills. On phones the row scrolls sideways."
+      source="FilterPills · src/components/FilterPills.tsx · src/components/filter-pills.css">
+      <SpecimenList>
+        <Specimen label="Team to-dos / Open, Done"><FilterPills label="Filter team to-dos" value={value} onChange={setValue} options={[{ value: 'open', label: 'Open' }, { value: 'done', label: 'Done' }]} /></Specimen>
+      </SpecimenList>
     </Section>
   )
 }
@@ -943,7 +1084,7 @@ export function ComponentGallery() {
         </Typography>
         <Typography component="h1" variant="displayS" sx={{ mt: 1.5, textWrap: 'balance' }}>Component gallery</Typography>
         <Typography component="p" variant="bodyMStandard" color="text.secondary" sx={{ mt: 2, mb: { xs: 7, md: 10 }, maxWidth: 650, textWrap: 'pretty' }}>
-          A working record of PLACE foundations, shared components, and portal patterns. Samples render the production components and their supported variants. Page-specific combinations are documented under Portal patterns.
+          A working record of PLACE foundations and system-wide components. Samples render the production components and their supported variants. Page-specific components live with their pages, not here.
         </Typography>
 
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '170px minmax(0, 1fr)' }, gap: { xs: 2, md: 7 } }}>
@@ -952,7 +1093,7 @@ export function ComponentGallery() {
               Library / {sections.length}
             </Typography>
             {sections.map(section => (
-              <Box key={section.id} component="a" href={`#${section.id}`} sx={{ flexShrink: 0, color: 'text.primary', textDecoration: 'none', py: 0.75, borderRadius: 1, typography: 'labelM', transition: 'color 150ms ease', '&:hover': { color: 'text.secondary' }, '&:focus-visible': { outline: '2px solid var(--color-semantic-stroke-primary-dark)', outlineOffset: 3 } }}>
+              <Box key={section.id} component="a" href={`#${section.id}`} sx={{ flexShrink: 0, color: 'text.primary', textDecoration: 'none', py: 0.75, borderRadius: 1, typography: 'labelM', transition: 'color var(--motion-hover)', '&:hover': { color: 'text.secondary' }, '&:focus-visible': { outline: 'var(--focus-ring)', outlineOffset: 3 } }}>
                 {section.name}
               </Box>
             ))}
@@ -960,26 +1101,38 @@ export function ComponentGallery() {
           <Box sx={{ minWidth: 0 }}>
             <TypographySection />
             <ColorsSection />
+            <RadiusSection />
+            <ElevationSection />
+            <SpacingSection />
+            <FocusMotionSection />
+            <BreakpointsSection />
             <ButtonSection />
             <IconButtonSection />
             <ChipSection />
             <SegmentedSwitchSection />
+            <TabsSection />
+            <CardSection />
+            <CardHeaderSection />
             <PaperSection />
             <ModalSection />
             <SheetSection />
             <ToastSection />
             <MenuSection />
+            <FormControlsSection />
+            <EyebrowSection />
+            <SectionLabelSection />
+            <TextLinkSection />
+            <DisclosureSection />
+            <TagSection />
+            <FilterPillsSection />
+            <StatSection />
+            <FactListSection />
+            <IconBadgeSection />
+            <AgentIdentitySection />
+            <BrandLockupSection />
             <ListingSheetSection />
-            <PortalPatternsSection />
-            <Section id="team-resources" number="16" title="Transaction resource visibility" description="A resource’s publication state lives in the library. Its visibility is chosen separately for each transaction." source="Team workspace · uses the shared Switch, Typography, and semantic surface tokens.">
-              <Specimen label="Visible / hidden"><TeamResourceSwitchSample /></Specimen>
-              <Specimen label="Internal canvas page link"><Box sx={{ p: 3, bgcolor: 'var(--color-semantic-surface-reverse-primary)', borderRadius: 2 }}><a className="flow-page-button" href="/team/library">Open resource library</a></Box><Typography variant="bodySStandard" color="text.secondary" sx={{ mt: 2 }}>The standalone HTML flow map uses this equivalent of PLACE’s onImagePrimary button, with the same pill shape, spacing, and color tokens.</Typography></Specimen>
-              <Specimen label="Client preview banner"><ClientPreviewBanner clientLabel="Tim & Alex Bennett’s seller portal" /></Specimen>
-              <Typography variant="bodySStandard" color="text.secondary" sx={{ mt: 3 }}>Switch changes apply immediately to one transaction. Publishing and archiving are admin-only; creation, editing, and default permissions remain proposals. Publishing opens a review dialog inside the editor, with the number of linked transactions affected. Buttons and dialogs reuse the existing PLACE components.</Typography>
-            </Section>
             <Section
               id="email-blocks"
-              number="13"
               title="Email blocks"
               description="The client email family shares a team and brokerage header, property context, body pane, primary action, agent signature, and a centered footer."
               source="src/email-templates/EmailPreview.tsx · src/email-templates/email-preview.css"

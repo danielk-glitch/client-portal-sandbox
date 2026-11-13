@@ -4,9 +4,11 @@ import MenuOutlined from '@mui/icons-material/MenuOutlined'
 import CloseOutlined from '@mui/icons-material/CloseOutlined'
 import ExpandMoreOutlined from '@mui/icons-material/ExpandMoreOutlined'
 import { PlaceSheet } from '../../components/PlaceSheet'
+import { Eyebrow } from '../../components/Eyebrow'
 import type { TransactionResource } from '../types'
 import './resource-guide-sheet.css'
 import { cleanResourceHtml } from '../resourceContent'
+import { below } from '../../system-tokens'
 
 /* design-build · self-critique: Clarity5 Warmth4 Restraint5 Craft5 Variety5 SlopFree5 */
 export function ResourceGuideSheet({ resource, resources, onSelectResource, onClose }: {
@@ -63,7 +65,7 @@ export function ResourceGuideSheet({ resource, resources, onSelectResource, onCl
         {resource && (
           <Box component="article" key={resource.id} className="resource-editorial">
             <Box component="header" className="resource-editorial-intro">
-              <Typography variant="labelS" color="text.secondary" className="resource-editorial-eyebrow">Seller guide · {resource.readingTime}</Typography>
+              <Eyebrow className="resource-editorial-eyebrow">Seller guide · {resource.readingTime}</Eyebrow>
               <Typography component="h1" ref={headingRef} tabIndex={-1} id={titleId} variant="displayM" sx={{ typography: { xs: 'titleL', sm: 'displayM' } }}>{resource.title}</Typography>
               <Typography variant="bodyLStandard" color="text.secondary" className="resource-editorial-deck">{resource.summary}</Typography>
             </Box>
@@ -128,7 +130,7 @@ export function ResourceGuideSheet({ resource, resources, onSelectResource, onCl
 
 function GuideContents({ resource, sectionPrefix, onGoToSection }: { resource: TransactionResource; sectionPrefix: string; onGoToSection: (index: number) => void }) {
   const [expanded, setExpanded] = useState(false)
-  const mobile = useMediaQuery('(max-width: 600px)')
+  const mobile = useMediaQuery(below('phone'))
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
   const navigationId = useId()
   return (

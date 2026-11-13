@@ -22,7 +22,7 @@ import OpenInNewOutlined from '@mui/icons-material/OpenInNewOutlined'
 import { toast } from 'sonner'
 import { PlaceModal } from '../components/PlaceModal'
 import { SegmentedSwitch } from '../components/SegmentedSwitch'
-import { PortalOutlineTag } from '../components/PortalOutlineTag'
+import { PlaceTag } from '../components/PlaceTag'
 import { brandAssets } from '../assets/brand'
 import { sampleSellerTransaction as transaction } from '../seller-portal/sellerTransaction'
 import { cleanResourceHtml, defaultDifferences, liveCount, loadTeamState, roleFromUrl, selectableResources, statusOf, teamPeople, teamStateKey, titleOf } from './teamData'
@@ -186,7 +186,7 @@ function TransactionPage({ state, setState }: { state: TeamState; setState: SetS
         <Box component="ul" className="team-resource-list">{available.filter(resource => sourceFilter === 'all' || resource.source === sourceFilter).map(resource => {
           const showing = state.visible.includes(resource.id)
           return <Box component="li" className={`team-row${showing ? '' : ' is-hidden'}`} key={resource.id}>
-            <Box className="team-row-copy"><Box className="team-row-title"><Typography variant="titleXS">{resource.published?.title}</Typography><PortalOutlineTag label={resource.source === 'Brivity' ? 'Brivity' : 'Your team'} className={`team-source-tag ${resource.source === 'Brivity' ? 'brivity' : 'team'}`} /></Box><Typography variant="bodySStandard" color="text.secondary">{resource.published?.summary}</Typography>{(attached.has(resource.id) || resource.archived) && <Box className="team-row-meta">{attached.has(resource.id) && <Typography variant="labelS" color="text.secondary">Attached to a date</Typography>}{resource.archived && <Typography variant="labelS" color="text.secondary">Archived</Typography>}</Box>}</Box>
+            <Box className="team-row-copy"><Box className="team-row-title"><Typography variant="titleXS">{resource.published?.title}</Typography><PlaceTag className={`team-source-tag ${resource.source === 'Brivity' ? 'brivity' : 'team'}`}>{resource.source === 'Brivity' ? 'Brivity' : 'Your team'}</PlaceTag></Box><Typography variant="bodySStandard" color="text.secondary">{resource.published?.summary}</Typography>{(attached.has(resource.id) || resource.archived) && <Box className="team-row-meta">{attached.has(resource.id) && <Typography variant="labelS" color="text.secondary">Attached to a date</Typography>}{resource.archived && <Typography variant="labelS" color="text.secondary">Archived</Typography>}</Box>}</Box>
             <Box className="team-row-actions"><Typography variant="labelS" color={showing ? 'text.primary' : 'text.secondary'} className="team-visibility-label">{showing ? 'Visible' : 'Hidden'}</Typography><IconButton aria-label={`Preview ${resource.published?.title}`} onClick={() => setGuide(resource.published)}><VisibilityOutlined fontSize="small" /></IconButton><Switch checked={showing} onChange={() => toggle(resource)} slotProps={{ input: { 'aria-label': `Show ${resource.published?.title} to clients` } }} color="primary" /></Box>
           </Box>
         })}</Box>
@@ -383,9 +383,4 @@ function ResourceEditor({ resource, state, updateResource }: { resource?: TeamRe
       <TextField autoFocus fullWidth label="Link address" placeholder="https://" value={url} onChange={event => setUrl(event.target.value)} helperText="Select the words you want to link before opening this dialog." />
     </PlaceModal>
   </>
-}
-
-export function TeamResourceSwitchSample() {
-  const [checked, setChecked] = useState(true)
-  return <Box className="team-app" sx={{ width: '100%' }}><Box className="team-row"><Box className="team-row-copy"><Typography variant="titleXS">Getting ready for closing day</Typography><Typography variant="bodySStandard" color="text.secondary">Provided by Brivity</Typography><Typography variant="labelS">{checked ? 'Visible to clients' : 'Hidden from clients'}</Typography></Box><Switch checked={checked} onChange={(_, value) => setChecked(value)} slotProps={{ input: { 'aria-label': 'Show closing guide to clients' } }} /></Box></Box>
 }

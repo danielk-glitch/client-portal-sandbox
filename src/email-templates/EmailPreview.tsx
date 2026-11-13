@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import EmailOutlined from '@mui/icons-material/EmailOutlined'
 import { Button, IconButton } from '@mui/material'
 import { sampleSellerTransaction } from '../seller-portal/sellerTransaction'
-import { PartnerBrandLockup } from '../transaction-portal/components/PartnerBrandLockup'
+import { PartnerBrandLockup } from '../components/PartnerBrandLockup'
 import type { EmailTemplate } from './emailTemplates'
 import './email-preview.css'
 

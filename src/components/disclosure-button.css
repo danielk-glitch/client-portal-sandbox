@@ -1,0 +1,41 @@
+/* DisclosureButton: see DisclosureButton.tsx */
+.disclosure-button.MuiButtonBase-root {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  color: var(--color-semantic-text-dark);
+  transition: background-color var(--motion-hover), scale var(--motion-press);
+}
+
+.disclosure-button .MuiTypography-root { display: inline-flex; align-items: baseline; gap: var(--space-6); }
+.disclosure-button-count { font-size: var(--type-label-xs-size); color: var(--color-semantic-text-light); font-variant-numeric: tabular-nums; }
+.disclosure-button-chevron.MuiSvgIcon-root { width: 20px; height: 20px; transition: rotate var(--motion-reveal); }
+.disclosure-button.is-open .disclosure-button-chevron.MuiSvgIcon-root { rotate: 180deg; }
+.disclosure-button.MuiButtonBase-root:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+
+/* Under a list: flush left with the rows. Same quiet text-button shape as TextLink: a pill fill on hover that reaches past the text. */
+.disclosure-button--list.MuiButtonBase-root {
+  align-self: start;
+  margin-inline: calc(var(--space-16) * -1);
+  padding: 0 var(--space-16);
+  border-radius: var(--radius-pill);
+}
+.disclosure-button--list.MuiButtonBase-root:hover { background: var(--color-semantic-surface-primary-dark); }
+.disclosure-button--list.MuiButtonBase-root:active { scale: 0.98; }
+
+/* Card footer: the card's full width, a hairline above, and the card's bottom corners. Place it as the card's last child
+   inside a PlaceCard with padding "none". */
+.disclosure-button--card-footer.MuiButtonBase-root {
+  width: 100%;
+  min-height: 56px;
+  justify-content: center;
+  border-top: 1px solid var(--color-semantic-stroke-primary-light);
+  border-radius: 0 0 var(--radius-m) var(--radius-m);
+}
+.disclosure-button--card-footer.MuiButtonBase-root:hover { background: var(--color-semantic-surface-primary-dark); }
+.disclosure-button--card-footer.MuiButtonBase-root:focus-visible { outline-offset: -2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .disclosure-button.MuiButtonBase-root, .disclosure-button-chevron.MuiSvgIcon-root { transition: none; }
+}

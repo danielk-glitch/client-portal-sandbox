@@ -7,7 +7,7 @@
   border: 1px solid var(--color-semantic-stroke-primary-light);
   border-radius: 14px;
   background: var(--color-semantic-surface-primary);
-  box-shadow: var(--elevation-raised);
+  box-shadow: var(--elevation-2);
 }
 
 .journey-view-menu-paper .MuiMenuItem-root {
@@ -20,7 +20,7 @@
 .journey-view-description.MuiTypography-root { margin-top: 4px; }
 .journey-view-check { display: grid; place-items: center; flex: 0 0 20px; color: var(--color-semantic-text-primary); }
 
-@media (max-width: 600px) {
+@media (max-width: 599.95px) {
   .journey-view-prefix { display: none; }
   .feedback-toolbar-controls .journey-view-trigger { gap: 4px; min-width: 0; }
 }

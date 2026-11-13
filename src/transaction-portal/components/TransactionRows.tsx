@@ -1,13 +1,12 @@
 import { useState, type ReactNode } from 'react'
-import { Avatar, Box, Button, ButtonBase, Chip, IconButton, Rating, Stack, Typography } from '@mui/material'
+import { Avatar, Box, Button, ButtonBase, Chip, IconButton, Stack, Typography } from '@mui/material'
 import MenuBookOutlined from '@mui/icons-material/MenuBookOutlined'
 import CampaignOutlined from '@mui/icons-material/CampaignOutlined'
 import EmailOutlined from '@mui/icons-material/EmailOutlined'
-import Favorite from '@mui/icons-material/Favorite'
-import FavoriteBorder from '@mui/icons-material/FavoriteBorder'
 import InsertDriveFileOutlined from '@mui/icons-material/InsertDriveFileOutlined'
 import PhoneOutlined from '@mui/icons-material/PhoneOutlined'
-import { PortalOutlineTag } from '../../components/PortalOutlineTag'
+import ArrowOutwardRounded from '@mui/icons-material/ArrowOutwardRounded'
+import { PlaceTag } from '../../components/PlaceTag'
 import type {
   AdvertisingEvent,
   ShowingFeedback,
@@ -17,8 +16,9 @@ import type {
   TransactionResource,
   UpcomingDate,
 } from '../types'
-import { PortalIconBadge } from './PortalIconBadge'
+import { PortalIconBadge } from '../../components/PortalIconBadge'
 import { MilestoneExplanation } from './MilestoneExplanation'
+import { InterestRating } from './FeedbackQuote'
 import './transaction-rows.css'
 
 type Person = Pick<TeamMember, 'name' | 'role' | 'initials' | 'photoUrl'>
@@ -27,10 +27,19 @@ export function TransactionRowList({ children }: { children: ReactNode }) {
   return <Box component="ul" className="portal-row-list">{children}</Box>
 }
 
-export function PersonRow({ person, variant = 'team', actions }: {
-  person: Person
+function formatPhone(phone: string) {
+  return phone.replace(/^\+1(\d{3})(\d{3})(\d{4})$/, '($1) $2-$3')
+}
+
+/**
+ * A person: photo, name, and role. With `showContact`, their phone number and email address sit under the role as links,
+ * so nobody has to open anything to find them. Pass `actions` instead for the compact call and email buttons.
+ */
+export function PersonRow({ person, variant = 'team', actions, showContact = false }: {
+  person: Person & { phone?: string; email?: string }
   variant?: 'team' | 'viewer'
   actions?: ReactNode
+  showContact?: boolean
 }) {
   return (
     <Box className={`portal-person-row portal-person-row-${variant}`}>
@@ -38,11 +47,28 @@ export function PersonRow({ person, variant = 'team', actions }: {
         {person.initials}
       </Avatar>
       <Box className="portal-person-copy">
-        <Typography variant="bodySStandard" className="portal-person-name">{person.name}</Typography>
-        <Typography variant="labelS" color="text.secondary" className="portal-person-role">{person.role}</Typography>
+        {showContact && <Typography variant="labelS" className="portal-person-role portal-person-role--above">{person.role}</Typography>}
+        <Typography variant={showContact ? 'bodyMStandard' : 'bodySStandard'} className="portal-person-name">{person.name}</Typography>
+        {!showContact && <Typography variant="labelS" color="text.secondary" className="portal-person-role">{person.role}</Typography>}
+        {showContact && (person.phone || person.email) && (
+          <Box className="portal-person-contact">
+            {person.phone && <PersonContactLink label="Phone" value={formatPhone(person.phone)} href={`tel:${person.phone}`} />}
+            {person.email && <PersonContactLink label="Email" value={person.email} href={`mailto:${person.email}`} />}
+          </Box>
+        )}
       </Box>
       {actions}
     </Box>
+  )
+}
+
+/** One contact: the label sits above the value ("Phone" over "(406) 555-0101"). The whole block is the link, so it is a large tap target on a phone. */
+function PersonContactLink({ label, value, href }: { label: string; value: string; href: string }) {
+  return (
+    <ButtonBase component="a" href={href} className="portal-person-contact-link" disableRipple>
+      <Typography component="span" variant="labelS" color="text.secondary" className="portal-person-contact-label">{label}</Typography>
+      <Typography component="span" variant="bodySStandard" className="portal-person-contact-value" data-text={value}>{value}</Typography>
+    </ButtonBase>
   )
 }
 
@@ -69,15 +95,65 @@ export function DateEventList({ children }: { children: ReactNode }) {
   return <Box component="ol" className="portal-date-list">{children}</Box>
 }
 
-/** The round month/day bubble shared by the client portal and the team workspace. `date` is an ISO day (YYYY-MM-DD). */
-export function DateStamp({ date, className }: { date: string; className?: string }) {
+/**
+ * The round month/day bubble shared by the client portal and the team workspace. `date` is an ISO day (YYYY-MM-DD).
+ * Without a date, pass `icon` to show the same bubble holding an icon (documents, resources).
+ */
+export function DateStamp({ date, icon, tbd = false, className }: { date?: string; icon?: ReactNode; /** No date yet: the same circle reads "TBD". */ tbd?: boolean; className?: string }) {
+  if (tbd) {
+    return (
+      <Box component="span" className={['portal-date-stamp portal-date-stamp--tbd', className].filter(Boolean).join(' ')}>
+        <Typography variant="labelS" component="span">TBD</Typography>
+      </Box>
+    )
+  }
+  const classes = ['portal-date-stamp', date ? '' : 'portal-date-stamp--icon', className].filter(Boolean).join(' ')
+  if (!date) {
+    return (
+      <Box component="span" className={classes}>
+        <Box component="span" className="portal-date-stamp-icon" aria-hidden="true">{icon}</Box>
+      </Box>
+    )
+  }
   const value = new Date(`${date}T12:00:00Z`)
   const month = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' }).format(value)
   const day = new Intl.DateTimeFormat('en-US', { day: '2-digit', timeZone: 'UTC' }).format(value)
   return (
-    <Box component="time" dateTime={date} className={['portal-date-stamp', className].filter(Boolean).join(' ')}>
-      <Typography variant="labelS">{month}</Typography>
-      <Typography variant="metricM">{day}</Typography>
+    <Box component="time" dateTime={date} className={classes}>
+      <Typography variant="labelS" component="span">{month}</Typography>
+      <Typography variant="metricM" component="span">{day}</Typography>
+    </Box>
+  )
+}
+
+/** A date as text ("Oct 14"), for lists where a round stamp would be too heavy. */
+function PlainDate({ date }: { date: string }) {
+  const label = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T12:00:00Z`))
+  return <Typography component="time" dateTime={date} variant="titleXS" className="portal-date-text">{label}</Typography>
+}
+
+/** Title, summary, and an optional meta line: the text column of date rows and timeline rows. */
+export function DateRowCopy({ title, titleAdornment, eyebrow, description, meta, className, metaClassName }: {
+  title: ReactNode
+  /** Sits beside the title, such as a "Next step" tag. */
+  titleAdornment?: ReactNode
+  /** A small label above the title, such as "Up next". */
+  eyebrow?: ReactNode
+  /** Optional: rows with only a date and a title leave it out. */
+  description?: ReactNode
+  meta?: ReactNode
+  className?: string
+  metaClassName?: string
+}) {
+  return (
+    <Box component="span" className={['portal-date-copy', className].filter(Boolean).join(' ')}>
+      {eyebrow}
+      <Box component="span" className="portal-date-title">
+        <Typography variant="titleXS" component="span">{title}</Typography>
+        {titleAdornment}
+      </Box>
+      {description && <Typography variant="bodySStandard" color="text.secondary" component="span">{description}</Typography>}
+      {meta && <Typography variant="labelS" color="text.secondary" component="span" className={['portal-date-meta', metaClassName].filter(Boolean).join(' ')}>{meta}</Typography>}
     </Box>
   )
 }
@@ -89,8 +165,21 @@ export function DateStamp({ date, className }: { date: string; className?: strin
  * - two or more: a "<n> resources" chip opens the date's explanation dialog, which lists every resource.
  * The row itself opens the explanation whenever there is guidance or more than one resource.
  */
-export function DateEventRow({ date, title, description, children, guidance, resources = [], onReadResource, onEdit, notes, trailing }: Pick<UpcomingDate, 'date' | 'title' | 'description' | 'guidance'> & {
+export function DateEventRow({ date, title, description, children, guidance, resources = [], onReadResource, onEdit, notes, trailing, today, featured = false, plainDate = false, past = false, titleAdornment, eyebrow }: Pick<UpcomingDate, 'date' | 'title' | 'guidance'> & {
+  description?: string
+  /** Highlights the row, such as the next date coming up. Styling is up to the page. */
+  featured?: boolean
+  /** Show the date as plain text ("Oct 14") instead of the round stamp. */
+  plainDate?: boolean
+  /** A date that has already gone by: the date and title are struck through. */
+  past?: boolean
+  /** Sits beside the title, such as how far away the date is. */
+  titleAdornment?: ReactNode
+  /** A small label above the title. */
+  eyebrow?: ReactNode
   children?: ReactNode
+  /** ISO date treated as today. Dates before it don't offer Add to calendar. Without it, every date does. */
+  today?: string
   resources?: TransactionResource[]
   onReadResource?: (resource: TransactionResource) => void
   /** Team mode: clicking the row edits the date instead of opening the client explanation. */
@@ -107,23 +196,46 @@ export function DateEventRow({ date, title, description, children, guidance, res
   const hasExplanation = !!guidance || multiple
   const rowIsButton = !!onEdit || hasExplanation
   const content = <>
-    <DateStamp date={date} />
-    <Box component="span" className="portal-date-copy">
-      <Typography variant="titleXS">{title}</Typography>
-      <Typography variant="bodySStandard" color="text.secondary">{description}</Typography>
-      {children && <Typography variant="labelS" color="text.secondary" className="portal-date-meta">{children}</Typography>}
-    </Box>
+    {plainDate ? <PlainDate date={date} /> : <DateStamp date={date} />}
+    <DateRowCopy title={title} titleAdornment={titleAdornment} eyebrow={eyebrow} description={description} meta={children} />
   </>
 
   return (
-    <Box component="li" className={['portal-date-row', readable.length ? 'portal-date-row--resource' : '', trailing ? 'portal-date-row--trailing' : '', notes ? 'portal-date-row--notes' : ''].filter(Boolean).join(' ')}>
+    <Box component="li" className={['portal-date-row', featured ? 'portal-date-row--featured' : '', past ? 'portal-date-row--past' : '', readable.length ? 'portal-date-row--resource' : '', trailing ? 'portal-date-row--trailing' : '', notes ? 'portal-date-row--notes' : ''].filter(Boolean).join(' ')}>
       {rowIsButton ? <ButtonBase className="portal-date-row-main" onClick={() => onEdit ? onEdit() : setExplanationOpen(true)} aria-haspopup="dialog" aria-label={onEdit ? `Edit ${title}` : `About ${title}`} disableRipple>{content}</ButtonBase> : content}
-      {single && <Chip component="button" type="button" variant="outlined" icon={<MenuBookOutlined />} label={`Resource: ${single.shortTitle ?? single.title}`} title={single.title} aria-label={`Read ${single.title}`} onClick={() => onReadResource!(single)} className="portal-date-resource" />}
-      {multiple && <Chip component="button" type="button" variant="outlined" icon={<MenuBookOutlined />} label={`${readable.length} resources`} title={readable.map(resource => resource.title).join(', ')} aria-label={`See ${readable.length} resources for ${title}`} aria-haspopup="dialog" onClick={() => setExplanationOpen(true)} className="portal-date-resource" />}
+      {single && <ResourceChip resources={[single]} onClick={() => onReadResource!(single)} />}
+      {multiple && <ResourceChip resources={readable} subject={title} onClick={() => setExplanationOpen(true)} />}
       {trailing && <Box className="portal-date-trailing">{trailing}</Box>}
       {notes && <Box className="portal-date-notes">{notes}</Box>}
-      {hasExplanation && <MilestoneExplanation title={title} guidance={guidance} resources={readable} open={explanationOpen} onClose={() => setExplanationOpen(false)} onReadResource={onReadResource} />}
+      {hasExplanation && <MilestoneExplanation title={title} date={today && date < today ? undefined : date} guidance={guidance} resources={readable} open={explanationOpen} onClose={() => setExplanationOpen(false)} onReadResource={onReadResource} />}
     </Box>
+  )
+}
+
+/**
+ * The outlined chip on the right of a date or timeline row.
+ * One resource reads "Resource: <short title>" and opens it. Several read "<n> resources" and open a list of them.
+ */
+export function ResourceChip({ resources, subject, onClick }: {
+  resources: TransactionResource[]
+  /** What the resources belong to, used in the accessible name when there are several. */
+  subject?: string
+  onClick: () => void
+}) {
+  const single = resources.length === 1 ? resources[0] : undefined
+  return (
+    <Chip
+      component="button"
+      type="button"
+      variant="outlined"
+      icon={<MenuBookOutlined />}
+      label={single ? `Resource: ${single.shortTitle ?? single.title}` : `${resources.length} resources`}
+      title={single ? single.title : resources.map(resource => resource.title).join(', ')}
+      aria-label={single ? `Read ${single.title}` : `See ${resources.length} resources${subject ? ` for ${subject}` : ''}`}
+      aria-haspopup={single ? undefined : 'dialog'}
+      onClick={onClick}
+      className="portal-date-resource"
+    />
   )
 }
 
@@ -132,7 +244,7 @@ export function TaskRow({ task }: { task: TransactionTask }) {
     <Box component="li" className="portal-task-row">
       <Box className="portal-task-heading">
         <Typography variant="titleXS">{task.name}</Typography>
-        <PortalOutlineTag label={`Due ${task.dueDate}`} className="portal-task-due" />
+        <PlaceTag className="portal-task-due">{`Due ${task.dueDate}`}</PlaceTag>
       </Box>
       <Typography variant="bodySStandard" color="text.secondary" className="portal-task-description">{task.description}</Typography>
       <Typography variant="labelS" color="text.secondary" className="portal-task-assignee">Assigned to {task.assignee}</Typography>
@@ -140,18 +252,32 @@ export function TaskRow({ task }: { task: TransactionTask }) {
   )
 }
 
+/**
+ * One advertising update. With a `url`, the whole row is a link that opens in a new tab,
+ * and an up-and-right arrow fades in at the end of the row on hover or keyboard focus.
+ */
 export function AdvertisingRow({ event, compact = false }: { event: AdvertisingEvent; compact?: boolean }) {
   const [month, day, year] = event.occurredAt.split(' · ')[0].split('/')
   const shortDate = `${month}/${day}/${year.slice(-2)}`
+  const content = (
+    <>
+      <Stack direction={compact ? 'column' : { xs: 'column', sm: 'row' }} sx={{ flex: 1, minWidth: 0, alignItems: compact ? 'flex-start' : { sm: 'center' }, gap: compact ? 0.75 : { xs: 1, sm: 2 } }}>
+        {!compact && <PortalIconBadge><CampaignOutlined /></PortalIconBadge>}
+        <Box className="portal-advertising-copy">
+          <Typography variant="bodySStandard">{event.action} on <strong>{event.platform}</strong></Typography>
+          <Typography variant="labelS" className="portal-advertising-meta">Added by {event.postedBy}{compact && ` · ${shortDate}`}</Typography>
+        </Box>
+        {!compact && <Typography variant="labelS" color="text.secondary" className="portal-advertising-date">{event.occurredAt}</Typography>}
+      </Stack>
+      {event.url && <Box component="span" className="portal-advertising-go" aria-hidden="true"><ArrowOutwardRounded /></Box>}
+    </>
+  )
   return (
-    <Stack component="li" direction={compact ? 'column' : { xs: 'column', sm: 'row' }} sx={{ alignItems: compact ? 'flex-start' : { sm: 'center' }, gap: compact ? 0.75 : { xs: 1, sm: 2 } }} className="portal-advertising-row">
-      {!compact && <PortalIconBadge><CampaignOutlined /></PortalIconBadge>}
-      <Box className="portal-advertising-copy">
-        <Typography variant="bodySStandard">{event.action} on <strong>{event.platform}</strong></Typography>
-        <Typography variant="labelS" className="portal-advertising-meta">Added by {event.postedBy}{compact && ` · ${shortDate}`}</Typography>
-      </Box>
-      {!compact && <Typography variant="labelS" color="text.secondary" className="portal-advertising-date">{event.occurredAt}</Typography>}
-    </Stack>
+    <Box component="li" className={['portal-advertising-row', event.url ? 'portal-advertising-row--link' : ''].filter(Boolean).join(' ')}>
+      {event.url
+        ? <ButtonBase component="a" href={event.url} target="_blank" rel="noreferrer" className="portal-advertising-main" aria-label={`${event.action} on ${event.platform}, opens in a new tab`} disableRipple>{content}</ButtonBase>
+        : <Box className="portal-advertising-main">{content}</Box>}
+    </Box>
   )
 }
 
@@ -165,7 +291,7 @@ export function ShowingFeedbackRow({ feedback }: { feedback: ShowingFeedback }) 
           <Typography variant="bodySStandard" color="text.secondary">{feedback.showingType}</Typography>
         </Stack>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }} className="portal-feedback-interest">
-          <Rating value={feedback.interest} max={5} readOnly size="small" icon={<Favorite fontSize="inherit" />} emptyIcon={<FavoriteBorder fontSize="inherit" />} aria-label={`Interest ${feedback.interest} out of 5`} />
+          <InterestRating value={feedback.interest} />
         </Stack>
       </Stack>
       <Typography variant="bodySStandard" className="portal-feedback-quote">“{feedback.feedback}”</Typography>
@@ -182,25 +308,8 @@ export function DocumentRow({ document, onPreview }: { document: TransactionDocu
         <Typography variant="bodySStandard" color="text.secondary">Uploaded {document.uploadedAt}</Typography>
         <Typography variant="labelS" className="portal-document-attribution">Added by {document.postedBy}</Typography>
       </Box>
-      <Chip label={document.status} size="small" variant="outlined" className="portal-document-status" />
+      <PlaceTag className="portal-document-status">{document.status}</PlaceTag>
       <Button variant="outlined" onClick={() => onPreview(document)} className="portal-document-action">Preview</Button>
     </Stack>
-  )
-}
-
-export function DetailItem({ label, value }: { label: string; value: string }) {
-  return (
-    <Box className="portal-detail-item">
-      <Typography variant="labelS" color="text.secondary">{label}</Typography>
-      <Typography variant="bodySStandard" className="portal-detail-value">{value}</Typography>
-    </Box>
-  )
-}
-
-export function DetailGrid({ rows }: { rows: Array<{ label: string; value: string }> }) {
-  return (
-    <Box className="portal-detail-grid">
-      {rows.map((row) => <DetailItem key={row.label} label={row.label} value={row.value} />)}
-    </Box>
   )
 }

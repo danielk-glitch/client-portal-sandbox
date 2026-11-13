@@ -1,0 +1,7 @@
+/* FilterPills: see FilterPills.tsx */
+.filter-pills { display: flex; flex-wrap: wrap; gap: var(--space-8); }
+
+@media (max-width: 599.95px) {
+  .filter-pills { flex-wrap: nowrap; overflow-x: auto; margin-inline: calc(var(--page-gutter) * -1); padding-inline: var(--page-gutter); scrollbar-width: none; }
+  .filter-pill.MuiButton-root { flex: none; }
+}

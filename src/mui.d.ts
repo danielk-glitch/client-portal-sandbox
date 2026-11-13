@@ -20,6 +20,7 @@ declare module '@mui/material/styles' {
     bodySCompact: TypographyToken
     labelM: TypographyToken
     labelS: TypographyToken
+    labelXS: TypographyToken
     metricL: TypographyToken
     metricM: TypographyToken
     metricS: TypographyToken
@@ -40,6 +41,7 @@ declare module '@mui/material/styles' {
     bodySCompact?: TypographyToken
     labelM?: TypographyToken
     labelS?: TypographyToken
+    labelXS?: TypographyToken
     metricL?: TypographyToken
     metricM?: TypographyToken
     metricS?: TypographyToken
@@ -62,6 +64,7 @@ declare module '@mui/material/Typography' {
     bodySCompact: true
     labelM: true
     labelS: true
+    labelXS: true
     metricL: true
     metricM: true
     metricS: true

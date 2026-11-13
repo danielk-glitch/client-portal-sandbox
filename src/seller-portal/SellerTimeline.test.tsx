@@ -1,6 +1,5 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { ThemeProvider } from '@mui/material/styles'
-import { act } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { theme } from '../theme'
 import { SellerTimeline } from './SellerTimeline'
@@ -19,24 +18,42 @@ function renderTimeline(layout: 'tracker' | 'stacked', handlers = { onOpenResour
 describe('SellerTimeline', () => {
   it('opens on the current milestone and marks the next step', () => {
     renderTimeline('tracker')
-    expect(screen.getByRole('tab', { name: /Under contract/ })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: /Pending/ })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByRole('button', { name: /Review and sign Form 17\. Document, next step/ })).toBeInTheDocument()
   })
 
-  it('opens an item in a modal with its primary action', () => {
-    const handlers = renderTimeline('tracker')
+  it.each(['tracker', 'stacked'] as const)('opens document rows directly without a detail modal in the %s layout', (layout) => {
+    const handlers = renderTimeline(layout)
     fireEvent.click(screen.getByRole('button', { name: /Review and sign Form 17/ }))
-    const dialog = screen.getByRole('dialog', { name: 'Review and sign Form 17' })
-    expect(within(dialog).getByText('Document')).toBeInTheDocument()
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Review document' }))
     expect(handlers.onOpenDocument).toHaveBeenCalledWith(expect.objectContaining({ id: 'doc-2' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('keeps resource links on the right and lists standalone guides as items', () => {
+  it('opens a date with its timing and what happens next', () => {
+    renderTimeline('tracker')
+    fireEvent.click(screen.getByRole('button', { name: /^Appraisal\. Date/ }))
+    const dialog = screen.getByRole('dialog', { name: 'Appraisal' })
+    expect(within(dialog).getByText(/In 8 days/)).toBeInTheDocument()
+    expect(within(dialog).getByText('What happens next')).toBeInTheDocument()
+  })
+
+  it('splits dates from documents', () => {
+    renderTimeline('tracker')
+    const main = screen.getByRole('region', { name: 'Dates' })
+    const docs = screen.getByRole('complementary', { name: 'Pending documents' })
+    expect(within(main).getByRole('button', { name: /^Appraisal\. Date/ })).toBeInTheDocument()
+    expect(within(docs).getByRole('button', { name: /Review and sign Form 17/ })).toBeInTheDocument()
+    expect(within(main).queryByRole('button', { name: /Review and sign Form 17/ })).not.toBeInTheDocument()
+  })
+
+  it('offers add to calendar on dated rows and lists standalone guides as documents', () => {
     const handlers = renderTimeline('tracker')
-    fireEvent.click(screen.getByRole('button', { name: 'Read What to expect from the appraisal' }))
-    expect(handlers.onOpenResource).toHaveBeenCalledWith(expect.objectContaining({ id: 'appraisal' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Read What “under contract” means' }))
+    // Resource chips no longer sit on rows; dated rows get one add-to-calendar button instead.
+    expect(screen.queryByRole('button', { name: 'Read What to expect from the appraisal' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Add Appraisal to your calendar' }))
+    expect(screen.getByRole('menuitem', { name: 'Google Calendar' })).toBeInTheDocument()
+    fireEvent.keyDown(screen.getByRole('menu'), { key: 'Escape' })
+    fireEvent.click(screen.getByRole('button', { name: 'Read What “pending” means' }))
     expect(handlers.onOpenResource).toHaveBeenCalledWith(expect.objectContaining({ id: 'contingencies' }))
   })
 
@@ -44,16 +61,16 @@ describe('SellerTimeline', () => {
     renderTimeline('tracker')
     fireEvent.click(screen.getByRole('tab', { name: /Closing/ }))
     const panel = screen.getByRole('tabpanel')
-    expect(within(panel).getByText(/Opens after under contract/)).toBeInTheDocument()
+    expect(within(panel).getByText(/Opens after pending/)).toBeInTheDocument()
     fireEvent.click(within(panel).getByRole('button', { name: /^Review your closing statement/ }))
     const dialog = screen.getByRole('dialog', { name: 'Review your closing statement' })
-    expect(within(dialog).getByText(/Closing statement will be shared in closing/)).toBeInTheDocument()
+    expect(within(dialog).getByText('Shared in closing')).toBeInTheDocument()
     expect(within(dialog).queryByRole('button', { name: 'Review document' })).not.toBeInTheDocument()
   })
 
   it('collapses the Done group until it is opened', () => {
     renderTimeline('tracker')
-    const toggle = screen.getByRole('button', { name: /Done/ })
+    const toggle = screen.getByRole('button', { name: /^(Show|Hide) done/ })
     expect(toggle).toHaveAttribute('aria-expanded', 'false')
     expect(screen.queryByRole('button', { name: /^Purchase agreement signed/ })).not.toBeInTheDocument()
     fireEvent.click(toggle)
@@ -61,23 +78,10 @@ describe('SellerTimeline', () => {
     expect(screen.getByRole('button', { name: /^Purchase agreement signed/ })).toBeInTheDocument()
   })
 
-  it('lets sellers check off an action, which then moves to Done', () => {
-    vi.useFakeTimers()
-    renderTimeline('tracker')
-    const check = screen.getByRole('checkbox', { name: /Confirm appraisal access: mark as done/ })
-    expect(check).toHaveAttribute('aria-checked', 'false')
-    fireEvent.click(check)
-    expect(check).toHaveAttribute('aria-checked', 'true')
-    act(() => { vi.advanceTimersByTime(700) })
-    expect(screen.getByRole('tab', { name: /Under contract/ })).toHaveTextContent('3 of 7 done')
-    expect(screen.getByRole('button', { name: /Done/ })).toHaveTextContent('3')
-    vi.useRealTimers()
-  })
-
   it('shows documents with their file icon instead of a date', () => {
     const { container } = render(<ThemeProvider theme={theme}><SellerTimeline layout="tracker" data={underContractTimeline} resources={timelineResources} documents={sampleSellerTransaction.documents} team={sampleSellerTransaction.team} onOpenResource={vi.fn()} onOpenDocument={vi.fn()} /></ThemeProvider>)
-    const documentRow = container.querySelector('.timeline-item--document')!
-    expect(documentRow.querySelector('.timeline-stamp--icon')).not.toBeNull()
+    const documentRow = container.querySelector('.document-list-row')!
+    expect(documentRow.querySelector('.document-list-row-icon svg')).not.toBeNull()
     expect(documentRow.textContent).not.toMatch(/OCT/i)
   })
 
@@ -96,13 +100,13 @@ describe('SellerTimeline', () => {
 
   it('moves between milestones with arrow keys', () => {
     renderTimeline('tracker')
-    fireEvent.keyDown(screen.getByRole('tab', { name: /Under contract/ }), { key: 'ArrowLeft' })
+    fireEvent.keyDown(screen.getByRole('tab', { name: /Pending/ }), { key: 'ArrowLeft' })
     expect(screen.getByRole('tab', { name: /Active listing/ })).toHaveAttribute('aria-selected', 'true')
   })
 
   it('stacks milestones along a vertical rail on small screens', () => {
     renderTimeline('stacked')
-    expect(screen.getByRole('button', { name: /^Under contract/ })).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('button', { name: /^Pending/ })).toHaveAttribute('aria-expanded', 'true')
     const closing = screen.getByRole('button', { name: /^Closing/ })
     fireEvent.click(closing)
     expect(closing).toHaveAttribute('aria-expanded', 'true')

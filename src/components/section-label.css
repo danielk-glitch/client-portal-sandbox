@@ -1,0 +1,28 @@
+/* SectionLabel: see SectionLabel.tsx */
+.section-label {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+}
+
+.section-label-text.MuiTypography-root {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-8);
+  margin: 0;
+  color: var(--color-semantic-text-primary);
+  letter-spacing: var(--tracking-uppercase);
+  text-transform: uppercase;
+}
+
+/* Count: one step smaller, muted, no tracking, sharing the label's baseline. */
+.section-label-count {
+  font-size: var(--type-label-xs-size);
+  letter-spacing: 0;
+  color: var(--color-semantic-text-light);
+  font-variant-numeric: tabular-nums;
+}
+
+.section-label-action { flex: 0 0 auto; }

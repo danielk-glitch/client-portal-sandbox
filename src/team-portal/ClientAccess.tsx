@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Box, Button, Paper, Stack, Tab, Tabs, TextField, Typography } from '@mui/material'
+import { Box, Button, Stack, Tab, Tabs, TextField, Typography } from '@mui/material'
+import { PlaceCard } from '../components/PlaceCard'
 import AddOutlined from '@mui/icons-material/AddOutlined'
 import { toast } from 'sonner'
 import { PlaceModal } from '../components/PlaceModal'
@@ -72,7 +73,7 @@ export function ClientAccess({ state, setState }: { state: TeamState; setState: 
   }
 
   const initials = (name: string) => name.split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase()
-  return <Paper component="section" elevation={0} className="people-section team-portal-access" aria-labelledby="portal-access-heading">
+  return <PlaceCard component="section" className="people-section team-portal-access" aria-labelledby="portal-access-heading">
     <Box className="team-portal-access-header">
       <Typography component="h2" variant="titleS" id="portal-access-heading">Portal access</Typography>
       {isAdmin && <Button size="small" variant="contained" startIcon={<AddOutlined />} onClick={() => open(null)} aria-label="Invite a client">Invite</Button>}
@@ -111,5 +112,5 @@ export function ClientAccess({ state, setState }: { state: TeamState; setState: 
     <PlaceModal open={!!removing} onClose={() => setRemoving(null)} title={removing ? `Remove ${removing.name}’s portal access?` : ''} description="This takes effect right away." actions={<><Button onClick={() => setRemoving(null)}>Cancel</Button><Button variant="contained" color="error" onClick={remove}>Remove access</Button></>}>
       <Typography variant="bodyMStandard">{removing && `${firstName(removing.name)} won’t be able to open the portal for this transaction. Nothing is sent to them. You can invite them again later.`}</Typography>
     </PlaceModal>
-  </Paper>
+  </PlaceCard>
 }

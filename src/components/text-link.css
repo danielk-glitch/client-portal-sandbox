@@ -1,0 +1,30 @@
+/* TextLink: see TextLink.tsx. A quiet text button: no fill or outline at rest, a soft pill fill on hover.
+   The fill reaches past the text (negative inline margin), so the label stays aligned with the content edge. 44px tall. */
+.text-link.MuiButtonBase-root {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  margin: calc(var(--space-12) * -1) calc(var(--space-16) * -1);
+  padding: 0 var(--space-16);
+  border-radius: var(--radius-pill);
+  color: var(--color-semantic-text-dark);
+  text-decoration: none;
+  transition: background-color var(--motion-hover), scale var(--motion-press);
+}
+
+.text-link-icon.MuiSvgIcon-root { width: 18px; height: 18px; transition: translate var(--motion-hover); }
+
+.text-link.MuiButtonBase-root:hover { background: var(--color-semantic-surface-primary-dark); }
+.text-link--forward.MuiButtonBase-root:hover .text-link-icon { translate: 2px 0; }
+.text-link--back.MuiButtonBase-root:hover .text-link-icon { translate: -2px 0; }
+.text-link.MuiButtonBase-root:active { scale: 0.98; }
+.text-link.MuiButtonBase-root:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+
+.text-link--on-dark.MuiButtonBase-root { color: var(--color-primitive-base-white); }
+.text-link--on-dark.MuiButtonBase-root:hover { background: color-mix(in oklch, var(--color-primitive-base-white) 12%, transparent); }
+.text-link--on-dark.MuiButtonBase-root:focus-visible { outline-color: currentColor; }
+
+@media (prefers-reduced-motion: reduce) {
+  .text-link.MuiButtonBase-root, .text-link-icon.MuiSvgIcon-root { transition: none; }
+}

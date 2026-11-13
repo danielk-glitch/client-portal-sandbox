@@ -1,15 +1,17 @@
 import type { SellerTransaction } from '../../seller-portal/sellerTransaction'
 import type { TransactionResource } from '../../transaction-portal/types'
 
-export type SellerJourneyView = 'before-listing' | 'under-contract'
+export type SellerJourneyView = 'before-listing' | 'listed' | 'under-contract'
 
 export const sellerJourneyViews: Array<{ id: SellerJourneyView; label: string; description: string }> = [
   { id: 'before-listing', label: 'Before listing', description: 'Preparing the home and planning the launch.' },
-  { id: 'under-contract', label: 'Under contract', description: 'An offer is accepted. Working toward closing.' },
+  { id: 'listed', label: 'Listed', description: 'Live on the market. Showings, marketing, and nearby activity.' },
+  { id: 'under-contract', label: 'Pending', description: 'An offer is accepted. Working toward closing.' },
 ]
 
 export function readSellerJourneyView(search: string): SellerJourneyView {
-  return new URLSearchParams(search).get('view') === 'before-listing' ? 'before-listing' : 'under-contract'
+  const view = new URLSearchParams(search).get('view')
+  return view === 'before-listing' || view === 'listed' ? view : 'under-contract'
 }
 
 const preparationGuide: TransactionResource = {
@@ -66,12 +68,12 @@ export function createBeforeListingTransaction(source: SellerTransaction): Selle
     advertising: [],
     feedback: [],
     notes: [
-      { id: 'prep-note-launch', title: 'Your listing launch plan', body: 'We’re aiming to launch on September 1. Photography is scheduled for August 26, then we’ll review the photos and listing details together. We’ll confirm the final launch date once everything is ready.', author: agent?.name ?? source.teamBrand.name, authorPhotoUrl: agent?.photoUrl, createdAt: '08/24/2026 · 04:45 PM' },
-      { id: 'prep-note-photos', title: 'Getting ready for photography', body: 'Please clear counters and put away personal items before the photographer arrives. Let us know about pets or any special access instructions so we can plan the visit.', author: coordinator?.name ?? source.teamBrand.name, authorPhotoUrl: coordinator?.photoUrl, createdAt: '08/24/2026 · 11:30 AM' },
+      { id: 'prep-note-launch', body: 'We’re aiming to launch on September 1. Photography is scheduled for August 26, then we’ll review the photos and listing details together. We’ll confirm the final launch date once everything is ready.', author: agent?.name ?? source.teamBrand.name, authorPhotoUrl: agent?.photoUrl, createdAt: '08/24/2026 · 04:45 PM' },
+      { id: 'prep-note-photos', body: 'Please clear counters and put away personal items before the photographer arrives. Let us know about pets or any special access instructions so we can plan the visit.', author: coordinator?.name ?? source.teamBrand.name, authorPhotoUrl: coordinator?.photoUrl, createdAt: '08/24/2026 · 11:30 AM' },
     ],
     documents: [
-      { id: 'prep-doc-agreement', name: 'Exclusive listing agreement', category: 'Listing paperwork', uploadedAt: '08/20/2026', postedBy: agent?.name ?? source.teamBrand.name, status: 'Signed', summary: 'The signed agreement covering your listing terms and marketing plan.' },
-      { id: 'prep-doc-disclosures', name: 'Property disclosures', category: 'Property information', uploadedAt: '08/22/2026', postedBy: agent?.name ?? source.teamBrand.name, status: 'Signature requested', summary: 'Disclosure forms for you to review and complete before launch.' },
+      { id: 'prep-doc-agreement', fileUrl: '/documents/doc-1.pdf', name: 'Exclusive listing agreement', category: 'Listing paperwork', uploadedAt: '08/20/2026', postedBy: agent?.name ?? source.teamBrand.name, status: 'Signed', summary: 'The signed agreement covering your listing terms and marketing plan.' },
+      { id: 'prep-doc-disclosures', fileUrl: '/documents/doc-2.pdf', name: 'Property disclosures', category: 'Property information', uploadedAt: '08/22/2026', postedBy: agent?.name ?? source.teamBrand.name, status: 'Signature requested', summary: 'Disclosure forms for you to review and complete before launch.' },
       { id: 'prep-doc-plan', name: 'Listing launch plan', category: 'Marketing', uploadedAt: '08/24/2026', postedBy: coordinator?.name ?? source.teamBrand.name, status: 'Ready to view', summary: 'Your proposed launch date, photography appointment, and planned marketing activities.' },
     ],
     details: {
@@ -85,5 +87,37 @@ export function createBeforeListingTransaction(source: SellerTransaction): Selle
       ],
     },
     resources: source.resources ? [preparationGuide, ...source.resources.filter((resource) => resource.id === 'disclosures')] : undefined,
+  }
+}
+
+/**
+ * Listed: the home is live (since Sep 1) and no offer is accepted yet. "Today" stays Oct 6, matching the market activity mock.
+ * Keeps the transaction's marketing history, showings, and feedback; swaps contract dates and tasks for listed-stage ones.
+ */
+export function createListedTransaction(source: SellerTransaction): SellerTransaction {
+  const agent = source.team.find((member) => member.id === source.teamBrand.leadAgentId)
+  const seller = source.viewers[0]
+  return {
+    ...source,
+    listing: { ...source.listing, status: 'Active', daysOnMarket: 35, lastUpdated: '10/03/2026' },
+    upcomingDates: [
+      { id: 'listed-price-review', date: '2026-10-08', title: 'Pricing check-in', description: 'Avery will walk through showing feedback and nearby market activity with you.' },
+      { id: 'listed-open-house', date: '2026-10-11', title: 'Open house', description: '12:00 to 3:00 PM. Plan to be away from the home during these hours.' },
+      { id: 'listed-marketing', date: '2026-10-15', title: 'Marketing update', description: 'Your team will share listing views, saves, and the next round of promotion.' },
+    ],
+    tasks: [
+      { id: 'listed-task-open-house', name: 'Prepare for the open house', description: 'Tidy the main rooms, secure valuables, and arrange care for pets.', assignee: seller?.name ?? 'Seller', dueDate: '10/11/2026' },
+      { id: 'listed-task-feedback', name: 'Review showing feedback', description: 'Read recent buyer comments before your pricing check-in.', assignee: seller?.name ?? 'Seller', dueDate: '10/08/2026' },
+      { id: 'listed-task-comps', name: 'Share pricing recommendation', description: 'Summarize nearby activity and feedback for the check-in.', assignee: agent?.name ?? source.teamBrand.name, dueDate: '10/07/2026' },
+    ],
+    notes: source.notes.filter((note) => note.id === 'note-1'),
+    details: {
+      ...source.details,
+      dateListed: '09/01/2026',
+      customDates: [
+        { label: 'Listing published', value: '09/01/2026 · 08:55 AM' },
+        { label: 'Open house', value: '10/11/2026 · 12:00 PM' },
+      ],
+    },
   }
 }

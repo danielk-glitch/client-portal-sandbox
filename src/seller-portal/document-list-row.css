@@ -1,0 +1,82 @@
+/* Document list row: see DocumentListRow.tsx. Follows the shared list-row spec (DESIGN.md › List rows). */
+
+.document-list-row,
+.document-list-row.MuiButtonBase-root {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  justify-content: stretch;
+  align-items: center;
+  gap: var(--space-16);
+  padding: var(--padding-row-block) 0;
+  color: var(--color-semantic-text-dark);
+  text-align: left;
+  text-decoration: none;
+}
+
+/* Hover fill: divider to divider, reaching past the column edge like a date row's. */
+.document-list-row.MuiButtonBase-root::after {
+  position: absolute;
+  inset: 0 calc(var(--row-hover-bleed) * -1);
+  z-index: -1;
+  content: '';
+  border-radius: var(--radius-s);
+  background: transparent;
+  transition: background-color var(--motion-hover);
+}
+
+/* Icon badge: round, soft fill. The same badge as activity rows. */
+.document-list-row-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-circle);
+  color: var(--color-semantic-text-primary);
+  background: var(--color-semantic-surface-secondary);
+}
+.document-list-row-icon svg { width: 22px; height: 22px; }
+
+.document-list-row-copy { min-width: 0; display: grid; gap: var(--space-2); }
+.document-list-row-title { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4) var(--space-8); }
+.document-list-row-meta.MuiTypography-root { color: var(--color-semantic-text-light); }
+.document-list-row-meta--truncate.MuiTypography-root { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Tag sits 12px from the chevron. */
+.document-list-row-end { display: inline-flex; align-items: center; gap: var(--space-12); }
+.document-list-row-go { width: 20px; height: 20px; color: var(--color-semantic-text-light); transition: translate var(--motion-hover), color var(--motion-hover); }
+
+/* States */
+.document-list-row.MuiButtonBase-root:hover::after { background: var(--color-semantic-surface-primary-dark); }
+.document-list-row.MuiButtonBase-root:hover .document-list-row-go { translate: 2px 0; color: var(--color-semantic-text-dark); }
+.document-list-row.MuiButtonBase-root:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); border-radius: var(--radius-s); }
+.document-list-row.is-done .document-list-row-title .MuiTypography-root,
+.document-list-row.is-locked .document-list-row-title .MuiTypography-root { color: var(--color-semantic-text-primary); }
+.document-list-row.is-locked .document-list-row-icon { color: var(--color-semantic-text-light); }
+
+/* First and last rows sit flush with the list's edges; their hover fill still reaches a little past. */
+.document-list-row-item:first-child > .document-list-row { padding-top: 0; }
+.document-list-row-item:last-child > .document-list-row { padding-bottom: 0; }
+.document-list-row-item:first-child > .document-list-row.MuiButtonBase-root::after { top: calc(var(--row-hover-bleed) * -1); }
+.document-list-row-item:last-child > .document-list-row.MuiButtonBase-root::after { bottom: calc(var(--row-hover-bleed) * -1); }
+
+/* List: hairlines between rows only, never boxing the list. */
+.document-list-row-item { list-style: none; }
+ul:has(> .document-list-row-item) { margin: 0; padding: 0; }
+.document-list-row-item + .document-list-row-item { border-top: 1px solid var(--color-semantic-stroke-primary-light); }
+
+@media (max-width: 599.95px) {
+  .document-list-row,
+  .document-list-row.MuiButtonBase-root { gap: var(--space-12); }
+  .document-list-row-end { gap: var(--space-8); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .document-list-row.MuiButtonBase-root::after, .document-list-row-go { transition: none; }
+}
+
+/* Pinned: a small pin after the title */
+.document-list-row-pin.MuiSvgIcon-root { width: 14px; height: 14px; font-size: 14px; color: var(--color-semantic-text-light); }

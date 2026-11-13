@@ -1,0 +1,174 @@
+/* Shadowbox reader. Floating surfaces use the portal's glass and elevation tokens. */
+.doc-viewer {
+  --viewer-duration: 180ms;
+  --viewer-ease: cubic-bezier(0.32, 0.72, 0, 1);
+}
+.doc-viewer.is-open { --viewer-duration: 240ms; }
+.doc-viewer .MuiBackdrop-root {
+  background: color-mix(in oklch, var(--color-semantic-surface-reverse-primary) 64%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.doc-viewer-paper.MuiPaper-root {
+  min-width: 0;
+  overflow: visible;
+  color: var(--color-semantic-text-dark);
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
+}
+.doc-viewer-workspace {
+  width: min(1240px, 100%);
+  height: 100%;
+  margin-inline: auto;
+  padding: var(--space-24) var(--space-32) 112px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+}
+.doc-viewer-reader {
+  position: relative;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  opacity: 0;
+  transform: translateY(8px) scale(0.985);
+  transition: transform var(--viewer-duration) var(--viewer-ease), opacity var(--viewer-duration) var(--viewer-ease);
+}
+.doc-viewer.is-open .doc-viewer-reader { opacity: 1; transform: none; }
+/* The scroll surface stays transparent so the portal remains the backdrop. */
+.doc-viewer-stage {
+  height: 100%;
+  min-width: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--color-semantic-surface-primary) 36%, transparent) transparent;
+  pointer-events: auto;
+}
+.doc-viewer-stage:focus-visible { outline: 2px solid var(--color-semantic-surface-primary); outline-offset: 4px; border-radius: var(--radius-xs); }
+.doc-viewer-stage-inner {
+  width: max-content;
+  min-width: 100%;
+  min-height: 100%;
+  padding: var(--space-24);
+  box-sizing: border-box;
+  display: grid;
+  justify-items: center;
+  align-content: safe center;
+}
+.doc-viewer-document { display: grid; justify-items: center; gap: var(--space-24); }
+.doc-viewer-page {
+  position: relative;
+  background: var(--color-primitive-base-white);
+  box-shadow: var(--elevation-3);
+}
+.doc-viewer-page .react-pdf__Page { background: transparent !important; }
+.doc-viewer-page canvas { display: block; }
+.doc-viewer-page--loading {
+  background: linear-gradient(100deg, var(--color-primitive-neutral-50) 30%, var(--color-semantic-surface-primary) 50%, var(--color-primitive-neutral-50) 70%) 0 0 / 300% 100%;
+  animation: doc-viewer-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes doc-viewer-shimmer { from { background-position: 100% 0; } to { background-position: 0 0; } }
+.doc-viewer-empty {
+  align-self: center;
+  max-width: 360px;
+  padding: var(--space-28);
+  display: grid;
+  justify-items: center;
+  gap: var(--space-12);
+  text-align: center;
+  border-radius: var(--radius-m);
+  background: var(--color-semantic-surface-primary);
+  box-shadow: var(--elevation-3);
+}
+.doc-viewer-empty .MuiTypography-root { margin: 0; }
+.doc-viewer-empty-icon { width: 44px; height: 44px; display: grid; place-items: center; color: var(--color-semantic-text-primary); }
+
+/* One bar keeps the reading surface free of permanent metadata. */
+.doc-viewer-dock {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  translate: -50% 0;
+  width: min(960px, calc(100% - 48px));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-24);
+  padding: var(--space-8) var(--space-12) var(--space-8) var(--space-24);
+  border-radius: var(--radius-pill);
+  background: var(--color-semantic-surface-glass);
+  box-shadow: var(--elevation-2);
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(8px) scale(0.985);
+  transition: transform var(--viewer-duration) var(--viewer-ease), opacity var(--viewer-duration) var(--viewer-ease);
+}
+.doc-viewer.is-open .doc-viewer-dock { opacity: 1; transform: none; }
+.doc-viewer-identity { min-width: 0; display: flex; align-items: center; gap: var(--space-4); }
+.doc-viewer-identity h2 { min-width: 0; margin: 0; }
+.doc-viewer-info-anchor { display: inline-flex; flex: 0 0 auto; }
+.doc-viewer-reading-controls, .doc-viewer-actions { display: flex; align-items: center; gap: var(--space-8); }
+.doc-viewer-reading-controls { gap: var(--space-12); }
+.doc-viewer-pages.MuiTypography-root { min-width: 40px; text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.doc-viewer-control-divider { width: 1px; height: 20px; background: var(--color-semantic-stroke-primary-light); }
+.doc-viewer-zoom { display: inline-flex; align-items: center; }
+.doc-viewer-zoom-value.MuiButton-root { min-width: 52px; min-height: 44px; padding: 0 var(--space-4); border-radius: var(--radius-pill); font-variant-numeric: tabular-nums; color: var(--color-semantic-text-dark); }
+.doc-viewer-download.MuiButton-root { min-height: 44px; }
+.doc-viewer-pin.place-icon-button.MuiIconButton-root[aria-pressed="true"] { background: var(--color-semantic-surface-secondary-dark); }
+.doc-viewer-info-tooltip.MuiTooltip-tooltip {
+  max-width: min(360px, calc(100vw - 48px));
+  box-sizing: border-box;
+  padding: var(--space-20);
+  border-radius: var(--radius-s);
+  color: var(--color-semantic-text-dark);
+  background: var(--color-semantic-surface-primary);
+  box-shadow: var(--elevation-3);
+}
+.doc-viewer-info-content { display: grid; gap: var(--space-12); }
+.doc-viewer-info-content > p { margin: 0; text-wrap: pretty; }
+.doc-viewer-info-content .place-fact { padding-block: var(--space-6); gap: var(--space-16); }
+.doc-viewer-info-content .place-fact dd { max-width: 68%; }
+@starting-style {
+  .doc-viewer.is-open .doc-viewer-reader,
+  .doc-viewer.is-open .doc-viewer-dock { opacity: 0; transform: translateY(8px) scale(0.985); }
+}
+@media (max-width: 1099.95px) {
+  .doc-viewer-dock { gap: var(--space-12); padding-left: var(--space-20); }
+  .doc-viewer-actions { gap: var(--space-4); }
+}
+@media (max-width: 767.95px) {
+  .doc-viewer-workspace { padding: var(--space-16) var(--space-8) 164px; }
+  .doc-viewer-stage-inner { padding-inline: var(--space-24); }
+  .doc-viewer-dock {
+    width: min(520px, calc(100% - 32px));
+    grid-template-columns: minmax(0, 1fr) 44px 44px;
+    gap: var(--space-4);
+    padding: var(--space-12);
+    border-radius: var(--radius-m);
+    bottom: max(16px, env(safe-area-inset-bottom));
+  }
+  .doc-viewer-identity { grid-row: 1; grid-column: 1; padding-left: var(--space-8); }
+  .doc-viewer-actions { display: contents; }
+  .doc-viewer-reading-controls { grid-row: 2; grid-column: 1 / 3; gap: var(--space-8); padding-left: var(--space-8); }
+  .doc-viewer-pin { grid-row: 1; grid-column: 2; }
+  .doc-viewer-close { grid-row: 1; grid-column: 3; }
+  .doc-viewer-download.MuiButton-root { grid-row: 2; grid-column: 3; min-width: 44px; width: 44px; padding: 0; }
+  .doc-viewer-download .MuiButton-startIcon { margin: 0; }
+  .doc-viewer-download-label { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .doc-viewer-reader, .doc-viewer-dock { transition: none; }
+  .doc-viewer-page--loading { animation: none; }
+  @starting-style {
+    .doc-viewer.is-open .doc-viewer-reader,
+    .doc-viewer.is-open .doc-viewer-dock { opacity: 1; transform: none; }
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .doc-viewer .MuiBackdrop-root { -webkit-backdrop-filter: none; backdrop-filter: none; background: color-mix(in oklch, var(--color-semantic-surface-reverse-primary) 88%, transparent); }
+  .doc-viewer-dock { background: var(--color-semantic-surface-primary); }
+}

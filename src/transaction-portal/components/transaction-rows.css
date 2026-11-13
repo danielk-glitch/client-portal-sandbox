@@ -9,35 +9,25 @@
 }
 
 .portal-person-row {
+  /* Team and viewer rows share one size: 42px avatar, and at least the height of the 44px contact buttons,
+     so switching between the tabs never shifts the list. */
   min-width: 0;
-  padding-inline: 17px;
-  align-items: center;
-  gap: 12px;
-}
-
-.portal-person-row-team {
+  min-height: 44px;
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr) auto;
-}
-
-.portal-person-row-viewer {
-  min-height: 40px;
-  display: flex;
+  padding-inline: 17px;
+  align-items: center;
+  gap: var(--space-12);
 }
 
 .portal-person-avatar.MuiAvatar-root {
   width: 42px;
   height: 42px;
   flex: 0 0 auto;
-  font-size: 0.75rem;
+  font-size: var(--type-label-s-size);
   font-weight: 500;
   color: var(--color-semantic-text-primary);
   background: var(--color-semantic-surface-secondary);
-}
-
-.portal-person-row-viewer .portal-person-avatar.MuiAvatar-root {
-  width: 40px;
-  height: 40px;
 }
 
 .portal-person-copy { min-width: 0; }
@@ -48,7 +38,7 @@
 .portal-person-actions {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-2);
 }
 
 .portal-person-action.MuiIconButton-root {
@@ -57,7 +47,7 @@
   flex: 0 0 auto;
   color: var(--color-semantic-text-primary);
   background: transparent;
-  transition: background-color 140ms ease, color 140ms ease;
+  transition: background-color var(--motion-hover), color var(--motion-hover), scale var(--motion-press);
 }
 
 .portal-person-action.MuiIconButton-root:hover {
@@ -66,8 +56,8 @@
 }
 
 .portal-person-action.MuiIconButton-root:focus-visible {
-  outline: 2px solid var(--color-semantic-stroke-primary-dark);
-  outline-offset: 2px;
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .portal-date-list {
@@ -93,13 +83,15 @@
   display: grid;
   grid-template-columns: var(--date-stamp-size) minmax(0, 1fr);
   align-items: center;
-  gap: 18px;
-  padding: 18px 0;
+  gap: var(--space-20);
+  padding: var(--padding-row-block) 0;
 }
 
 .portal-date-row:first-child { padding-top: 0; }
 .portal-date-row:last-child { padding-bottom: 0; }
 
+/* Date stamp: one look everywhere. A date is a hairline circle on white; "TBD" uses the same circle.
+   Without a date it holds an icon on a soft fill (the same role as an icon badge). */
 .portal-date-stamp {
   position: relative;
   z-index: 1;
@@ -108,10 +100,12 @@
   display: grid;
   align-content: center;
   justify-items: center;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   color: var(--color-semantic-text-dark);
-  background: var(--color-semantic-surface-secondary);
+  background: var(--color-semantic-surface-primary);
+  box-shadow: inset 0 0 0 1px var(--color-semantic-stroke-primary-light);
   font-variant-numeric: tabular-nums;
+  transition: box-shadow var(--motion-hover);
 }
 
 .portal-date-stamp .MuiTypography-root:first-child {
@@ -121,11 +115,17 @@
 
 .portal-date-stamp .MuiTypography-root:last-child { font-size: 1.375rem; }
 
+.portal-date-stamp--tbd { color: var(--color-semantic-text-light); }
+.portal-date-stamp--tbd .MuiTypography-root:first-child { color: inherit; letter-spacing: var(--tracking-uppercase); }
+.portal-date-stamp--icon { color: var(--color-semantic-text-primary); background: var(--color-semantic-surface-secondary); box-shadow: none; }
+.portal-date-stamp-icon { display: grid; place-items: center; }
+.portal-date-row-main:hover .portal-date-stamp:not(.portal-date-stamp--icon) { box-shadow: inset 0 0 0 1px var(--color-semantic-stroke-primary); }
+
 .portal-date-copy {
   min-width: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 4px;
+  gap: var(--space-4);
 }
 
 .portal-date-row--resource { grid-template-columns: var(--date-stamp-size) minmax(0, 1fr) auto; }
@@ -141,22 +141,34 @@
   justify-items: start;
   text-align: left;
   isolation: isolate;
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
 }
 
+/* Row hover: one fill for every list row. It spans divider to divider and bleeds past the column edge,
+   so row content stays aligned with the section label above it. */
 .portal-date-row-main::after {
   position: absolute;
-  inset: -10px -12px;
+  inset: calc(var(--padding-row-block) * -1) calc(var(--row-hover-bleed) * -1);
   z-index: -1;
   content: '';
-  border-radius: 10px;
+  border-radius: var(--radius-s);
   background: transparent;
-  transition: background-color 140ms ease;
+  transition: background-color var(--motion-hover);
 }
+.portal-date-row:first-child .portal-date-row-main::after { top: calc(var(--row-hover-bleed) * -1); }
+.portal-date-row:last-child .portal-date-row-main::after { bottom: calc(var(--row-hover-bleed) * -1); }
 
 .portal-date-row-main:hover::after { background: var(--color-semantic-surface-primary-dark); }
-.portal-date-row-main:focus-visible { outline: 2px solid var(--color-semantic-stroke-primary-dark); outline-offset: 6px; }
-.portal-date-copy > .MuiTypography-root { text-wrap: pretty; }
+.portal-date-row-main:focus-visible { outline: var(--focus-ring); outline-offset: 6px; }
+.portal-date-copy > .MuiTypography-root,
+.portal-date-title > .MuiTypography-root { text-wrap: pretty; }
+
+.portal-date-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-12);
+}
 
 .portal-date-resource.MuiChip-root {
   position: relative;
@@ -169,23 +181,23 @@
   max-width: 100%;
   min-height: 36px;
   height: auto;
-  padding-block: 4px;
+  padding-block: var(--space-4);
   color: var(--color-semantic-text-primary);
   border-color: var(--color-semantic-stroke-primary-light);
   background: var(--color-semantic-surface-primary);
   font: inherit;
-  font-size: 0.75rem;
+  font-size: var(--type-label-s-size);
   text-align: left;
-  transition: background-color 140ms ease, color 140ms ease;
+  transition: background-color var(--motion-hover), color var(--motion-hover);
 }
 
-.portal-date-resource.MuiChip-root .MuiChip-icon { font-size: 16px; margin-left: 12px; margin-right: 0; color: inherit; }
-.portal-date-resource.MuiChip-root .MuiChip-label { min-width: 0; padding-inline: 8px 12px; white-space: normal; }
+.portal-date-resource.MuiChip-root .MuiChip-icon { font-size: 16px; margin-left: var(--space-12); margin-right: 0; color: inherit; }
+.portal-date-resource.MuiChip-root .MuiChip-label { min-width: 0; padding-inline: var(--space-8) var(--space-12); white-space: normal; }
 .portal-date-resource.MuiChip-root:hover { background: var(--color-semantic-surface-primary-dark); color: var(--color-semantic-text-dark); }
-.portal-date-resource.MuiChip-root:focus-visible { outline: 2px solid var(--color-semantic-stroke-primary-dark); outline-offset: 3px; }
+.portal-date-resource.MuiChip-root:focus-visible { outline: var(--focus-ring); outline-offset: 3px; }
 
-@media (max-width: 600px) {
-  .portal-date-row--resource { grid-template-columns: var(--date-stamp-size) minmax(0, 1fr); gap: 12px 18px; }
+@media (max-width: 599.95px) {
+  .portal-date-row--resource { grid-template-columns: var(--date-stamp-size) minmax(0, 1fr); gap: var(--space-12) var(--space-20); }
   .portal-date-row--resource .portal-date-row-main { grid-row: 1 / span 2; grid-template-rows: subgrid; align-items: start; }
   .portal-date-row--resource .portal-date-row-main > * { grid-row: 1; }
   .portal-date-resource.MuiChip-root { min-height: 44px; grid-column: 2; grid-row: 2; }
@@ -197,11 +209,11 @@
 }
 
 .portal-date-meta.MuiTypography-root {
-  margin-top: 4px;
+  margin-top: var(--space-4);
   font-variant-numeric: tabular-nums;
 }
 
-.portal-task-row { padding: 20px 0; }
+.portal-task-row { padding: var(--space-20) 0; }
 .portal-task-row:first-child { padding-top: 0; }
 .portal-task-row:last-child { padding-bottom: 0; }
 
@@ -210,7 +222,7 @@
   align-items: flex-start;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 8px 16px;
+  gap: var(--space-8) var(--space-16);
 }
 
 .portal-task-description.MuiTypography-root {
@@ -219,23 +231,63 @@
   margin-top: 5px;
 }
 
-.portal-task-assignee.MuiTypography-root { display: block; margin-top: 16px; }
+.portal-task-assignee.MuiTypography-root { display: block; margin-top: var(--space-16); }
 
-.portal-task-due.MuiChip-root {
+.portal-task-due.place-tag {
   align-self: flex-start;
   margin-left: auto;
-  font-variant-numeric: tabular-nums;
 }
 
 .portal-advertising-row {
   min-height: 68px;
-  padding: 14px 0;
+  padding: var(--space-16) 0;
+}
+
+.portal-advertising-main,
+.portal-advertising-main.MuiButtonBase-root {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-12);
+  text-align: left;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Linked rows: the outward arrow sits at the end of the row, hidden below a clipping mask,
+   and slides up into view on hover or keyboard focus. */
+.portal-advertising-go {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  display: block;
+  overflow: hidden;
+  color: var(--color-semantic-text-lightest);
+}
+.portal-advertising-go svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  translate: 0 100%;
+  transition: translate 220ms var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1));
+}
+.portal-advertising-main.MuiButtonBase-root:hover .portal-advertising-go svg,
+.portal-advertising-main.MuiButtonBase-root:focus-visible .portal-advertising-go svg { translate: 0 0; }
+.portal-advertising-main.MuiButtonBase-root:focus-visible { outline: var(--focus-ring); outline-offset: 4px; border-radius: var(--radius-xs); }
+/* Touch screens have no hover, so the arrow stays in place. */
+@media (hover: none) {
+  .portal-advertising-go svg { translate: 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portal-advertising-go svg { transition: none; }
 }
 
 .portal-advertising-row:first-child { padding-top: 0; }
 .portal-advertising-row:last-child { padding-bottom: 0; }
 
-.portal-advertising-copy { flex: 1; min-width: 0; display: grid; gap: 6px; }
+.portal-advertising-copy { flex: 1; min-width: 0; display: grid; gap: var(--space-6); }
 .portal-advertising-copy .MuiTypography-root { display: block; }
 .portal-advertising-meta.MuiTypography-root { color: var(--color-semantic-text-light); }
 .portal-advertising-copy strong {
@@ -253,8 +305,6 @@
 .portal-feedback-row:first-child { padding-top: 0; }
 .portal-feedback-row:last-child { padding-bottom: 0; }
 
-.portal-feedback-interest .MuiRating-root { color: var(--color-primitive-base-black); }
-.portal-feedback-interest .MuiRating-iconEmpty { color: var(--color-primitive-neutral-400); opacity: 1; }
 .portal-metadata-separator.MuiTypography-root { color: var(--color-semantic-text-lightest); }
 .portal-tabular-numbers.MuiTypography-root { font-variant-numeric: tabular-nums; }
 
@@ -267,7 +317,7 @@
 
 .portal-document-row {
   min-height: 76px;
-  padding: 24px 0;
+  padding: var(--space-24) 0;
 }
 
 .portal-document-row:first-child { padding-top: 0; }
@@ -279,17 +329,12 @@
   flex: 1;
   min-width: 0;
   display: grid;
-  gap: 6px;
+  gap: var(--space-6);
 }
 
 .portal-document-copy .MuiTypography-root { text-wrap: pretty; }
 
 .portal-document-attribution.MuiTypography-root { color: var(--color-semantic-text-primary); }
-
-.portal-document-status.MuiChip-root {
-  color: var(--color-semantic-text-primary);
-  border-color: var(--color-semantic-stroke-primary-light);
-}
 
 .portal-document-action.MuiButton-root {
   min-width: 84px;
@@ -303,25 +348,11 @@
 }
 
 .portal-document-action.MuiButton-root:focus-visible {
-  outline: 2px solid var(--color-semantic-stroke-primary-dark);
-  outline-offset: 2px;
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
-.portal-detail-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px 16px;
-}
-
-.portal-detail-item { min-width: 0; }
-.portal-detail-value.MuiTypography-root {
-  display: block;
-  margin-top: 4px;
-  font-variant-numeric: tabular-nums;
-  text-wrap: pretty;
-}
-
-@media (max-width: 900px) {
+@media (max-width: 899.95px) {
   .portal-person-row-team { align-items: flex-start; }
   .portal-person-avatar.MuiAvatar-root { width: 36px; height: 36px; }
   .portal-advertising-date.MuiTypography-root { min-width: 0; text-align: left; }
@@ -329,7 +360,7 @@
   .portal-document-action.MuiButton-root { align-self: flex-start; margin-left: 54px; }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 419.95px) {
   .portal-feedback-interest { flex-wrap: wrap; }
 }
 
@@ -337,10 +368,55 @@
 .portal-date-row--trailing { grid-template-columns: var(--date-stamp-size) minmax(0, 1fr) auto; }
 .portal-date-row--trailing.portal-date-row--resource { grid-template-columns: var(--date-stamp-size) minmax(0, 1fr) auto auto; }
 .portal-date-trailing { position: relative; z-index: 1; grid-column: -2; grid-row: 1; align-self: center; }
-.portal-date-notes { grid-column: 2 / -1; grid-row: 2; display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: -6px; }
-@media (max-width: 600px) {
+.portal-date-notes { grid-column: 2 / -1; grid-row: 2; display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-16); margin-top: calc(var(--space-6) * -1); }
+@media (max-width: 599.95px) {
   .portal-date-row--trailing.portal-date-row--resource { grid-template-columns: var(--date-stamp-size) minmax(0, 1fr) auto; }
   .portal-date-row--trailing .portal-date-trailing { grid-column: 3; grid-row: 1; }
   .portal-date-row--trailing.portal-date-row--resource .portal-date-row-main { grid-column: 1 / 3; }
   .portal-date-row--notes .portal-date-notes { grid-row: 3; }
 }
+
+/* A date that has already gone by: struck through and quieter. */
+.portal-date-row--past .portal-date-title .MuiTypography-root,
+.portal-date-row--past .portal-date-text {
+  color: var(--color-semantic-text-light);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+/* Contact details under a person's role: phone and email, each a label over its value, side by side on one row (they wrap when the column is narrow).
+   The whole block is the link, with a pill fill on hover. At least 36px tall with a mouse and 44px on touch screens.
+   Under the photo and name, lined up with the photo's left edge. In a wide People card it moves to the right (see people-section.css). */
+.portal-person-row:has(.portal-person-contact) {
+  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  align-items: center;
+}
+.portal-person-row:has(.portal-person-contact) .portal-person-avatar { grid-row: 1 / span 2; }
+.portal-person-row:has(.portal-person-contact) .portal-person-copy { display: contents; }
+/* With contact shown, the role is a small lighter label above the name, and the pair is about as tall as the photo. */
+.portal-person-row:has(.portal-person-contact) { row-gap: 2px; column-gap: var(--space-12); }
+.portal-person-row:has(.portal-person-contact) .portal-person-role--above.MuiTypography-root { grid-column: 2; grid-row: 1; align-self: end; line-height: 1.2; color: var(--color-semantic-text-light); }
+.portal-person-row:has(.portal-person-contact) .portal-person-name.MuiTypography-root { grid-column: 2; grid-row: 2; align-self: start; line-height: 1.3; color: var(--color-semantic-text-dark); }
+/* Narrow: the contact sits on its own row under the photo and name, lined up with the left edge of the photo. */
+.portal-person-contact { grid-column: 1 / -1; grid-row: 3; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); margin: var(--space-8) 0 0 calc(var(--space-12) * -1); min-width: 0; }
+.portal-person-contact-link.MuiButtonBase-root {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+  align-content: center;
+  min-width: 0;
+  min-height: 44px;
+  padding: var(--space-6) var(--space-12);
+  border-radius: var(--radius-xs, 8px);
+  text-align: left;
+  color: var(--color-semantic-text-primary);
+  transition: background-color var(--motion-hover), scale var(--motion-press);
+}
+.portal-person-contact-value.MuiTypography-root { max-width: 100%; min-width: 0; overflow-wrap: anywhere; text-decoration: none; transition: color var(--motion-hover); }
+/* Reserves the width of the bold text so the hover weight change doesn't shift anything. */
+.portal-person-contact-value.MuiTypography-root::after { content: attr(data-text); display: block; height: 0; overflow: hidden; visibility: hidden; font-weight: 600; }
+.portal-person-contact-link.MuiButtonBase-root:hover { background: var(--color-semantic-surface-primary-dark); }
+.portal-person-contact-link.MuiButtonBase-root:hover .portal-person-contact-value { color: var(--color-semantic-text-dark); font-weight: 600; }
+.portal-person-contact-link.MuiButtonBase-root:active { scale: 0.99; }
+.portal-person-contact-link.MuiButtonBase-root:focus-visible { outline: var(--focus-ring); outline-offset: -2px; }

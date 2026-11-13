@@ -1,6 +1,6 @@
 import { Avatar, Box, Container, Typography } from '@mui/material'
 import type { TeamMember } from '../types'
-import { PartnerBrandLockup, type PartnerBrand } from './PartnerBrandLockup'
+import { PartnerBrandLockup, type PartnerBrand } from '../../components/PartnerBrandLockup'
 import { PersonContactActions } from './TransactionRows'
 import './portal-footer.css'
 

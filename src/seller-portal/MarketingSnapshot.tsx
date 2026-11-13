@@ -1,15 +1,14 @@
 /* design-build · self-critique: Clarity5 Warmth4 Restraint5 Craft4 Variety4 SlopFree5 */
 import { useState } from 'react'
-import { Box, IconButton, Paper, Rating, Typography } from '@mui/material'
-import ArrowForwardOutlined from '@mui/icons-material/ArrowForwardOutlined'
+import { Box, IconButton, Paper, Typography } from '@mui/material'
 import ChevronLeftOutlined from '@mui/icons-material/ChevronLeftOutlined'
 import ChevronRightOutlined from '@mui/icons-material/ChevronRightOutlined'
-import Favorite from '@mui/icons-material/Favorite'
-import FavoriteBorder from '@mui/icons-material/FavoriteBorder'
 import type { ShowingFeedback } from './sellerTransaction'
 import type { MarketingMaterial } from './marketingMaterials'
 import type { MarketingFeedbackLayout } from './marketingFeedbackLayouts'
-import { CardActionButton } from '../components/CardActionButton'
+import { TextLink } from '../components/TextLink'
+import { FeedbackQuote } from '../transaction-portal/components'
+import { PortalSectionHeader } from '../components/PortalSection'
 import './marketing-snapshot.css'
 
 export type MarketingSnapshotData = {
@@ -40,12 +39,12 @@ export function MarketingSnapshot({ data, feedback, feedbackLayout = 'editorial'
 
   return (
     <Paper component="section" variant="outlined" className="marketing-snapshot" aria-labelledby="marketing-snapshot-title">
-      <Box className="marketing-snapshot-header">
-        <Typography component="h2" variant="titleS" id="marketing-snapshot-title">Listing Marketing</Typography>
-        <CardActionButton className="marketing-snapshot-action" onClick={onOpenDashboard} endIcon={<ArrowForwardOutlined />}>
-          View marketing dashboard
-        </CardActionButton>
-      </Box>
+      <PortalSectionHeader
+        title="Listing Marketing"
+        titleId="marketing-snapshot-title"
+        prominent
+        action={<TextLink onClick={onOpenDashboard}>View marketing dashboard</TextLink>}
+      />
 
       <Box className="marketing-snapshot-content">
         <Box className="marketing-snapshot-channels" aria-label="Marketing materials and campaigns">
@@ -63,18 +62,18 @@ export function MarketingSnapshot({ data, feedback, feedbackLayout = 'editorial'
         {activeFeedback && (
           <Box className="marketing-snapshot-feedback" data-layout={feedbackLayout} role="group" aria-roledescription="carousel" aria-label="Showing feedback">
             <Box className="marketing-snapshot-feedback-slides" aria-live="polite" aria-atomic="true">
-              {feedback.map((item, index) => {
-                const rating = <Rating value={item.interest} max={5} readOnly size="small" icon={<Favorite fontSize="inherit" />} emptyIcon={<FavoriteBorder fontSize="inherit" />} aria-label={`Interest ${item.interest} out of 5`} />
-                return (
-                  <Box key={item.id} className="marketing-snapshot-feedback-slide" data-active={index === activeFeedbackIndex} aria-hidden={index !== activeFeedbackIndex}>
-                    {rating}
-                    <Typography variant="bodyLStandard" className="marketing-snapshot-feedback-quote">“{item.feedback}”</Typography>
-                    <Typography variant="bodySStandard" className="marketing-snapshot-feedback-meta">
-                      {item.showingType} · {item.date}
-                    </Typography>
-                  </Box>
-                )
-              })}
+              {feedback.map((item, index) => (
+                <FeedbackQuote
+                  key={item.id}
+                  feedback={item}
+                  size="l"
+                  className="marketing-snapshot-feedback-slide"
+                  quoteClassName="marketing-snapshot-feedback-quote"
+                  metaClassName="marketing-snapshot-feedback-meta"
+                  data-active={index === activeFeedbackIndex}
+                  aria-hidden={index !== activeFeedbackIndex}
+                />
+              ))}
             </Box>
             <Box className="marketing-snapshot-feedback-footer">
               <Typography variant="labelS" className="marketing-snapshot-label">Showing feedback</Typography>

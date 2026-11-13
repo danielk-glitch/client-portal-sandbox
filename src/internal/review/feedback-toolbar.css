@@ -125,7 +125,7 @@
   .feedback-toolbar-controls .annotation-layer-trigger:hover { background: var(--color-primitive-neutral-800); color: inherit; box-shadow: none; }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 599.95px) {
   .feedback-toolbar { --feedback-trigger-size: 48px; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); }
   .feedback-toolbar-controls { gap: 0; padding-left: 4px; }
   .feedback-toolbar-controls .MuiButton-root,

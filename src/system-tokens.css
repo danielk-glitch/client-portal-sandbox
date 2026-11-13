@@ -1,0 +1,94 @@
+/* PLACE system tokens: corner radius, elevation, and spacing.
+   Colors and type live in design-tokens.css / design-tokens.ts. This file holds the shape and space system.
+   Components consume these names. Never hardcode a radius, shadow, or padding value that one of these covers.
+   Mirrors: src/system-tokens.ts (for MUI theme and sx props). Guidance: DESIGN.md › Tokens. */
+
+:root {
+  /* ---------- Corner radius: five tiers, chosen by what the surface is, not by its size ---------- */
+  --radius-2xs: 4px;     /* Marks only: progress bars, tiny indicators, focus nubs */
+  --radius-xs: 8px;      /* Hover and selected fills inside lists, menu items, small thumbnails */
+  --radius-s: 12px;      /* Inputs, menus, popovers, tooltips, image tiles inside cards */
+  --radius-m: 20px;      /* Every card */
+  --radius-l: 28px;      /* Overlays: modals, sheets, the full timeline */
+  --radius-pill: 999px;  /* Buttons, tags, chips, segmented switches */
+  --radius-circle: 50%;  /* Avatars, date stamps, icon badges, icon buttons */
+
+  /* ---------- Elevation: four levels ----------
+     0 · flat: sits on the canvas, separated by spacing or dividers.
+     1 · rest: cards on the page canvas.
+     2 · floating: things that hover above content while you scroll or act (sticky header, menus, carousel arrows on photos).
+     3 · overlay: modals, sheets, and surfaces placed on photography. */
+  --elevation-ink: oklch(0.21 0.032 265);
+  --elevation-0: none;
+  /* Level 1 carries a faint 1px edge (the first shadow), so a card's outline holds on the near-white canvas. */
+  --elevation-1: 0 0 0 1px color-mix(in oklch, var(--elevation-ink) 4%, transparent), 0 1px 3px color-mix(in oklch, var(--elevation-ink) 8%, transparent), 0 8px 28px -12px color-mix(in oklch, var(--elevation-ink) 16%, transparent);
+  --elevation-2: 0 2px 6px -2px color-mix(in oklch, var(--elevation-ink) 10%, transparent), 0 16px 36px -16px color-mix(in oklch, var(--elevation-ink) 24%, transparent);
+  --elevation-3: 0 30px 64px -38px color-mix(in oklch, var(--elevation-ink) 30%, transparent), 0 8px 24px -16px color-mix(in oklch, var(--elevation-ink) 17%, transparent);
+  /* Overlays sit on a dimmed or photographic backdrop, so level 3 on a photo uses a deeper shadow. */
+  --elevation-3-on-photo: 0 24px 48px -24px oklch(0 0 0 / 0.6);
+
+  /* ---------- Spacing scale (4px base, 8px rhythm) ---------- */
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;     /* Tight inline gaps only: metadata separators, icon + label */
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-28: 28px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+  --space-56: 56px;
+  --space-64: 64px;
+  --space-80: 80px;
+
+  /* ---------- Semantic padding and layout spacing ---------- */
+  --padding-card: var(--space-32);        /* Inside every card */
+  --padding-overlay: var(--space-32);     /* Inside modals and sheets */
+  --padding-row-block: var(--space-20);   /* Top and bottom of a list row */
+  --padding-control-inline: var(--space-20);
+  --row-hover-bleed: var(--space-12);       /* How far a row's or tab's hover fill reaches past the column edge */
+  --gap-card: var(--space-24);            /* Between stacked or side-by-side cards */
+  --padding-panel-top: var(--space-32);   /* Tab bar to the first thing in a tab panel */
+  --gap-panel: var(--space-32);           /* A tab panel's intro or filters to its list */
+  --gap-panel-group: var(--space-48);     /* Between groups inside a tab panel ("Open", "Done") */
+  --gap-stack: var(--space-16);           /* Between a section label and its content */
+  --gap-section: var(--space-64);         /* Between page sections inside a zone */
+  --gap-zone: var(--space-80);            /* Between the page's major zones */
+  --page-gutter: var(--space-24);
+
+  /* ---------- Focus ring: one keyboard-focus outline for every control ----------
+     outline: var(--focus-ring); outline-offset: var(--focus-ring-offset);
+     Inset (-2px) only where an outside ring would be clipped, such as a full-width card footer.
+     On photography or dark bands use --focus-ring-on-dark. */
+  --focus-ring: 2px solid var(--color-semantic-stroke-primary-dark);
+  --focus-ring-on-dark: 2px solid currentColor;
+  --focus-ring-offset: 2px;
+
+  /* ---------- Motion: duration and easing in one value, used as `transition: background-color var(--motion-hover)` ---------- */
+  --motion-press: 120ms ease-out;   /* Press scale on buttons and links */
+  --motion-hover: 160ms ease;       /* Hover and selection: fills, colors, borders, small icon nudges */
+  --motion-reveal: 200ms ease;      /* Something changing shape in place: chevrons turning, cards lifting */
+  --motion-overlay: 240ms ease-out; /* Modals, sheets, and drawers entering */
+
+  /* ---------- Breakpoints ----------
+     CSS can't read custom properties inside @media, so these are fixed values. Use only these six,
+     written as max-width at 0.05px under the value: @media (max-width: 599.95px).
+     smallPhone 420 · phone 600 · tablet 768 · laptop 900 · desktop 1100 · wide 1280
+     TypeScript: `below('phone')` from system-tokens.ts. */
+}
+
+@media (max-width: 599.95px) {
+  :root {
+    --padding-card: var(--space-20);
+    --padding-overlay: var(--space-20);
+    --padding-panel-top: var(--space-24);
+    --gap-panel: var(--space-24);
+    --gap-panel-group: var(--space-40);
+    --gap-section: var(--space-48);
+    --gap-zone: var(--space-56);
+    --page-gutter: var(--space-16);
+  }
+}

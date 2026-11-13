@@ -3,44 +3,33 @@
   scroll-margin-top: 72px;
 }
 
+/* Pager: left aligned with the rows above it, like every other control under a list. */
 .tab-list-pagination {
-  margin-top: 32px;
-  padding-top: 20px;
+  margin-top: var(--space-24);
+  padding-top: var(--space-20);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
   border-top: 1px solid var(--color-semantic-stroke-primary-light);
 }
 
+.tab-list-pagination .MuiPagination-ul { margin-left: calc(var(--space-8) * -1); }
+
 .tab-list-pagination .MuiPaginationItem-root {
   min-width: 40px;
-  min-height: 40px;
-  border-radius: 8px;
-  color: var(--color-semantic-text-dark);
+  height: 40px;
+  border-radius: var(--radius-circle);
+  color: var(--color-semantic-text-primary);
 }
 
-.tab-list-pagination .MuiPaginationItem-root:hover {
-  background: var(--color-semantic-surface-primary-darkest);
-}
+.tab-list-pagination .MuiPaginationItem-root:hover { background: var(--color-semantic-surface-primary-dark); }
 
-.tab-list-pagination .MuiPaginationItem-root.Mui-selected {
-  color: var(--color-semantic-text-on-color-primary);
-  background: var(--color-semantic-text-dark);
-}
-
+.tab-list-pagination .MuiPaginationItem-root.Mui-selected,
 .tab-list-pagination .MuiPaginationItem-root.Mui-selected:hover {
-  background: var(--color-semantic-text-primary);
+  color: var(--color-semantic-text-on-color-primary);
+  background: var(--color-semantic-surface-reverse-primary);
 }
 
 .tab-list-pagination .MuiPaginationItem-root:focus-visible {
-  outline: 2px solid var(--color-semantic-stroke-primary-dark);
-  outline-offset: 2px;
-}
-
-@media (max-width: 620px) {
-  .tab-list-pagination {
-    align-items: flex-start;
-    flex-direction: column;
-  }
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }

@@ -29,8 +29,9 @@ body:has(.seller-portal--polestar),
   --color-semantic-stroke-primary-light: var(--ps-rule);
   --color-semantic-stroke-primary: var(--ps-rule);
   --color-semantic-stroke-primary-dark: var(--ps-ink-2);
-  --elevation-raised: none;
-  --elevation-hero: none;
+  --elevation-1: none;
+  --elevation-2: none;
+  --elevation-3: none;
   color-scheme: dark;
   color: var(--ps-ink);
   background: var(--ps-paper);
@@ -68,14 +69,14 @@ body:has(.seller-portal--polestar),
 
 .seller-portal--polestar .topbar-divider { background: var(--ps-rule); }
 .seller-portal--polestar .account-avatar.MuiAvatar-root {
-  border-radius: 2px;
+  border-radius: var(--radius-2xs);
   background: var(--ps-paper-3);
   color: var(--ps-ink);
 }
 
 .seller-portal--polestar .portal-main.MuiContainer-root {
   max-width: 1600px;
-  padding-top: 12px;
+  padding-top: var(--space-12);
   padding-bottom: 88px;
 }
 
@@ -98,7 +99,7 @@ body:has(.seller-portal--polestar),
 .seller-portal--polestar .listing-overview--card .listing-summary {
   width: min(58%, 720px);
   margin: 0;
-  padding: clamp(28px, 4vw, 60px);
+  padding: clamp(28px, 4vw, var(--space-64));
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -108,34 +109,34 @@ body:has(.seller-portal--polestar),
 }
 
 .seller-portal--polestar .eyebrow.MuiTypography-root,
-.seller-portal--polestar .people-kicker.MuiTypography-root {
+.seller-portal--polestar .listing-card-agent .agent-identity-label.MuiTypography-root {
   color: var(--ps-muted);
   font-size: 0.72rem;
   letter-spacing: 0.15em;
 }
 .seller-portal--polestar .listing-summary-header .eyebrow { display: none; }
 
-.seller-portal--polestar .listing-statuses { margin-top: 28px; }
+.seller-portal--polestar .listing-statuses { margin-top: var(--space-28); }
 .seller-portal--polestar .status-chip.MuiChip-root {
-  border-radius: 2px;
+  border-radius: var(--radius-2xs);
   background: var(--ps-ink);
   color: var(--ps-paper);
 }
-.seller-portal--polestar .published-chip.MuiChip-root {
-  border-radius: 2px;
-  border-color: var(--ps-rule);
+.seller-portal--polestar .published-chip.place-tag {
+  border-radius: var(--radius-2xs);
+  box-shadow: inset 0 0 0 1px var(--ps-rule);
   color: var(--ps-ink-2);
 }
 .seller-portal--polestar .listing-overview--card .listing-address.MuiTypography-root {
   max-width: 650px;
-  margin-top: 28px;
+  margin-top: var(--space-28);
   color: var(--ps-ink);
   font-size: clamp(2.5rem, 3.7vw, 4rem);
   line-height: 1.08;
   text-wrap: balance;
 }
 .seller-portal--polestar .listing-location.MuiTypography-root {
-  margin-top: 10px;
+  margin-top: var(--space-12);
   color: var(--ps-ink-2);
 }
 .seller-portal--polestar .listing-feature-footer {
@@ -149,23 +150,23 @@ body:has(.seller-portal--polestar),
   margin-top: 0;
   margin-left: auto;
 }
-.seller-portal--polestar .listing-agent-avatar.MuiAvatar-root { border-radius: 2px; }
-.seller-portal--polestar .listing-agent-name.MuiTypography-root { color: var(--ps-ink); }
+.seller-portal--polestar .listing-card-agent .agent-identity-avatar.MuiAvatar-root { border-radius: var(--radius-2xs); }
+.seller-portal--polestar .listing-card-agent .agent-identity-name.MuiTypography-root { color: var(--ps-ink); }
 .seller-portal--polestar .partner-brand-lockup {
-  padding: 8px;
-  border-radius: 2px;
+  padding: var(--space-8);
+  border-radius: var(--radius-2xs);
   background: var(--ps-ink);
 }
 .seller-portal--polestar .partner-brand-divider { background: var(--ps-rule); }
 
 .seller-portal--polestar .MuiButton-contained,
 .seller-portal--polestar .listing-detail-link.MuiButton-root {
-  border-radius: 2px;
+  border-radius: var(--radius-2xs);
   background: var(--ps-ink);
   color: var(--ps-paper);
   box-shadow: none;
   text-transform: none;
-  transition: background-color 140ms ease, color 140ms ease;
+  transition: background-color var(--motion-hover), color var(--motion-hover), scale var(--motion-press);
 }
 .seller-portal--polestar .MuiButton-contained:hover,
 .seller-portal--polestar .listing-detail-link.MuiButton-root:hover {
@@ -193,19 +194,19 @@ body:has(.seller-portal--polestar),
 
 .seller-portal--polestar .priority-grid {
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
-  gap: 10px;
-  margin-top: 10px;
+  gap: var(--space-12);
+  margin-top: var(--space-12);
 }
 .seller-portal--polestar .priority-grid .portal-section.MuiPaper-root {
-  padding: 32px 36px;
+  padding: var(--space-32) var(--space-40);
   border: 0;
   border-radius: 0;
   background: var(--ps-paper-3);
   box-shadow: none;
 }
-.seller-portal--polestar .portal-section-heading { padding-bottom: 24px; }
+.seller-portal--polestar .portal-section-heading { padding-bottom: var(--space-24); }
 .seller-portal--polestar .portal-section-heading h2 { color: var(--ps-ink); }
-.seller-portal--polestar .portal-section > .MuiDivider-root { border-color: var(--ps-rule); }
+.seller-portal--polestar .portal-section-divider.MuiDivider-root { border-color: var(--ps-rule); }
 .seller-portal--polestar .activity-event-row + .activity-event-row { border-color: var(--ps-rule); }
 .seller-portal--polestar .portal-date-list::before { background: var(--ps-rule); }
 .seller-portal--polestar .upcoming-dates-card .portal-date-row::before { background: var(--ps-rule); }
@@ -213,16 +214,15 @@ body:has(.seller-portal--polestar),
 
 .seller-portal--polestar .marketing-snapshot.MuiPaper-root,
 .seller-portal--polestar .advertising-snapshot.MuiPaper-root {
-  margin-top: 56px;
-  padding: 0 36px;
+  margin-top: var(--space-56);
+  padding: 0 var(--space-40);
   border: 0;
   border-radius: 0;
   color: var(--ps-ink);
   background: transparent;
   box-shadow: none;
 }
-.seller-portal--polestar .marketing-snapshot-header { border-color: var(--ps-rule); }
-.seller-portal--polestar .marketing-snapshot-content { gap: 48px; }
+.seller-portal--polestar .marketing-snapshot-content { gap: var(--space-48); }
 .seller-portal--polestar .marketing-snapshot-channel { border-color: var(--ps-rule); }
 .seller-portal--polestar .marketing-snapshot-channel-value .MuiTypography-metricL {
   color: var(--ps-ink);
@@ -232,33 +232,31 @@ body:has(.seller-portal--polestar),
 .seller-portal--polestar .marketing-snapshot-channel-value .MuiTypography-labelS,
 .seller-portal--polestar .marketing-snapshot-feedback-meta.MuiTypography-root { color: var(--ps-muted); }
 .seller-portal--polestar .marketing-snapshot-feedback[data-layout='editorial'] {
-  padding-left: 32px;
+  padding-left: var(--space-32);
   border-color: var(--ps-rule);
 }
-.seller-portal--polestar .marketing-snapshot-feedback-slide .MuiRating-root { color: var(--ps-ink); }
-.seller-portal--polestar .marketing-snapshot-feedback-slide .MuiRating-iconEmpty { color: var(--ps-rule); }
-.seller-portal--polestar .advertising-snapshot-quote .MuiRating-root { color: var(--ps-ink); }
-.seller-portal--polestar .advertising-snapshot-quote .MuiRating-iconEmpty { color: var(--ps-rule); }
+.seller-portal--polestar .interest-rating.MuiRating-root { color: var(--ps-ink); }
+.seller-portal--polestar .interest-rating .MuiRating-iconEmpty { color: var(--ps-rule); }
 .seller-portal--polestar .marketing-snapshot-feedback-controls .MuiIconButton-root {
-  border-radius: 2px;
+  border-radius: var(--radius-2xs);
   color: var(--ps-ink);
   border-color: var(--ps-rule);
 }
 
 .seller-portal--polestar .transaction-lower-grid {
   grid-template-columns: minmax(290px, 0.9fr) minmax(0, 2.1fr);
-  gap: 48px;
-  margin-top: 56px;
+  gap: var(--space-48);
+  margin-top: var(--space-56);
 }
 .seller-portal--polestar .transaction-sections { grid-column: auto; background: transparent; }
 .seller-portal--polestar .people-section.MuiPaper-root {
-  padding: 20px 28px 32px;
+  padding: var(--space-20) var(--space-28) var(--space-32);
   border: 0;
   border-radius: 0;
   background: var(--ps-paper-3);
 }
-.seller-portal--polestar .people-tabs,
 .seller-portal--polestar .portal-section-nav { border-bottom-color: var(--ps-rule); }
+.seller-portal--polestar .people-tabs::before { background: var(--ps-rule); }
 .seller-portal--polestar .people-tabs .MuiTab-root,
 .seller-portal--polestar .portal-section-nav .MuiTab-root { color: var(--ps-muted); }
 .seller-portal--polestar .people-tabs .MuiTab-root.Mui-selected,
@@ -270,10 +268,10 @@ body:has(.seller-portal--polestar),
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
-.seller-portal--polestar .portal-panel { padding: 8px 0 24px; }
-.seller-portal--polestar .portal-tab-content { padding-inline: 8px; }
+.seller-portal--polestar .portal-panel { padding: var(--space-8) 0 var(--space-24); }
+.seller-portal--polestar .portal-tab-content { padding-inline: var(--space-8); }
 .seller-portal--polestar .portal-panel .portal-section.MuiPaper-root { color: var(--ps-ink); }
-.seller-portal--polestar .portal-task-due.MuiChip-root { color: var(--color-primitive-base-white); }
+.seller-portal--polestar .portal-task-due.place-tag { color: var(--color-primitive-base-white); }
 .seller-portal--polestar .team-note-card.MuiPaper-root {
   border-radius: 0;
   background: var(--ps-paper-3);
@@ -282,11 +280,11 @@ body:has(.seller-portal--polestar),
 .seller-portal--polestar .portal-footer { color: var(--ps-ink); background: var(--ps-paper); }
 .seller-portal--polestar .portal-footer-inner.MuiContainer-root { max-width: 1600px; }
 .seller-portal--polestar .portal-footer-content { border-color: var(--ps-rule); }
-.seller-portal--polestar .portal-footer-avatar.MuiAvatar-root { border-radius: 2px; }
+.seller-portal--polestar .portal-footer-avatar.MuiAvatar-root { border-radius: var(--radius-2xs); }
 
 .seller-portal--polestar .floating-design-tools .MuiButton-root {
   border: 1px solid var(--ps-rule);
-  border-radius: 2px;
+  border-radius: var(--radius-2xs);
   background: var(--ps-paper-3);
   color: var(--ps-ink);
   box-shadow: none;
@@ -294,7 +292,7 @@ body:has(.seller-portal--polestar),
 .seller-portal--polestar .floating-design-tools .MuiButton-root:hover { background: var(--ps-surface); }
 
 body:has(.seller-portal--polestar) :is(.listing-sheet-paper, .marketing-dashboard-paper, .dates-drawer-paper, .design-panel-paper, .MuiDialog-paper) {
-  border-radius: 2px;
+  border-radius: var(--radius-2xs);
   border-color: var(--ps-rule);
   color: var(--ps-ink);
   background: var(--ps-paper-2);
@@ -304,7 +302,7 @@ body:has(.seller-portal--polestar) :is(.listing-sheet-paper, .marketing-dashboar
   color: var(--ps-muted);
 }
 body:has(.seller-portal--polestar) :is(.listing-sheet-paper, .marketing-dashboard-paper, .dates-drawer-paper, .design-panel-paper, .MuiDialog-paper) .MuiButton-contained {
-  border-radius: 2px;
+  border-radius: var(--radius-2xs);
   color: var(--ps-paper);
   background: var(--ps-ink);
 }
@@ -313,10 +311,8 @@ body:has(.seller-portal--polestar) :is(.listing-sheet-paper, .marketing-dashboar
   outline-offset: 3px;
 }
 body:has(.seller-portal--polestar) .design-panel-paper .MuiFormControlLabel-label { color: var(--ps-ink); }
-body:has(.seller-portal--polestar) .design-panel-paper .MuiRadio-root { color: var(--ps-muted); }
-body:has(.seller-portal--polestar) .design-panel-paper .MuiRadio-root.Mui-checked { color: var(--ps-ink); }
-body:has(.seller-portal--polestar) .marketing-dashboard-paper .MuiRating-root { color: var(--ps-ink); }
-body:has(.seller-portal--polestar) .marketing-dashboard-paper .MuiRating-iconEmpty { color: var(--ps-rule); }
+body:has(.seller-portal--polestar) .marketing-dashboard-paper .interest-rating.MuiRating-root { color: var(--ps-ink); }
+body:has(.seller-portal--polestar) .marketing-dashboard-paper .interest-rating .MuiRating-iconEmpty { color: var(--ps-rule); }
 body:has(.seller-portal--polestar) .marketing-dashboard-hero::after {
   background: linear-gradient(90deg, rgb(16 16 16 / 82%), rgb(16 16 16 / 28%) 67%, rgb(16 16 16 / 12%));
 }
@@ -325,17 +321,17 @@ body:has(.seller-portal--polestar) .marketing-material-preview[data-design='vide
   background: linear-gradient(0deg, rgb(16 16 16 / 75%), transparent 63%);
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1099.95px) {
   .seller-portal--polestar .priority-grid,
   .seller-portal--polestar .transaction-lower-grid { grid-template-columns: 1fr; }
   .seller-portal--polestar .floating-design-tools {
     position: static;
     justify-content: flex-end;
-    padding: 0 24px 24px;
+    padding: 0 var(--space-24) var(--space-24);
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 899.95px) {
   .seller-portal--polestar .listing-overview--card .listing-photo {
     position: relative;
     inset: auto;
@@ -345,41 +341,41 @@ body:has(.seller-portal--polestar) .marketing-material-preview[data-design='vide
     width: 100%;
     max-width: none;
     margin: 0;
-    padding: 32px;
+    padding: var(--space-32);
   }
   .seller-portal--polestar .listing-overview--card .listing-address.MuiTypography-root { font-size: clamp(2.2rem, 5.3vw, 3.2rem); }
 }
 
-@media (max-width: 620px) {
-  .seller-portal--polestar .portal-topbar-inner.MuiContainer-root { padding-inline: 12px; }
-  .seller-portal--polestar .portal-main.MuiContainer-root { padding-inline: 12px; }
+@media (max-width: 599.95px) {
+  .seller-portal--polestar .portal-topbar-inner.MuiContainer-root { padding-inline: var(--space-12); }
+  .seller-portal--polestar .portal-main.MuiContainer-root { padding-inline: var(--space-12); }
   .seller-portal--polestar .listing-overview--card .listing-photo { height: 240px; }
-  .seller-portal--polestar .listing-overview--card .listing-summary { padding: 28px 24px; }
+  .seller-portal--polestar .listing-overview--card .listing-summary { padding: var(--space-28) var(--space-24); }
   .seller-portal--polestar .listing-overview--card .listing-address.MuiTypography-root { font-size: 2rem; }
   .seller-portal--polestar .listing-feature-footer { align-items: stretch; }
   .seller-portal--polestar .listing-feature-footer .partner-brand-lockup {
     align-self: flex-end;
-    margin-top: 4px;
+    margin-top: var(--space-4);
   }
-  .seller-portal--polestar .priority-grid .portal-section.MuiPaper-root { padding: 28px 24px; }
+  .seller-portal--polestar .priority-grid .portal-section.MuiPaper-root { padding: var(--space-28) var(--space-24); }
   .seller-portal--polestar .marketing-snapshot.MuiPaper-root,
   .seller-portal--polestar .advertising-snapshot.MuiPaper-root {
-    margin-top: 40px;
-    padding: 0 12px;
+    margin-top: var(--space-40);
+    padding: 0 var(--space-12);
   }
-  .seller-portal--polestar .transaction-lower-grid { gap: 40px; margin-top: 40px; }
-  .seller-portal--polestar .marketing-snapshot-content { gap: 24px; }
+  .seller-portal--polestar .transaction-lower-grid { gap: var(--space-40); margin-top: var(--space-40); }
+  .seller-portal--polestar .marketing-snapshot-content { gap: var(--space-24); }
   .seller-portal--polestar .marketing-snapshot-feedback[data-layout='editorial'] { padding-left: 0; }
-  .seller-portal--polestar .portal-panel { padding-inline: 16px; }
+  .seller-portal--polestar .portal-panel { padding-inline: var(--space-16); }
   .seller-portal--polestar .activity-event-heading {
     grid-template-columns: minmax(0, 1fr);
-    gap: 4px;
+    gap: var(--space-4);
   }
   .seller-portal--polestar .activity-event-date.MuiTypography-root { text-align: left; }
-  .seller-portal--polestar .floating-design-tools { padding-inline: 12px; }
+  .seller-portal--polestar .floating-design-tools { padding-inline: var(--space-12); }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 767.95px) {
   body:has(.seller-portal--polestar) .marketing-dashboard-hero::after {
     background: linear-gradient(0deg, rgb(16 16 16 / 80%), transparent 82%);
   }

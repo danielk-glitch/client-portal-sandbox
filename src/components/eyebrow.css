@@ -1,0 +1,6 @@
+.place-eyebrow.MuiTypography-root {
+  display: block;
+  color: var(--color-semantic-text-primary);
+  letter-spacing: var(--tracking-uppercase);
+  text-transform: uppercase;
+}

@@ -1,25 +1,16 @@
 /* design-build · self-critique: Clarity5 Warmth4 Restraint5 Craft4 Variety4 SlopFree5 */
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
-  Avatar,
   Box,
   Button,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Divider,
-  Drawer,
-  IconButton,
   Stack,
   Tab,
   Tabs,
   Typography,
 } from '@mui/material'
 import CloseOutlined from '@mui/icons-material/CloseOutlined'
-import InsertDriveFileOutlined from '@mui/icons-material/InsertDriveFileOutlined'
-import { brandAssets } from '../assets/brand'
 import {
   sampleSellerTransaction,
   type SellerTransaction,
@@ -35,42 +26,57 @@ import { MarketingSnapshot, type MarketingSnapshotData } from './MarketingSnapsh
 import { AdvertisingSnapshot } from './AdvertisingSnapshot'
 import { marketingFeedbackLayouts, type MarketingFeedbackLayout } from './marketingFeedbackLayouts'
 import { MarketingDashboardSheet, type MarketingDashboardSection } from './MarketingDashboardSheet'
-import {
-  ResourcesPanel,
-  ResourceGuideSheet,
-  ActivityEventRow,
-  ActivityPanel,
-  DateEventList,
-  DateEventRow,
-  DocumentsPanel,
-  DocumentThumbnail,
-  PeopleSection,
-  PaginatedTabList,
-  PortalIconBadge,
-  PortalFooter,
-  PortalSection,
-  TaskRow,
-  TeamNoteCard,
-  TransactionRowList,
-  type PeopleTab,
-} from '../transaction-portal/components'
+import { AdvertisingRow, ShowingFeedbackRow, ResourcesPanel, ResourceGuideSheet, ActivityEventRow, ActivityPanel, DateEventList, DateEventRow, DocumentsPanel, DocumentViewer, useDocumentPins, PeopleSection, PaginatedTabList, PortalFooter, PortalTopbar, TaskRow, TeamNoteCard, TransactionRowList, type PeopleTab } from '../transaction-portal/components'
+import { PortalSection } from '../components/PortalSection'
 import type { TransactionResource } from '../transaction-portal/types'
-import { CardActionButton } from '../components/CardActionButton'
+import { TextLink } from '../components/TextLink'
+import { SectionLabel } from '../components/SectionLabel'
+import { PlaceCard } from '../components/PlaceCard'
+import { PlaceIconButton } from '../components/PlaceIconButton'
+import { PlaceSheet } from '../components/PlaceSheet'
+import { PlaceModal } from '../components/PlaceModal'
+import { PlaceTag } from '../components/PlaceTag'
 import { ListingPreparation } from './ListingPreparation'
-import { createBeforeListingTransaction, readSellerJourneyView, type SellerJourneyView } from '../internal/review/sellerJourneyViews'
+import { createBeforeListingTransaction, createListedTransaction, readSellerJourneyView, type SellerJourneyView } from '../internal/review/sellerJourneyViews'
 import { SellerReviewTools } from '../internal/review/SellerReviewTools'
 import { SellerTimeline, type TimelineTransition } from './SellerTimeline'
+import { DocumentListRow } from './DocumentListRow'
+import { TransactionOverview } from './TransactionOverview'
+import { ImportantNotes } from './timeline-first/ImportantNotes'
 import { PropertySummaryCard } from './PropertySummaryCard'
+import { MarketActivityBlock } from './market-activity/MarketActivityBlock'
+import { emptyMarketActivity, hiddenMarketActivity, type MarketActivity } from './market-activity/marketActivityData'
+import { daysBetween } from './timeline-first/timelineFirstData'
 import './seller-columns.css'
-import { beforeListingTimeline, timelineResources, underContractTimeline, type SellerTimelineData } from './sellerTimelineData'
+import { beforeListingTimeline, listedTimeline, timelineResources, underContractTimeline, type SellerTimelineData } from './sellerTimelineData'
+import { buildClientDocuments, documentsLinkedTo, sellerDocumentRecords, type ClientDocument } from './timeline-first/documentLibrary'
+import { clientDocumentFacts } from './timeline-first/documentViewerFacts'
+import { StagedDocumentsPanel } from './timeline-first/StagedDocumentsPanel'
+import { buildTaggedDocuments, resourceDocumentId } from './timeline-first/taggedDocuments'
 import './seller-portal.css'
 import './seller-polestar.css'
+
+/** 2 column page only: how containers separate from the page. */
+type ContainerStyle = 'shadow' | 'stroke'
+
+/** Design panel review scenario for Market activity (?market=empty|hidden). */
+export type MarketActivityScenario = 'activity' | 'empty' | 'hidden'
 
 type SellerPortalProps = {
   transaction?: SellerTransaction
   marketingSnapshot?: MarketingSnapshotData
+  /** Nearby competing homes since listing. Omit to leave the block off the page. */
+  marketActivity?: MarketActivity
   initialListingOpen?: boolean
   basePath?: string
+  /** Show documents as list rows instead of preview cards, with no pinning (current functionality). */
+  documentRows?: boolean
+  /** Adds Showing feedback and Advertising to the tabs under the overview (current functionality). */
+  listingPerformanceTabs?: boolean
+  /** Header layout when the URL doesn't pick one. */
+  defaultHeader?: ListingOverviewVariant
+  /** Before listing: put the preparation message in the header (top right) instead of in its own block below it. */
+  headerPreparation?: boolean
   visualTheme?: 'polestar'
   readOnly?: boolean
   showReviewTools?: boolean
@@ -78,41 +84,68 @@ type SellerPortalProps = {
   layout?: 'dashboard' | 'timeline' | 'timeline-columns'
 }
 
-export type PortalTab = 'activity' | 'tasks' | 'notes' | 'documents' | 'resources'
+export type OverviewLayout = 'timeline' | 'classic'
+
+export type PortalTab = 'activity' | 'tasks' | 'notes' | 'feedback' | 'advertising' | 'documents' | 'resources'
 
 export const portalTabs: Array<{ id: PortalTab; label: string }> = [
   { id: 'activity', label: 'Activity' },
   { id: 'tasks', label: 'Tasks' },
   { id: 'notes', label: 'Notes' },
+  { id: 'feedback', label: 'Showing feedback' },
+  { id: 'advertising', label: 'Advertising' },
   { id: 'documents', label: 'Documents' },
   { id: 'resources', label: 'Resources' },
 ]
 
-export function SellerPortal({ transaction: baseTransaction = sampleSellerTransaction, marketingSnapshot, initialListingOpen = false, basePath = '/seller', visualTheme, readOnly = false, showReviewTools = true, layout = 'dashboard' }: SellerPortalProps) {
+/**
+ * V1 documents for the timeline pages. Guides from the old resource list become documents with the type "resource".
+ * Pending view: the team's document records (type, stage, linked date, visibility). Before-listing view: its own documents, with guides tagged.
+ */
+function timelineDocuments(transaction: SellerTransaction, beforeListing: boolean): TransactionDocument[] {
+  return beforeListing
+    ? buildTaggedDocuments(transaction.documents, timelineResources)
+    : buildClientDocuments(sellerDocumentRecords, timelineResources, underContractTimeline)
+}
+
+export function SellerPortal({ transaction: baseTransaction = sampleSellerTransaction, marketingSnapshot, marketActivity, initialListingOpen = false, basePath = '/seller', visualTheme, readOnly = false, showReviewTools = true, layout = 'dashboard', documentRows = false, listingPerformanceTabs = false, defaultHeader = 'light-bottom', headerPreparation = false }: SellerPortalProps) {
   /** Both timeline explorations share the timeline; 'timeline-columns' rearranges the page into two columns. */
   const timelineLayout = layout === 'timeline' || layout === 'timeline-columns'
   const columnsLayout = layout === 'timeline-columns'
   const [journeyView, setJourneyView] = useState(() => readSellerJourneyView(window.location.search))
   const beforeListing = journeyView === 'before-listing'
+  const listed = journeyView === 'listed'
   const transaction = useMemo(() => {
-    const journeyTransaction = beforeListing ? createBeforeListingTransaction(baseTransaction) : baseTransaction
-    return timelineLayout ? { ...journeyTransaction, resources: timelineResources } : journeyTransaction
-  }, [beforeListing, baseTransaction, timelineLayout])
-  const availableTabs = portalTabs.filter((tab) => tab.id !== 'resources' || Boolean(transaction.resources?.length))
+    const journeyTransaction = beforeListing ? createBeforeListingTransaction(baseTransaction) : listed ? createListedTransaction(baseTransaction) : baseTransaction
+    // V1 data: on the timeline pages resources are documents (type "resource"), not their own list.
+    return timelineLayout ? { ...journeyTransaction, listing: { ...journeyTransaction.listing, status: journeyTransaction.listing.status === 'Under contract' ? 'Pending' : journeyTransaction.listing.status }, documents: timelineDocuments(journeyTransaction, beforeListing), resources: undefined } : journeyTransaction
+  }, [beforeListing, listed, baseTransaction, timelineLayout])
+  const showListingTabs = listingPerformanceTabs && !beforeListing
+  const availableTabs = portalTabs.filter((tab) => {
+    if (tab.id === 'feedback' || tab.id === 'advertising') return showListingTabs
+    return tab.id !== 'resources' || Boolean(transaction.resources?.length)
+  })
   const [selectedResource, setSelectedResource] = useState<TransactionResource | null>(null)
   const portalRef = useRef<HTMLDivElement>(null)
   const defaultMarketingLayout = marketingSnapshot?.insights ? 'views' : 'materials'
   const [headerVariant, setHeaderVariant] = useState<ListingOverviewVariant>(() => {
     if (visualTheme === 'polestar') return 'card'
     const requestedHeader = new URLSearchParams(window.location.search).get('header')
-    if (requestedHeader === 'card' || requestedHeader === 'full' || requestedHeader === 'light' || requestedHeader === 'light-bottom') return requestedHeader
-    return 'light-bottom'
+    if (requestedHeader === 'card' || requestedHeader === 'full' || requestedHeader === 'light' || requestedHeader === 'light-bottom' || requestedHeader === 'light-compact') return requestedHeader
+    return defaultHeader
   })
+  const [containerStyle, setContainerStyle] = useState<ContainerStyle>(() =>
+    new URLSearchParams(window.location.search).get('containers') === 'stroke' ? 'stroke' : 'shadow',
+  )
   const [timelineTransition, setTimelineTransition] = useState<TimelineTransition>(() =>
     new URLSearchParams(window.location.search).get('timeline') === 'dark' ? 'dark' : 'divider',
   )
+  /** The row under the header on the current-functionality page. Timeline overview is the default; `?overview=classic` restores dates beside recent activity. */
+  const [overviewLayout, setOverviewLayout] = useState<OverviewLayout>(() =>
+    new URLSearchParams(window.location.search).get('overview') === 'classic' ? 'classic' : 'timeline',
+  )
   const [listingLink, setListingLink] = useState<HeaderListingLink>(() =>
-    new URLSearchParams(window.location.search).get('listingLink') === 'idx-mvp' ? 'idx-mvp' : 'first-party',
+    new URLSearchParams(window.location.search).get('listingLink') === 'first-party' ? 'first-party' : 'idx-mvp',
   )
   const [feedbackLayout, setFeedbackLayout] = useState<MarketingFeedbackLayout>(() => {
     const requestedLayout = new URLSearchParams(window.location.search).get('feedback')
@@ -122,6 +155,10 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
     const requestedLayout = new URLSearchParams(window.location.search).get('marketingLayout')
     return requestedLayout === 'views' || requestedLayout === 'materials' ? requestedLayout : defaultMarketingLayout
   })
+  const [marketScenario, setMarketScenario] = useState<MarketActivityScenario>(() => {
+    const requested = new URLSearchParams(window.location.search).get('market')
+    return requested === 'empty' || requested === 'hidden' ? requested : 'activity'
+  })
   const [activeTab, setActiveTab] = useState<PortalTab>(() => {
     const requestedTab = new URLSearchParams(window.location.search).get('section')
     if (requestedTab === 'timeline') return 'activity'
@@ -129,8 +166,10 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
   })
   const visibleTab = availableTabs.find((tab) => tab.id === activeTab)?.id ?? 'activity'
   const [activePeopleTab, setActivePeopleTab] = useState<PeopleTab>(() =>
-    new URLSearchParams(window.location.search).get('people') === 'viewers' ? 'viewers' : 'team',
+    peopleTabFromUrl(),
   )
+  const documentStorageKey = `place-document-pins:${transaction.listing.mlsNumber}:${transaction.viewers[0]?.id ?? 'guest'}`
+  const documentPins = useDocumentPins(documentStorageKey)
   const [selectedDocument, setSelectedDocument] = useState<TransactionDocument | null>(null)
   const [datesDrawerOpen, setDatesDrawerOpen] = useState(false)
   const [marketingDashboardSection, setMarketingDashboardSection] = useState<MarketingDashboardSection | null>(() => {
@@ -148,7 +187,7 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
     if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
     const blocks = portalRef.current?.querySelectorAll<HTMLElement>(
-      '.portal-main > .listing-overview, .portal-main > .seller-timeline, .priority-grid > .portal-section, .priority-grid > .upcoming-dates-card, .portal-main > .marketing-snapshot, .transaction-lower-grid > .people-section, .transaction-lower-grid > .transaction-sections, .portal-footer',
+      '.portal-main > .listing-overview, .portal-main > .seller-timeline, .portal-main > .transaction-overview, .priority-grid > .portal-section, .priority-grid > .upcoming-dates-card, .portal-main > .marketing-snapshot, .portal-main > .market-activity, .transaction-lower-grid > .people-section, .transaction-lower-grid > .transaction-sections, .portal-footer',
     )
     if (!blocks) return
 
@@ -168,7 +207,7 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
     }
 
     return () => observer.disconnect()
-  }, [marketingSnapshot, journeyView])
+  }, [marketingSnapshot, journeyView, marketScenario, overviewLayout])
 
   useEffect(() => {
     const target = window.location.hash.slice(1)
@@ -215,6 +254,11 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
     setListingOpen(false)
   }
 
+  function peopleTabFromUrl(): PeopleTab {
+    const requested = new URLSearchParams(window.location.search).get('people')
+    return requested === 'viewers' || requested === 'collaborators' ? requested : 'team'
+  }
+
   function selectTab(value: PortalTab) {
     setActiveTab(value)
     const url = new URL(window.location.href)
@@ -252,11 +296,27 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
     window.history.replaceState(null, '', url)
   }
 
+  function selectOverviewLayout(value: OverviewLayout) {
+    setOverviewLayout(value)
+    const url = new URL(window.location.href)
+    if (value === 'timeline') url.searchParams.delete('overview')
+    else url.searchParams.set('overview', value)
+    window.history.replaceState(null, '', url)
+  }
+
   function selectListingLink(value: HeaderListingLink) {
     setListingLink(value)
     const url = new URL(window.location.href)
-    if (value === 'first-party') url.searchParams.delete('listingLink')
+    if (value === 'idx-mvp') url.searchParams.delete('listingLink')
     else url.searchParams.set('listingLink', value)
+    window.history.replaceState(null, '', url)
+  }
+
+  function selectContainerStyle(value: ContainerStyle) {
+    setContainerStyle(value)
+    const url = new URL(window.location.href)
+    if (value === 'shadow') url.searchParams.delete('containers')
+    else url.searchParams.set('containers', value)
     window.history.replaceState(null, '', url)
   }
 
@@ -276,6 +336,14 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
     window.history.replaceState(null, '', url)
   }
 
+  function selectMarketScenario(value: MarketActivityScenario) {
+    setMarketScenario(value)
+    const url = new URL(window.location.href)
+    if (value === 'activity') url.searchParams.delete('market')
+    else url.searchParams.set('market', value)
+    window.history.replaceState(null, '', url)
+  }
+
   function selectMarketingLayout(value: 'materials' | 'views') {
     setMarketingLayout(value)
     const url = new URL(window.location.href)
@@ -290,6 +358,38 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
       document.getElementById('transaction-information')?.scrollIntoView({ block: 'start' })
       document.getElementById('seller-tab-activity')?.focus({ preventScroll: true })
     })
+  }
+
+  function showAllNotes() {
+    selectTab('notes')
+    requestAnimationFrame(() => {
+      document.getElementById('transaction-information')?.scrollIntoView({ block: 'start' })
+      document.getElementById('seller-tab-notes')?.focus({ preventScroll: true })
+    })
+  }
+
+  /** Unpinned documents in the current-functionality tab are list rows, like v1 iteration 2. Pinned ones keep their preview cards. */
+  function documentRow(doc: TransactionDocument) {
+    return (
+      <DocumentListRow
+        key={doc.id}
+        title={doc.name}
+        meta={`${doc.category} · Uploaded ${doc.uploadedAt}`}
+        label={`Open ${doc.name}`}
+        onOpen={() => setSelectedDocument(doc)}
+      />
+    )
+  }
+
+  /** Guides are documents in V1: open the matching "resource" document. */
+  function openGuideAsDocument(guide: { id: string }) {
+    const doc = transaction.documents.find((candidate) => candidate.id === resourceDocumentId(guide.id))
+    if (doc) setSelectedDocument(doc)
+  }
+
+  /** Documents the team linked to a date show on that date's row. Only the pending view has linked dates. */
+  function linkedDocumentsFor(step: { id: string }) {
+    return beforeListing ? [] : documentsLinkedTo(transaction.documents as ClientDocument[], step.id)
   }
 
   function openMilestoneGuide(resourceId: string) {
@@ -307,7 +407,7 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
   }
 
 
-  const timelineData = beforeListing ? beforeListingTimeline : underContractTimeline
+  const timelineData = beforeListing ? beforeListingTimeline : listed ? listedTimeline : underContractTimeline
   const marketingBlock = !beforeListing && (marketingSnapshot && marketingLayout === 'views' && marketingSnapshot.insights ? (
     <AdvertisingSnapshot
       data={marketingSnapshot.insights}
@@ -322,6 +422,12 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
       onOpenDashboard={() => setMarketingDashboardSection('overview')}
     />
   ))
+
+  // Competing homes matter while the home is live. Before listing there's no list date; once pending, the comparison is moot.
+  const scenarioActivity = marketScenario === 'empty' ? emptyMarketActivity : marketScenario === 'hidden' ? hiddenMarketActivity : marketActivity
+  // Keep nearby homes directly below listing performance in every layout.
+  const showMarketActivity = listed && marketActivity && scenarioActivity
+  const marketActivityBlock = showMarketActivity && <MarketActivityBlock activity={scenarioActivity} />
 
   const transactionSections = (
     <Box id="transaction-information" className="transaction-sections">
@@ -356,8 +462,25 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
         {visibleTab === 'activity' && <ActivityPanel events={transaction.timeline} />}
         {visibleTab === 'tasks' && <TasksPanel tasks={transaction.tasks} />}
         {visibleTab === 'notes' && <NotesPanel notes={transaction.notes} />}
-        {visibleTab === 'documents' && (
-          <DocumentsPanel readOnly={readOnly} key={`${transaction.listing.mlsNumber}:${transaction.viewers[0]?.id}`} storageKey={`place-document-pins:${transaction.listing.mlsNumber}:${transaction.viewers[0]?.id ?? "guest"}`} documents={transaction.documents} onOpen={setSelectedDocument} />
+        {visibleTab === 'feedback' && (
+          <Box component="section" aria-label="Showing feedback" className="portal-tab-content">
+            <PaginatedTabList items={transaction.feedback} itemName="responses" ariaLabel="Showing feedback pages">
+              {(visible) => <TransactionRowList>{visible.map((item) => <ShowingFeedbackRow key={item.id} feedback={item} />)}</TransactionRowList>}
+            </PaginatedTabList>
+          </Box>
+        )}
+        {visibleTab === 'advertising' && (
+          <Box component="section" aria-label="Advertising" className="portal-tab-content">
+            <PaginatedTabList items={transaction.advertising} itemName="updates" ariaLabel="Advertising pages">
+              {(visible) => <TransactionRowList>{visible.map((event) => <AdvertisingRow key={event.id} event={event} />)}</TransactionRowList>}
+            </PaginatedTabList>
+          </Box>
+        )}
+        {visibleTab === 'documents' && timelineLayout && !beforeListing && (
+          <StagedDocumentsPanel documents={transaction.documents as ClientDocument[]} side="seller" onOpen={setSelectedDocument} pinnedIds={documentPins.pinnedIds} />
+        )}
+        {visibleTab === 'documents' && !(timelineLayout && !beforeListing) && (
+          <DocumentsPanel readOnly={readOnly} key={`${transaction.listing.mlsNumber}:${transaction.viewers[0]?.id}`} storageKey={documentStorageKey} pins={documentPins} documents={transaction.documents} onOpen={setSelectedDocument} renderRow={documentRows ? documentRow : undefined} pinning={!documentRows} />
         )}
       </Box>
     </Box>
@@ -365,27 +488,10 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
 
   return (
     <Box className={`seller-portal${visualTheme === 'polestar' ? ' seller-portal--polestar' : ''}`} ref={portalRef}>
-      <Box component="header" className="portal-topbar">
-        <Container maxWidth="xl" className="portal-topbar-inner">
-          <Box component="a" href="/" className="portal-brand-link" aria-label="PLACE client portal home">
-            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-              <Box component="img" src={brandAssets.place.wordmarkDefault} alt="" className="place-wordmark" />
-              <Box className="topbar-divider" />
-              <Typography variant="bodySStandard" color="text.secondary" className="portal-brand-label">Client portal</Typography>
-            </Stack>
-          </Box>
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-            <Avatar className="account-avatar">TB</Avatar>
-            <Box className="account-name">
-              <Typography variant="labelM">Tim Bennett</Typography>
-              <Typography variant="labelS" color="text.secondary">Seller</Typography>
-            </Box>
-          </Stack>
-        </Container>
-      </Box>
+      <PortalTopbar viewer={transaction.viewers[0]} />
 
       {columnsLayout ? (
-        <Container maxWidth="xl" className="portal-main portal-main--columns">
+        <Container maxWidth="xl" className={`portal-main portal-main--columns portal-main--containers-${containerStyle}`}>
           <Box className="columns-greeting">
             <Box>
               <Typography variant="labelS" className="columns-greeting-date">{new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${timelineData.today}T12:00:00Z`))}</Typography>
@@ -398,52 +504,75 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
             <Box component="aside" className="columns-side" aria-label="Your home and team">
               <PropertySummaryCard
                 transaction={transaction}
-                stage={beforeListing ? 'Preparing to list' : 'Under contract'}
                 facts={columnFacts(timelineData)}
                 onSeeListing={openListing}
               />
-              <PeopleSection team={transaction.team} viewers={transaction.viewers} value={activePeopleTab} onChange={selectPeopleTab} />
+              <PeopleSection team={transaction.team} collaborators={transaction.collaborators} showContact={!!transaction.collaborators} viewers={transaction.viewers} value={activePeopleTab} onChange={selectPeopleTab} />
             </Box>
 
             <Box className="columns-main">
               <SellerTimeline
                 data={timelineData}
                 transition="card"
-                resources={transaction.resources ?? []}
+                resources={timelineResources}
                 documents={transaction.documents}
                 team={transaction.team}
-                onOpenResource={setSelectedResource}
+                resourcesAsDocuments
+                linkedDocuments={linkedDocumentsFor}
+                onOpenResource={openGuideAsDocument}
                 onOpenDocument={setSelectedDocument}
                 onOpenMarketing={!beforeListing && marketingSnapshot ? () => setMarketingDashboardSection('overview') : undefined}
               />
               {marketingBlock}
+              {marketActivityBlock}
               {transactionSections}
             </Box>
           </Box>
         </Container>
       ) : (
       <Container maxWidth="xl" className="portal-main">
-        <ListingOverview transaction={transaction} onSeeListing={openListing} listingLink={listingLink} variant={beforeListing ? 'no-listing' : headerVariant} polestarLayout={visualTheme === 'polestar'} />
+        <ListingOverview transaction={transaction} onSeeListing={openListing} listingLink={listingLink} variant={beforeListing ? 'no-listing' : headerVariant} polestarLayout={visualTheme === 'polestar'} compact={timelineLayout} preparation={beforeListing && headerPreparation ? transaction.clientMessage : undefined} />
 
-        {beforeListing && transaction.clientMessage && <ListingPreparation message={transaction.clientMessage} />}
+        {beforeListing && transaction.clientMessage && !headerPreparation && <ListingPreparation message={transaction.clientMessage} />}
 
         {timelineLayout ? (
           <SellerTimeline
             data={timelineData}
             transition={timelineTransition}
-            resources={transaction.resources ?? []}
+            resources={timelineResources}
             documents={transaction.documents}
             team={transaction.team}
-            onOpenResource={setSelectedResource}
+            resourcesAsDocuments
+            linkedDocuments={linkedDocumentsFor}
+            onOpenResource={openGuideAsDocument}
             onOpenDocument={setSelectedDocument}
             onOpenMarketing={!beforeListing && marketingSnapshot ? () => setMarketingDashboardSection('overview') : undefined}
           />
+        ) : overviewLayout === 'timeline' ? (
+          <TransactionOverview
+            timeline={
+              <SellerTimeline
+                data={timelineData}
+                transition="card"
+                trackerOnly
+                staticTracker
+                resources={timelineResources}
+                documents={transaction.documents}
+                team={transaction.team}
+                resourcesAsDocuments
+                onOpenResource={openGuideAsDocument}
+                onOpenDocument={setSelectedDocument}
+              />
+            }
+            dates={<OverviewDates today={timelineData.today} dates={transaction.upcomingDates} resources={transaction.resources} onReadGuide={openMilestoneGuide} />}
+            notes={<ImportantNotes embedded title="Notes" limit={3} emptyText="No notes yet." notes={transaction.notes} onSeeAll={showAllNotes} />}
+          />
         ) : <Box className="priority-grid" aria-label="Current transaction activity">
-          <UpcomingDatesPanel dates={transaction.upcomingDates} resources={transaction.resources} onSeeAll={() => setDatesDrawerOpen(true)} onReadGuide={openMilestoneGuide} />
+          <UpcomingDatesPanel today={timelineData.today} dates={transaction.upcomingDates} resources={transaction.resources} onSeeAll={() => setDatesDrawerOpen(true)} onReadGuide={openMilestoneGuide} />
           <PortalSection
             title="Recent activity"
             prominent
-            action={<CardActionButton onClick={showAllActivity}>See all</CardActionButton>}
+            action={<TextLink onClick={showAllActivity}>See all</TextLink>}
           >
             <TimelineEventsList events={transaction.timeline.slice(0, 3)} />
           </PortalSection>
@@ -451,8 +580,10 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
 
         {marketingBlock}
 
+        {marketActivityBlock}
+
         <Box className="transaction-lower-grid">
-          <PeopleSection team={transaction.team} viewers={transaction.viewers} value={activePeopleTab} onChange={selectPeopleTab} />
+          <PeopleSection team={transaction.team} collaborators={transaction.collaborators} showContact={!!transaction.collaborators} viewers={transaction.viewers} value={activePeopleTab} onChange={selectPeopleTab} />
 
           {transactionSections}
         </Box>
@@ -467,6 +598,8 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
         beforeListing={beforeListing}
         visualTheme={visualTheme}
         marketingSnapshot={marketingSnapshot}
+        overviewLayout={timelineLayout || columnsLayout ? undefined : overviewLayout}
+        selectOverviewLayout={selectOverviewLayout}
         listingLink={listingLink}
         selectListingLink={selectListingLink}
         headerVariant={headerVariant}
@@ -475,7 +608,11 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
         selectMarketingLayout={selectMarketingLayout}
         feedbackLayout={feedbackLayout}
         selectFeedbackLayout={selectFeedbackLayout}
+        marketScenario={marketActivity && listed ? marketScenario : undefined}
+        selectMarketScenario={selectMarketScenario}
         timelineTransition={timelineLayout && !columnsLayout ? timelineTransition : undefined}
+        containerStyle={columnsLayout ? containerStyle : undefined}
+        selectContainerStyle={selectContainerStyle}
         selectTimelineTransition={selectTimelineTransition}
       />}
 
@@ -491,68 +628,53 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
         />
       )}
 
-      <Drawer
-        anchor="right"
+      <PlaceSheet
         open={datesDrawerOpen}
         onClose={() => setDatesDrawerOpen(false)}
-        slotProps={{ paper: { className: 'dates-drawer-paper' } }}
+        labelledBy="transaction-dates-title"
+        paperClassName="dates-drawer-paper"
       >
-        <Box className="dates-drawer-header">
-          <Box>
-            <Typography component="h2" variant="titleS">Transaction dates</Typography>
-            <Typography variant="bodySStandard" color="text.secondary">
-              Key dates and activity for your sale
-            </Typography>
+        <Box className="place-sheet-scroll dates-drawer-scroll">
+          <Box className="dates-drawer-column">
+            <Box className="dates-drawer-header">
+              <Box>
+                <Typography component="h2" variant="titleS" id="transaction-dates-title">Transaction dates</Typography>
+                <Typography variant="bodySStandard" color="text.secondary">
+                  Key dates and activity for your sale
+                </Typography>
+              </Box>
+              <PlaceIconButton onClick={() => setDatesDrawerOpen(false)} aria-label="Close transaction dates">
+                <CloseOutlined />
+              </PlaceIconButton>
+            </Box>
+            <Box className="dates-drawer-content">
+              <Box component="section" aria-labelledby="all-upcoming-dates-title" className="dates-drawer-section">
+                <Typography component="h3" variant="titleXS" id="all-upcoming-dates-title" className="dates-drawer-section-title">
+                  Upcoming dates
+                </Typography>
+                <UpcomingDatesList today={timelineData.today} dates={transaction.upcomingDates} resources={transaction.resources} onReadGuide={openMilestoneGuide} />
+              </Box>
+              <Divider />
+              <Box component="section" aria-labelledby="past-events-title" className="dates-drawer-section">
+                <Typography component="h3" variant="titleXS" id="past-events-title" className="dates-drawer-section-title">
+                  Past events
+                </Typography>
+                <PastEventsList events={transaction.timeline} />
+              </Box>
+            </Box>
           </Box>
-          <IconButton onClick={() => setDatesDrawerOpen(false)} aria-label="Close transaction dates" className="dates-drawer-close">
-            <CloseOutlined />
-          </IconButton>
         </Box>
-        <Box className="dates-drawer-content">
-          <Box component="section" aria-labelledby="all-upcoming-dates-title" className="dates-drawer-section">
-            <Typography component="h3" variant="titleXS" id="all-upcoming-dates-title" className="dates-drawer-section-title">
-              Upcoming dates
-            </Typography>
-            <UpcomingDatesList dates={transaction.upcomingDates} resources={transaction.resources} onReadGuide={openMilestoneGuide} />
-          </Box>
-          <Divider />
-          <Box component="section" aria-labelledby="past-events-title" className="dates-drawer-section">
-            <Typography component="h3" variant="titleXS" id="past-events-title" className="dates-drawer-section-title">
-              Past events
-            </Typography>
-            <PastEventsList events={transaction.timeline} />
-          </Box>
-        </Box>
-      </Drawer>
+      </PlaceSheet>
 
       <ResourceGuideSheet resource={selectedResource} resources={transaction.resources ?? []} onSelectResource={setSelectedResource} onClose={() => setSelectedResource(null)} />
 
-      <Dialog open={selectedDocument !== null} onClose={() => setSelectedDocument(null)} fullWidth maxWidth="sm">
-        {selectedDocument && (
-          <>
-            <DialogTitle className="document-dialog-title">
-              <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-                <PortalIconBadge><InsertDriveFileOutlined /></PortalIconBadge>
-                <Box>
-                  <Typography variant="titleXS">{selectedDocument.name}</Typography>
-                  <Typography variant="labelS" color="text.secondary">{selectedDocument.category}</Typography>
-                </Box>
-              </Stack>
-            </DialogTitle>
-            <DialogContent dividers>
-              <Stack spacing={2}>
-                <DocumentThumbnail document={selectedDocument} />
-                <Typography variant="bodySStandard" color="text.secondary">
-                  {selectedDocument.summary}
-                </Typography>
-              </Stack>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setSelectedDocument(null)}>Close preview</Button>
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
+      <DocumentViewer
+        document={selectedDocument}
+        onClose={() => setSelectedDocument(null)}
+        pinned={selectedDocument ? documentPins.isPinned(selectedDocument.id) : false}
+        onTogglePin={readOnly || documentRows ? undefined : documentPins.togglePin}
+        extraFacts={clientDocumentFacts}
+      />
     </Box>
   )
 }
@@ -577,31 +699,94 @@ function TimelineEventsList({ events }: { events: TimelineEvent[] }) {
   )
 }
 
-function UpcomingDatesPanel({ dates, resources, onSeeAll, onReadGuide }: { dates: UpcomingDate[]; resources?: TransactionResource[]; onSeeAll: () => void; onReadGuide: (resourceId: string) => void }) {
-  const nextDates = [...dates].sort((first, second) => first.date.localeCompare(second.date)).slice(0, 3)
+function UpcomingDatesPanel({ today, dates, resources, onSeeAll, onReadGuide }: { today: string; dates: UpcomingDate[]; resources?: TransactionResource[]; onSeeAll: () => void; onReadGuide: (resourceId: string) => void }) {
+  const nextDates = [...dates].filter(item => item.date >= today).sort((first, second) => first.date.localeCompare(second.date)).slice(0, 3)
 
   return (
     <Box className="upcoming-dates-card">
       <PortalSection
         title="Upcoming dates"
         prominent
-        action={<CardActionButton onClick={onSeeAll}>See all</CardActionButton>}
+        action={<TextLink onClick={onSeeAll}>See all</TextLink>}
       >
-        <UpcomingDatesList dates={nextDates} resources={resources} onReadGuide={onReadGuide} />
+        <UpcomingDatesList today={today} dates={nextDates} resources={resources} onReadGuide={onReadGuide} />
       </PortalSection>
     </Box>
   )
 }
 
-function UpcomingDatesList({ dates, resources, onReadGuide }: { dates: UpcomingDate[]; resources?: TransactionResource[]; onReadGuide: (resourceId: string) => void }) {
+/** Dates carry only a day and a title, so rows stay light. The first date on or after today is featured with how far away it is. */
+function UpcomingDatesList({ today, dates, resources, onReadGuide, featureNext = true }: { today: string; dates: UpcomingDate[]; resources?: TransactionResource[]; onReadGuide: (resourceId: string) => void; featureNext?: boolean }) {
+  const sorted = [...dates].sort((first, second) => first.date.localeCompare(second.date))
+  const nextId = featureNext ? sorted.find(item => item.date >= today)?.id : undefined
   return (
     <DateEventList>
-      {[...dates].sort((first, second) => first.date.localeCompare(second.date)).map((item) => {
+      {sorted.map((item) => {
         const guidance = item.guidance
         const attached = (guidance?.resourceIds ?? []).map(id => resources?.find(resource => resource.id === id)).filter((resource): resource is TransactionResource => !!resource)
-        return <DateEventRow key={item.id} date={item.date} title={item.title} description={item.description} resources={attached} onReadResource={resource => onReadGuide(resource.id)} guidance={guidance} />
+        const featured = item.id === nextId
+        const days = daysBetween(today, item.date)
+        const away = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`
+        return <DateEventRow key={item.id} today={today} date={item.date} title={item.title} featured={featured} plainDate={!featured} resources={attached} onReadResource={resource => onReadGuide(resource.id)} guidance={guidance}>{featured ? away : undefined}</DateEventRow>
       })}
     </DateEventList>
+  )
+}
+
+/** Overview block, one "Dates" section: the next date in an elevated card, the dates after it, and a button that opens every date. */
+function OverviewDates({ today, dates, resources, onReadGuide }: { today: string; dates: UpcomingDate[]; resources?: TransactionResource[]; onReadGuide: (resourceId: string) => void }) {
+  const sorted = [...dates].sort((first, second) => first.date.localeCompare(second.date))
+  const upcoming = sorted.filter(item => item.date >= today)
+  const [next, ...later] = upcoming
+  const [allOpen, setAllOpen] = useState(false)
+  const listedCount = 5
+  if (!next) return <><SectionLabel component="h2">Dates</SectionLabel><Typography variant="bodySStandard" color="text.secondary" className="overview-empty">No upcoming dates.</Typography></>
+  const days = daysBetween(today, next.date)
+  const away = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`
+  const attached = (next.guidance?.resourceIds ?? []).map(id => resources?.find(resource => resource.id === id)).filter((resource): resource is TransactionResource => !!resource)
+  return (
+    <>
+      <SectionLabel id="overview-dates-label" component="h2">Dates</SectionLabel>
+      <PlaceCard className="overview-next">
+        <DateEventList>
+          <DateEventRow today={today} date={next.date} title={next.title} featured eyebrow={<Typography variant="labelS" component="span" className="overview-next-eyebrow">Up next</Typography>} titleAdornment={<PlaceTag className="overview-next-away">{away}</PlaceTag>} resources={attached} onReadResource={resource => onReadGuide(resource.id)} guidance={next.guidance} />
+        </DateEventList>
+      </PlaceCard>
+      {later.length > 0 && (
+        <Box className="overview-later">
+          <UpcomingDatesList today={today} dates={later.slice(0, listedCount)} resources={resources} onReadGuide={onReadGuide} featureNext={false} />
+        </Box>
+      )}
+      <Box className="overview-all">
+        <Button variant="outlined" onClick={() => setAllOpen(true)} aria-haspopup="dialog">See all dates</Button>
+      </Box>
+      <PlaceModal open={allOpen} onClose={() => setAllOpen(false)} title="All dates" size="m" closeLabel="Close all dates">
+        <AllDatesList today={today} dates={sorted} resources={resources} onReadGuide={onReadGuide} />
+      </PlaceModal>
+    </>
+  )
+}
+
+/** Every date in order as one connected timeline. Past dates are struck through. When it opens, the list scrolls to the first date that is today or later; earlier dates are above it. */
+function AllDatesList({ today, dates, resources, onReadGuide }: { today: string; dates: UpcomingDate[]; resources?: TransactionResource[]; onReadGuide: (resourceId: string) => void }) {
+  const firstUpcoming = dates.find(item => item.date >= today)
+  const firstUpcomingDate = firstUpcoming?.date
+  const scrollToUpcoming = useCallback((list: HTMLElement | null) => {
+    if (!list || !firstUpcomingDate) return
+    const row = list.querySelector(`time[datetime="${firstUpcomingDate}"]`)?.closest('li')
+    const scroller = list.closest('.place-modal-content')
+    if (!row || !scroller) return
+    scroller.scrollTop += row.getBoundingClientRect().top - scroller.getBoundingClientRect().top
+  }, [firstUpcomingDate])
+  return (
+    <Box className="all-dates-timeline" ref={scrollToUpcoming}>
+      <DateEventList>
+        {dates.map((item) => {
+          const attached = (item.guidance?.resourceIds ?? []).map(id => resources?.find(resource => resource.id === id)).filter((resource): resource is TransactionResource => !!resource)
+          return <DateEventRow key={item.id} today={today} date={item.date} title={item.title} past={item.date < today} resources={attached} onReadResource={resource => onReadGuide(resource.id)} guidance={item.guidance} />
+        })}
+      </DateEventList>
+    </Box>
   )
 }
 

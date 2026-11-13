@@ -4,7 +4,7 @@
   border: 1px solid var(--color-semantic-stroke-primary-light);
   border-radius: 14px;
   background: var(--color-semantic-surface-primary);
-  box-shadow: var(--elevation-raised);
+  box-shadow: var(--elevation-2);
 }
 
 .design-panel-header {

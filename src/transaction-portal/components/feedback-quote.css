@@ -1,0 +1,3 @@
+.interest-rating.MuiRating-root { color: var(--color-primitive-base-black); }
+.interest-rating .MuiRating-iconEmpty { color: var(--color-primitive-neutral-400); opacity: 1; }
+.feedback-quote-text.MuiTypography-root { text-wrap: pretty; }

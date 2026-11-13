@@ -6,20 +6,20 @@
   width: min(var(--place-modal-width), calc(100vw - 32px));
   max-width: none;
   max-height: calc(100dvh - 32px);
-  margin: 16px;
+  margin: var(--space-16);
   overflow: hidden;
-  border-radius: 18px;
+  border-radius: var(--radius-l);
   color: var(--color-semantic-text-dark);
   background: var(--color-semantic-surface-primary);
-  box-shadow: var(--elevation-hero);
+  box-shadow: var(--elevation-3);
 }
 
 .place-modal-header.MuiDialogTitle-root {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 20px;
-  padding: 28px;
+  gap: var(--space-20);
+  padding: var(--padding-overlay);
 }
 
 .place-modal-heading {
@@ -32,14 +32,14 @@
 }
 
 .place-modal-heading .MuiTypography-root + .MuiTypography-root {
-  margin-top: 6px;
+  margin-top: var(--space-6);
 }
 
 .place-modal-close.MuiIconButton-root {
   width: 44px;
   height: 44px;
   flex: 0 0 44px;
-  margin: -8px -8px -8px 0;
+  margin: calc(var(--space-8) * -1) calc(var(--space-8) * -1) calc(var(--space-8) * -1) 0;
   color: var(--color-semantic-text-primary);
 }
 
@@ -49,36 +49,36 @@
 }
 
 .place-modal-close.MuiIconButton-root:focus-visible {
-  outline: 2px solid var(--color-semantic-stroke-primary-dark);
-  outline-offset: 2px;
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .place-modal-content.MuiDialogContent-root {
   min-height: 0;
-  padding: 24px 28px 28px;
+  padding: var(--space-24) var(--padding-overlay) var(--padding-overlay);
   overflow-y: auto;
 }
 
 .place-modal-actions.MuiDialogActions-root {
-  gap: 8px;
-  padding: 20px 28px 28px;
+  gap: var(--space-8);
+  padding: var(--space-20) var(--space-28) var(--space-28);
 }
 
 .place-modal-actions.MuiDialogActions-root > :not(style) ~ :not(style) {
   margin-left: 0;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 599.95px) {
   .place-modal-header.MuiDialogTitle-root {
-    padding: 22px;
+    padding: var(--space-24);
   }
 
   .place-modal-content.MuiDialogContent-root {
-    padding: 22px;
+    padding: var(--space-24);
   }
 
   .place-modal-actions.MuiDialogActions-root {
-    padding: 18px 22px 22px;
+    padding: var(--space-20) var(--space-24) var(--space-24);
   }
 }
 

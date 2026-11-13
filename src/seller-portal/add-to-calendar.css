@@ -1,0 +1,22 @@
+/* Add to calendar: see AddToCalendarButton.tsx */
+
+.add-to-calendar.MuiButton-root {
+  position: relative;
+  z-index: 1;
+  min-height: 36px;
+  padding: var(--space-6) var(--space-16) var(--space-6) var(--space-12);
+  white-space: nowrap;
+}
+.add-to-calendar .MuiButton-startIcon { margin-right: var(--space-6); }
+.add-to-calendar .MuiButton-startIcon svg { font-size: 18px; }
+
+.add-to-calendar-menu.MuiPaper-root { width: 240px; margin-top: var(--space-6); }
+.add-to-calendar-favicon { width: 20px; height: 20px; border-radius: var(--radius-2xs); object-fit: contain; }
+.add-to-calendar-menu .MuiListItemIcon-root { min-width: 32px; color: var(--color-semantic-text-primary); }
+.add-to-calendar-menu .MuiListItemIcon-root svg { font-size: 20px; }
+
+/* On timeline rows: right column on wide screens, under the copy on narrow ones (matches the old resource chip). */
+.timeline-item-calendar.MuiButton-root { grid-column: 3; grid-row: 1; align-self: center; justify-self: end; }
+@media (max-width: 599.95px) {
+  .timeline-item .timeline-item-calendar.MuiButton-root { grid-column: 2; grid-row: 2; justify-self: start; min-height: 40px; }
+}

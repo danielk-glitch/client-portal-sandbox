@@ -36,7 +36,7 @@ export type {
   UpcomingDate,
 } from '../transaction-portal/types'
 
-export type ListingStatus = 'Active' | 'Under contract' | 'Closed' | 'Coming soon'
+export type ListingStatus = 'Active' | 'Under contract' | 'Pending' | 'Closed' | 'Coming soon'
 
 export type ListingFact = { label: string; value: string }
 
@@ -67,6 +67,8 @@ export type SellerTransaction = {
     }
   }
   team: TeamMember[]
+  /** Outside partners on the sale (title, escrow, lender). Only some views show them. */
+  collaborators?: TeamMember[]
   viewers: TransactionViewer[]
   timeline: TimelineEvent[]
   upcomingDates: UpcomingDate[]
@@ -218,10 +220,10 @@ export const sampleSellerTransaction: SellerTransaction = {
     },
   ],
   advertising: [
-    { id: 'ad-1', platform: 'Realtor.com', action: 'Listing published', occurredAt: '09/08/2026 · 09:12 AM', postedBy: 'Kendall Ortiz' },
-    { id: 'ad-2', platform: 'Homes.com', action: 'Listing published', occurredAt: '09/08/2026 · 09:12 AM', postedBy: 'Kendall Ortiz' },
-    { id: 'ad-3', platform: 'Ben Kinney Team', action: 'Social post shared', occurredAt: '09/09/2026 · 11:30 AM', postedBy: 'Kendall Ortiz' },
-    { id: 'ad-4', platform: 'Zillow', action: 'Listing details refreshed', occurredAt: '09/12/2026 · 02:05 PM', postedBy: 'Cameron Tate' },
+    { id: 'ad-1', platform: 'Realtor.com', action: 'Listing published', occurredAt: '09/08/2026 · 09:12 AM', postedBy: 'Kendall Ortiz', url: 'https://www.realtor.com/' },
+    { id: 'ad-2', platform: 'Homes.com', action: 'Listing published', occurredAt: '09/08/2026 · 09:12 AM', postedBy: 'Kendall Ortiz', url: 'https://www.homes.com/' },
+    { id: 'ad-3', platform: 'Ben Kinney Team', action: 'Social post shared', occurredAt: '09/09/2026 · 11:30 AM', postedBy: 'Kendall Ortiz', url: 'https://www.instagram.com/' },
+    { id: 'ad-4', platform: 'Zillow', action: 'Listing details refreshed', occurredAt: '09/12/2026 · 02:05 PM', postedBy: 'Cameron Tate', url: 'https://www.zillow.com/' },
   ],
   feedback: [
     {
@@ -249,23 +251,22 @@ export const sampleSellerTransaction: SellerTransaction = {
   notes: [
     {
       id: 'note-3',
-      title: 'Appraisal scheduling',
       body: 'The appraisal is set for October 14. We’ll confirm access details before the appointment. Please make sure the side gate is unlocked that morning and keep the driveway clear for the appraiser. We’ll send a reminder once the arrival window is confirmed.',
       author: 'Morgan Ellis',
       authorPhotoUrl: morganAvatar,
       createdAt: '09/30/2026 · 03:10 PM',
+      starredAt: '2026-10-09T09:15:00',
     },
     {
       id: 'note-4',
-      title: 'Closing preparation',
       body: 'Closing is scheduled for November 6. We’ll share your signing details as they come together.',
       author: 'Avery Coleman',
       authorPhotoUrl: averyAvatar,
       createdAt: '09/28/2026 · 10:45 AM',
+      starredAt: '2026-10-06T14:30:00',
     },
     {
       id: 'note-1',
-      title: 'Showing instructions',
       body: 'Please allow 24 hours’ notice when possible. The family dog will be away during scheduled showings.',
       author: 'Morgan Ellis',
       authorPhotoUrl: morganAvatar,
@@ -273,7 +274,6 @@ export const sampleSellerTransaction: SellerTransaction = {
     },
     {
       id: 'note-2',
-      title: 'Seller preference',
       body: 'Tim prefers a quick text before any same-day schedule changes.',
       author: 'Avery Coleman',
       authorPhotoUrl: averyAvatar,

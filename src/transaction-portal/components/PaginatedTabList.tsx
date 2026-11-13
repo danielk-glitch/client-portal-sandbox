@@ -1,4 +1,6 @@
-/* design-build · self-critique: Clarity5 Warmth4 Restraint5 Craft4 Variety4 SlopFree5 */
+/**
+ * Paginated tab list · a long list inside a tab, ten items per page, with a round pager under a hairline.
+ */
 import { useRef, useState, type ReactNode } from 'react'
 import { Box, Pagination, Typography } from '@mui/material'
 import './paginated-tab-list.css'
@@ -28,8 +30,9 @@ export function PaginatedTabList<T>({ items, itemName, ariaLabel, children }: {
       <Box ref={listRef} className="tab-list-content">{children(visibleItems)}</Box>
       {pageCount > 1 && (
         <Box className="tab-list-pagination">
-          <Typography variant="bodySStandard" color="text.secondary" aria-live="polite">
-            {firstVisible + 1}–{Math.min(firstVisible + pageSize, items.length)} of {items.length} {itemName}
+          {/* The pager shows where you are. The range is announced for screen readers only. */}
+          <Typography component="span" className="visually-hidden" aria-live="polite">
+            {firstVisible + 1} to {Math.min(firstVisible + pageSize, items.length)} of {items.length} {itemName}
           </Typography>
           <Pagination
             count={pageCount}

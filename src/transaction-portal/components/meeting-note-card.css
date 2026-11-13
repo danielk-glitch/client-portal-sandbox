@@ -1,0 +1,159 @@
+/* Meeting note · see MeetingNoteCard.tsx. Builds on the written note card's frame. */
+
+.meeting-note-tags { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-8) var(--space-12); margin-bottom: var(--space-16); }
+.meeting-note-association {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  font: var(--type-label-s);
+  color: var(--color-semantic-text-primary);
+}
+.meeting-note-association svg { width: 16px; height: 16px; }
+
+
+.meeting-note-section-title.MuiTypography-root {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  margin: var(--space-16) 0 var(--space-4);
+  color: var(--color-semantic-text-light);
+}
+.meeting-note-section-title svg { width: 14px; height: 14px; }
+
+/* Player: a hairline row, no gray panel. */
+.meeting-player {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  margin-top: var(--space-20);
+  padding: var(--space-16) 0;
+  border-block: 1px solid var(--color-semantic-stroke-primary-light);
+}
+.meeting-player-play.MuiIconButton-root { flex: 0 0 auto; }
+.meeting-player-play svg { width: 28px; height: 28px; }
+.meeting-player-track {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  touch-action: none;
+  border-radius: var(--radius-xs);
+}
+.meeting-player-track:focus-visible { outline: var(--focus-ring); outline-offset: 4px; }
+.meeting-player-bar {
+  flex: 1 1 0;
+  min-width: 2px;
+  border-radius: var(--radius-2xs);
+  background: var(--color-semantic-stroke-primary);
+  transition: background-color 120ms ease;
+}
+.meeting-player-bar.is-played { background: var(--color-semantic-surface-reverse-primary); }
+.meeting-player-time.MuiTypography-root { flex: 0 0 auto; color: var(--color-semantic-text-primary); font-variant-numeric: tabular-nums; }
+.meeting-player-speed.MuiIconButton-root { flex: 0 0 auto; font-variant-numeric: tabular-nums; }
+
+/* The AI summary: headings, short paragraphs, bullets. */
+.meeting-summary { display: grid; gap: var(--space-8); }
+.meeting-summary-heading.MuiTypography-root { margin: var(--space-8) 0 0; color: var(--color-semantic-text-dark); }
+.meeting-summary-heading.MuiTypography-root:first-child { margin-top: 0; }
+.meeting-summary-paragraph.MuiTypography-root { margin: 0; text-wrap: pretty; }
+.meeting-summary-list { margin: 0; padding-left: var(--space-20); display: grid; gap: var(--space-4); }
+.meeting-summary-list li { text-wrap: pretty; }
+.meeting-summary-list li::marker { color: var(--color-semantic-text-light); }
+
+/* Card preview: only the start of the summary, faded. */
+.meeting-summary--preview {
+  max-height: 132px;
+  overflow: hidden;
+  mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+}
+
+/* Card: the whole card opens the note; the play control sits above the overlay. */
+.meeting-note.MuiPaper-root { position: relative; transition: border-color var(--motion-hover), box-shadow var(--motion-hover); }
+.meeting-card-open.MuiButtonBase-root { position: absolute; inset: 0; z-index: 1; border-radius: inherit; }
+.meeting-card-open:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+.meeting-card-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  margin-top: var(--space-16);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--color-semantic-stroke-primary-light);
+}
+.meeting-card-play.MuiIconButton-root { position: relative; z-index: 2; flex: 0 0 auto; margin-left: calc(var(--space-8) * -1); }
+.meeting-card-play svg { width: 28px; height: 28px; }
+.meeting-card-progress { flex: 1 1 auto; min-width: 40px; height: 4px; border-radius: var(--radius-2xs); background: var(--color-semantic-stroke-primary-light); overflow: hidden; }
+.meeting-card-progress > span { display: block; height: 100%; background: var(--color-semantic-surface-reverse-primary); }
+.meeting-card-more.MuiTypography-root { flex: 0 0 auto; display: inline-flex; align-items: center; gap: var(--space-6); color: var(--color-semantic-text-dark); }
+.meeting-card-more svg { width: 18px; height: 18px; }
+
+/* Full note: player on top, summary left, transcript right. Each column scrolls on its own. */
+.meeting-modal { display: grid; gap: var(--space-20); }
+.meeting-modal .meeting-player { margin-top: 0; }
+.meeting-modal-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-32);
+  height: min(58vh, 560px);
+}
+.meeting-modal-summary, .meeting-modal-transcript { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.meeting-modal-summary { overflow-y: auto; padding-right: var(--space-8); }
+.meeting-modal-eyebrow.MuiTypography-root { margin: 0 0 var(--space-12); }
+.meeting-modal-summary .meeting-summary { gap: var(--space-12); }
+.meeting-modal-transcript { border-left: 1px solid var(--color-semantic-stroke-primary-light); padding-left: var(--space-32); }
+
+.meeting-transcript {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: var(--space-4) 0 0;
+  padding: 0 var(--space-8) 0 0;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-semantic-stroke-primary) transparent;
+}
+.meeting-line.MuiButtonBase-root {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: var(--space-12);
+  align-items: start;
+  padding: var(--space-12) var(--space-12) var(--space-12) var(--space-12);
+  text-align: left;
+  border-left: 2px solid transparent;
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+  color: var(--color-semantic-text-primary);
+  transition: background-color var(--motion-hover), border-color var(--motion-hover), color var(--motion-hover);
+}
+.meeting-line.MuiButtonBase-root:hover { background: var(--color-semantic-surface-secondary); }
+.meeting-line.MuiButtonBase-root:focus-visible { outline: var(--focus-ring); outline-offset: -2px; }
+.meeting-line.is-active.MuiButtonBase-root {
+  border-left-color: var(--color-semantic-surface-reverse-primary);
+  background: color-mix(in srgb, var(--color-semantic-surface-reverse-primary) 5%, transparent);
+  color: var(--color-semantic-text-dark);
+}
+.meeting-line-time.MuiTypography-root { padding-top: var(--space-2); color: var(--color-semantic-text-light); font-variant-numeric: tabular-nums; }
+.meeting-line-copy { display: grid; gap: var(--space-2); min-width: 0; }
+.meeting-line-speaker.MuiTypography-root { color: var(--color-semantic-text-dark); }
+.meeting-line-text.MuiTypography-root { text-wrap: pretty; }
+
+@media (max-width: 767.95px) {
+  .meeting-modal-columns { grid-template-columns: minmax(0, 1fr); height: auto; gap: var(--space-24); }
+  .meeting-modal-summary { overflow: visible; padding-right: 0; }
+  .meeting-modal-transcript { border-left: 0; padding-left: 0; }
+  .meeting-transcript { max-height: 360px; }
+  .meeting-card-more.MuiTypography-root { display: none; }
+}
+
+@media (max-width: 599.95px) {
+  .meeting-player { flex-wrap: wrap; }
+  .meeting-player-track { order: 3; flex-basis: 100%; }
+  .meeting-player-time.MuiTypography-root { margin-left: auto; }
+}
+
+/* With no title, the AI summary label leads the card. */

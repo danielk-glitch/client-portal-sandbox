@@ -62,13 +62,13 @@
 .email-preview-stage--mobile .email-footer { padding: 28px; }
 .email-gallery-page button:focus-visible, .email-gallery-page select:focus-visible, .email-gallery-page a:focus-visible { outline: 2px solid var(--color-primitive-blue-600); outline-offset: 3px; }
 
-@media (max-width: 1050px) {
+@media (max-width: 1099.95px) {
   .email-gallery-review-grid { grid-template-columns: 1fr; }
   .email-review-panel { position: static; }
   .email-review-notes { max-width: 720px; }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 767.95px) {
   .email-gallery-site-header { padding: 0 20px; }
   .email-gallery-main { padding: 40px 20px 72px; }
   .email-gallery-heading { flex-direction: column; align-items: start; gap: 28px; margin-bottom: 40px; }
@@ -84,5 +84,5 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .email-template-tab, .email-step, .email-gallery-nav-actions select { transition: background-color 160ms ease, color 160ms ease; }
+  .email-template-tab, .email-step, .email-gallery-nav-actions select { transition: background-color var(--motion-hover), color var(--motion-hover); }
 }

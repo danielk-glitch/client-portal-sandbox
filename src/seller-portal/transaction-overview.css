@@ -1,0 +1,99 @@
+/* On the page background, between a hairline above and below. The next date is the only elevated card. */
+.transaction-overview {
+  margin-top: var(--space-32);
+  border-block: 1px solid var(--color-semantic-stroke-primary-light);
+}
+.transaction-overview .seller-timeline { margin-top: 0; padding-bottom: var(--space-32); background: transparent; }
+
+.transaction-overview-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: var(--space-48);
+  padding: var(--space-8) var(--padding-card) var(--space-48);
+}
+.transaction-overview-dates,
+.transaction-overview-notes { min-width: 0; }
+.transaction-overview-notes .portal-section-content { padding-top: var(--space-16); }
+.transaction-overview .section-label { margin-bottom: var(--space-16); }
+
+/* Next date: one elevated card, never a button. A small "Up next" eyebrow right above the title, the standard outlined bubble, a larger title,
+   and how far away it is on the right of the title. */
+.overview-next-eyebrow.MuiTypography-root {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  margin: 0 0 var(--space-4);
+  color: var(--color-semantic-text-primary);
+  letter-spacing: var(--tracking-uppercase);
+  text-transform: uppercase;
+}
+.overview-next-eyebrow.MuiTypography-root::before {
+  width: 6px;
+  height: 6px;
+  content: '';
+  border-radius: 50%;
+  background: var(--color-semantic-text-dark);
+}
+.transaction-overview .overview-next .portal-date-row--featured { padding: 0; border: 0; --date-stamp-size: 64px; }
+.transaction-overview .overview-next .portal-date-row--featured .portal-date-stamp {
+  color: var(--color-semantic-text-dark);
+  background: var(--color-semantic-surface-primary);
+  box-shadow: inset 0 0 0 1px var(--color-semantic-stroke-primary-light);
+}
+.transaction-overview .overview-next .portal-date-row--featured .portal-date-stamp .MuiTypography-root:first-child { color: var(--color-semantic-text-primary); opacity: 1; }
+.transaction-overview .overview-next .portal-date-title { justify-content: space-between; flex-wrap: nowrap; gap: var(--space-16); }
+.transaction-overview .overview-next .portal-date-title .place-tag { flex: none; }
+.overview-later { margin-top: var(--space-32); }
+.overview-all { display: flex; justify-content: center; margin-top: var(--space-32); }
+.overview-empty.MuiTypography-root { display: block; }
+
+@media (max-width: 1099.95px) {
+  .transaction-overview-body { grid-template-columns: minmax(0, 1fr); gap: var(--space-40); }
+}
+@media (max-width: 600px) {
+  .transaction-overview { margin-top: var(--space-24); }
+}
+
+/* Dates list: a short horizontal line between each date and its title, with 12px on both sides of it.
+   The line is part of the date cell, so the spacing can't drift. All dates share one column (as wide as the longest),
+   so every title lines up. Not on the next-date card. */
+.overview-later .portal-date-list { grid-template-columns: auto minmax(0, 1fr); column-gap: 0; }
+.upcoming-dates-card .overview-later .portal-date-row { grid-column: 1 / -1; grid-template-columns: subgrid; column-gap: 0; }
+.overview-later .portal-date-text { display: flex; align-items: center; gap: var(--space-12); padding-right: var(--space-12); white-space: nowrap; justify-self: start; }
+.overview-later .portal-date-text::after {
+  flex: none;
+  width: 12px;
+  height: 1px;
+  content: '';
+  background: var(--color-semantic-stroke-primary);
+}
+
+/* All dates modal: one list, a round date bubble per row, joined by a thin vertical line.
+   The line runs behind the bubbles, and starts and ends at the first and last bubble's center. */
+.all-dates-timeline .portal-date-list { display: grid; }
+.all-dates-timeline .portal-date-list::before { display: none; }
+.all-dates-timeline .portal-date-row {
+  --date-stamp-size: 56px;
+  position: relative;
+  align-items: center;
+  gap: var(--space-20);
+  padding-block: var(--space-12);
+  border: 0;
+}
+.all-dates-timeline .portal-date-row:first-child { padding-top: 0; }
+.all-dates-timeline .portal-date-row:last-child { padding-bottom: 0; }
+.all-dates-timeline .portal-date-row::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(var(--date-stamp-size) / 2 - 0.5px);
+  width: 1px;
+  content: '';
+  background: var(--color-semantic-stroke-primary);
+}
+.all-dates-timeline .portal-date-row:first-child::before { top: calc(var(--date-stamp-size) / 2); }
+.all-dates-timeline .portal-date-row:last-child::before { bottom: calc(var(--date-stamp-size) / 2); }
+.all-dates-timeline .portal-date-row:only-child::before { display: none; }
+.all-dates-timeline .portal-date-stamp { position: relative; z-index: 1; }
+.all-dates-timeline .portal-date-title .MuiTypography-root { font-size: 1.0625rem; }
+.all-dates-timeline .portal-date-row--past::before { background: var(--color-semantic-stroke-primary-light); }
+.all-dates-timeline .portal-date-row--past .portal-date-stamp { color: var(--color-semantic-text-light); }

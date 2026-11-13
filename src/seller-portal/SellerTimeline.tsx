@@ -1,16 +1,27 @@
 import { createContext, useContext, useEffect, useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react'
-import { Avatar, Box, Button, ButtonBase, Chip, Typography, useMediaQuery } from '@mui/material'
+import { Avatar, Box, Button, ButtonBase, Typography, useMediaQuery } from '@mui/material'
 import CheckRounded from '@mui/icons-material/CheckRounded'
 import ExpandMoreRounded from '@mui/icons-material/ExpandMoreRounded'
 import LockOutlined from '@mui/icons-material/LockOutlined'
 import MenuBookOutlined from '@mui/icons-material/MenuBookOutlined'
 import DescriptionOutlined from '@mui/icons-material/DescriptionOutlined'
 import EventOutlined from '@mui/icons-material/EventOutlined'
-import TaskAltOutlined from '@mui/icons-material/TaskAltOutlined'
+import InsightsOutlined from '@mui/icons-material/InsightsOutlined'
 import { PlaceModal } from '../components/PlaceModal'
+import { DocumentListRow } from './DocumentListRow'
+import { AddToCalendarButton } from './AddToCalendarButton'
+import { Eyebrow } from '../components/Eyebrow'
+import { SectionLabel } from '../components/SectionLabel'
+import { DisclosureButton } from '../components/DisclosureButton'
+import { DateRowCopy, DateStamp, ResourceChip } from '../transaction-portal/components'
 import type { TeamMember, TransactionDocument, TransactionResource } from '../transaction-portal/types'
 import type { MilestoneId, SellerMilestone, SellerTimelineData, SellerTimelineStep, TimelineItemKind, TimelineStatus } from './sellerTimelineData'
+import { OwnerLabel, StepDetailBody, whenCopy } from './timeline-first/TimelineFirstParts'
+import { OpenHouseRow } from './OpenHouseRow'
+import { isOpenHouseDone, type OpenHouse } from './openHouses'
 import './seller-timeline.css'
+import './timeline-first/staged-documents.css'
+import { below } from '../system-tokens'
 
 /** divider and dark sit on the page under a hero; card sits inside a column layout. */
 export type TimelineTransition = 'divider' | 'dark' | 'card'
@@ -27,14 +38,36 @@ type SellerTimelineProps = {
   transition?: TimelineTransition
   /** Forces a layout. Used by the component gallery. */
   layout?: 'auto' | 'tracker' | 'stacked'
+  /** Replaces the built-in item modal, e.g. with a richer detail drawer. */
+  onOpenStep?: (step: SellerTimelineStep, milestone: SellerMilestone) => void
+  /** Show only the stage tracker. The page renders the selected stage's items elsewhere. */
+  trackerOnly?: boolean
+  /** With trackerOnly: stages are display only (no hover, click, or keyboard selection), for pages where picking a stage changes nothing. */
+  staticTracker?: boolean
+  /** Called when the client picks a stage in the tracker. */
+  onSelectMilestone?: (id: MilestoneId) => void
+  /** Word on the current stage's marker. Defaults to "Now". */
+  currentLabel?: string
+  /** V1 model: guides show as documents tagged "Resource" instead of book-icon guides. */
+  resourcesAsDocuments?: boolean
+  /** Prefix the stage block's column labels with the stage name, e.g. "Pending · Dates". */
+  stageInTitles?: boolean
+  /** A small link beside the "Transaction timeline" label, separated by a dot (e.g. "Full timeline"). */
+  headingAction?: ReactNode
+  /** Open houses show as rows in their stage's dates list, sorted in with the other dates. */
+  openHouses?: OpenHouse[]
+  onOpenOpenHouse?: (openHouse: OpenHouse) => void
+  /** Documents linked to a step's date. Shown as a chip on the date row that opens the document. */
+  linkedDocuments?: (step: SellerTimelineStep) => TransactionDocument[]
+  /** Extra content for a stage, shown full width below its dates and documents (e.g. Market activity under Active listing). */
+  stageContent?: Partial<Record<MilestoneId, ReactNode>>
 }
 
-type Handlers = Pick<SellerTimelineProps, 'resources' | 'documents' | 'team' | 'onOpenResource' | 'onOpenDocument' | 'onOpenMarketing'>
+type Handlers = Pick<SellerTimelineProps, 'resources' | 'documents' | 'team' | 'onOpenResource' | 'onOpenDocument' | 'onOpenMarketing' | 'trackerOnly' | 'staticTracker' | 'onSelectMilestone' | 'currentLabel' | 'resourcesAsDocuments' | 'stageInTitles' | 'headingAction' | 'openHouses' | 'onOpenOpenHouse' | 'linkedDocuments' | 'stageContent'>
 
 const statusCopy: Record<TimelineStatus, string> = { complete: 'Complete', current: 'Current stage', upcoming: 'Upcoming' }
 
 const timelineItemKinds: Record<TimelineItemKind, { label: string; icon: ReactNode }> = {
-  action: { label: 'Action', icon: <TaskAltOutlined /> },
   date: { label: 'Date', icon: <EventOutlined /> },
   document: { label: 'Document', icon: <DescriptionOutlined /> },
   resource: { label: 'Resource', icon: <MenuBookOutlined /> },
@@ -43,31 +76,36 @@ const timelineItemKinds: Record<TimelineItemKind, { label: string; icon: ReactNo
 function stepKind(step: SellerTimelineStep): Exclude<TimelineItemKind, 'resource'> {
   if (step.kind) return step.kind
   if (step.documentId || step.pendingDocument) return 'document'
-  return step.owner === 'you' ? 'action' : 'date'
+  return 'date'
 }
 
 function formatDate(iso: string, options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }) {
   return new Intl.DateTimeFormat('en-US', { ...options, timeZone: 'UTC' }).format(new Date(`${iso}T12:00:00Z`))
 }
 
-/** Prototype-only check-off state: sellers can tick actions, and progress updates live. */
+/** Prototype-only done state. Nothing in the UI toggles it now that there are no action items. */
 type TimelineChecks = { isDone: (step: SellerTimelineStep) => boolean; toggle: (step: SellerTimelineStep) => void }
 const defaultIsDone = (step: SellerTimelineStep) => step.status === 'complete'
 const ChecksContext = createContext<TimelineChecks>({ isDone: defaultIsDone, toggle: () => {} })
+
+/** Card mode (the 2 column page): no collapse; Done is revealed by a pill under the list. */
+const CardModeContext = createContext(false)
 
 function completedCount(milestone: SellerMilestone, isDone = defaultIsDone) {
   return milestone.steps.filter(isDone).length
 }
 
 /** Short date context, revealed on hover and selection. */
-function nodeCaption(milestone: SellerMilestone, isDone = defaultIsDone) {
+function nodeCaption(milestone: SellerMilestone) {
   if (milestone.status === 'complete') return milestone.endDate ? `Done ${formatDate(milestone.endDate)}` : 'Done'
-  if (milestone.status === 'current') return `${completedCount(milestone, isDone)} of ${milestone.steps.length} done`
+  // The current stage has no caption: the selected node already says where you are.
+  if (milestone.status === 'current') return ''
+  if (milestone.caption) return milestone.caption
   return milestone.startDate ? `From ${formatDate(milestone.startDate)}` : 'Not started'
 }
 
-export function SellerTimeline({ data, layout = 'auto', transition = 'divider', ...handlers }: SellerTimelineProps) {
-  const prefersStacked = useMediaQuery('(max-width: 899.95px)', { noSsr: true })
+export function SellerTimeline({ data, layout = 'auto', transition = 'divider', onOpenStep: openStepOverride, ...handlers }: SellerTimelineProps) {
+  const prefersStacked = useMediaQuery(below('laptop'), { noSsr: true })
   const stacked = layout === 'stacked' || (layout === 'auto' && prefersStacked)
   const current = data.milestones.find((milestone) => milestone.status === 'current') ?? data.milestones[0]
   const titleId = useId()
@@ -80,12 +118,14 @@ export function SellerTimeline({ data, layout = 'auto', transition = 'divider', 
 
   return (
     <ChecksContext.Provider value={checks}>
-    <Box component="section" aria-labelledby={titleId} className={`seller-timeline seller-timeline--${transition}${stacked ? ' seller-timeline--stacked' : ''}`}>
+    <CardModeContext.Provider value={transition === 'card'}>
+    <Box component="section" aria-labelledby={titleId} className={`seller-timeline seller-timeline--${transition}${stacked ? ' seller-timeline--stacked' : ''}${handlers.trackerOnly ? ' seller-timeline--tracker-only' : ''}`}>
       {stacked
-        ? <StackedTimeline data={data} currentId={current.id} titleId={titleId} onOpenStep={(step, milestone) => setOpenStep({ step, milestone })} {...handlers} />
-        : <TrackerTimeline data={data} currentId={current.id} titleId={titleId} onOpenStep={(step, milestone) => setOpenStep({ step, milestone })} {...handlers} />}
-      <StepModal item={openStep} onClose={() => setOpenStep(null)} {...handlers} />
+        ? <StackedTimeline data={data} currentId={current.id} titleId={titleId} onOpenStep={(step, milestone) => openStepOverride ? openStepOverride(step, milestone) : setOpenStep({ step, milestone })} {...handlers} />
+        : <TrackerTimeline data={data} currentId={current.id} titleId={titleId} onOpenStep={(step, milestone) => openStepOverride ? openStepOverride(step, milestone) : setOpenStep({ step, milestone })} {...handlers} />}
+      <StepModal item={openStep} today={data.today} onClose={() => setOpenStep(null)} {...handlers} />
     </Box>
+    </CardModeContext.Provider>
     </ChecksContext.Provider>
   )
 }
@@ -97,11 +137,14 @@ function daysBetween(from: string, to: string) {
 }
 
 /** Eyebrow, plus a countdown headline that only the card layout shows. */
-function TimelineHeading({ titleId, data }: { titleId: string; data: SellerTimelineData }) {
+function TimelineHeading({ titleId, data, action }: { titleId: string; data: SellerTimelineData; action?: ReactNode }) {
   const days = data.countdown ? daysBetween(data.today, data.countdown.date) : null
+  const eyebrow = <Eyebrow component="h2" id={titleId} className="seller-timeline-eyebrow">Transaction timeline</Eyebrow>
   return (
     <Box className="seller-timeline-heading">
-      <Typography component="h2" id={titleId} variant="labelS" className="seller-timeline-eyebrow">Transaction timeline</Typography>
+      {action
+        ? <Box className="seller-timeline-heading-row">{eyebrow}<Box component="span" className="seller-timeline-heading-sep" aria-hidden="true">·</Box>{action}</Box>
+        : eyebrow}
       {data.countdown && days !== null && (
         <Typography component="p" variant="titleL" className="seller-timeline-countdown">
           {days === 0 ? `Today: ${data.countdown.label}` : `${days} ${days === 1 ? 'day' : 'days'} until ${data.countdown.label}`}
@@ -122,6 +165,7 @@ function TrackerTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: 
   const [glint, setGlint] = useState<{ from: number; to: number; key: number } | null>(null)
   /** Collapsed shows only the tracker; picking a milestone opens it again. */
   const [collapsed, setCollapsed] = useState(false)
+  const cardMode = useContext(CardModeContext)
   const glintTimer = useRef<number | undefined>(undefined)
   const glintCount = useRef(0)
   if (prevCurrent !== currentId) {
@@ -144,6 +188,7 @@ function TrackerTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: 
 
   function select(index: number) {
     setSelectedId(milestones[index].id)
+    handlers.onSelectMilestone?.(milestones[index].id)
     setCollapsed(false)
     window.clearTimeout(glintTimer.current)
     const from = glint ? glint.to : arrivedIndex
@@ -176,13 +221,14 @@ function TrackerTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: 
     if (event.key === 'End') { event.preventDefault(); focusTab(milestones.length - 1) }
   }
 
+  const isStatic = Boolean(handlers.trackerOnly && handlers.staticTracker)
   const trackerStyle = { '--timeline-columns': milestones.length, '--timeline-progress': progress } as CSSProperties
 
   return (
     <>
       <Box className="timeline-stage">
-        <TimelineHeading titleId={titleId} data={data} />
-        <Box role="tablist" aria-label="Sale milestones" className="timeline-tracker" onKeyDown={onKeyDown} style={trackerStyle}>
+        <TimelineHeading titleId={titleId} data={data} action={handlers.headingAction} />
+        <Box role={isStatic ? 'list' : 'tablist'} aria-label="Sale milestones" className={`timeline-tracker${isStatic ? ' timeline-tracker--static' : ''}`} onKeyDown={isStatic ? undefined : onKeyDown} style={trackerStyle}>
           <Box className="timeline-rail" aria-hidden="true" />
           <Box className="timeline-rail-fill" aria-hidden="true" />
           {glint && (
@@ -200,26 +246,28 @@ function TrackerTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: 
               <ButtonBase
                 key={milestone.id}
                 ref={(node: HTMLButtonElement | null) => { tabRefs.current[index] = node }}
-                role="tab"
+                component={isStatic ? 'div' : 'button'}
+                role={isStatic ? 'listitem' : 'tab'}
                 id={`${baseId}-tab-${milestone.id}`}
-                aria-controls={`${baseId}-panel`}
-                aria-selected={isSelected}
+                aria-controls={handlers.trackerOnly ? undefined : `${baseId}-panel`}
+                aria-selected={isStatic ? undefined : isSelected}
+                aria-current={isStatic && milestone.status === 'current' ? 'step' : undefined}
                 aria-description={statusCopy[milestone.status]}
-                tabIndex={isSelected ? 0 : -1}
-                onClick={() => select(index)}
+                tabIndex={isStatic ? undefined : isSelected ? 0 : -1}
+                onClick={isStatic ? undefined : () => select(index)}
                 className={`timeline-node timeline-node--${milestone.status}${isSelected ? ' is-selected' : ''}${index === arrivedIndex ? ' is-arrived' : ''}`}
                 disableRipple
               >
-                <Box component="span" className="timeline-now" aria-hidden={milestone.status !== 'current'}>{milestone.status === 'current' ? 'Now' : ''}</Box>
                 <MilestoneMarker status={milestone.status} index={index} />
                 <Typography variant="labelM" component="span" className="timeline-node-label">{milestone.label}</Typography>
-                <Typography variant="labelS" component="span" className="timeline-node-caption">{nodeCaption(milestone, isDone)}</Typography>
+                {nodeCaption(milestone) && <Typography variant="labelS" component="span" className="timeline-node-caption">{nodeCaption(milestone)}</Typography>}
               </ButtonBase>
             )
           })}
         </Box>
       </Box>
 
+      {!handlers.trackerOnly && <>
       <Box id={`${baseId}-panel-shell`} className={`timeline-panel-shell${collapsed ? ' is-collapsed' : ''}`} inert={collapsed}>
         <Box className="timeline-panel-clip">
           <Box role="tabpanel" id={`${baseId}-panel`} aria-labelledby={`${baseId}-tab-${selected.id}`} className="timeline-panel" key={selected.id}>
@@ -227,7 +275,7 @@ function TrackerTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: 
           </Box>
         </Box>
       </Box>
-      <ButtonBase
+      {!cardMode && <ButtonBase
         className={`timeline-collapse${collapsed ? ' is-collapsed' : ''}`}
         onClick={() => setCollapsed(!collapsed)}
         aria-expanded={!collapsed}
@@ -236,14 +284,15 @@ function TrackerTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: 
       >
         <Typography variant="labelM" component="span">{collapsed ? 'Show details' : 'Hide details'}</Typography>
         <ExpandMoreRounded className="timeline-chevron" aria-hidden="true" />
-      </ButtonBase>
+      </ButtonBase>}
+      </>}
     </>
   )
 }
 
 /** Glint travel time grows gently with distance. */
 function glintDuration(from: number, to: number) {
-  return 320 + Math.abs(to - from) * 160
+  return 200 + Math.abs(to - from) * 90
 }
 
 /* ---------- Mobile: vertical rail ---------- */
@@ -251,32 +300,40 @@ function glintDuration(from: number, to: number) {
 function StackedTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: Handlers & { data: SellerTimelineData; currentId: MilestoneId; titleId: string; onOpenStep: OpenStep }) {
   const [openId, setOpenId] = useState<MilestoneId | null>(currentId)
   const baseId = useId()
+  const isStatic = Boolean(handlers.trackerOnly && handlers.staticTracker)
 
   return (
     <>
       <Box className="timeline-stage">
-        <TimelineHeading titleId={titleId} data={data} />
+        <TimelineHeading titleId={titleId} data={data} action={handlers.headingAction} />
       </Box>
-      <Box component="ol" className="timeline-stack">
+      <Box component="ol" className={`timeline-stack${isStatic ? ' timeline-stack--static' : ''}`}>
         {data.milestones.map((milestone, index) => {
           const open = openId === milestone.id
           return (
             <Box component="li" key={milestone.id} className={`timeline-stack-item timeline-stack-item--${milestone.status}${open ? ' is-open' : ''}`}>
               <ButtonBase
                 className="timeline-stack-header"
-                aria-expanded={open}
-                aria-controls={`${baseId}-${milestone.id}`}
-                onClick={() => setOpenId(open ? null : milestone.id)}
+                component={isStatic ? 'div' : 'button'}
+                role={isStatic ? 'presentation' : undefined}
+                tabIndex={isStatic ? -1 : undefined}
+                aria-expanded={handlers.trackerOnly ? undefined : open}
+                aria-pressed={handlers.trackerOnly && !isStatic ? open : undefined}
+                aria-controls={handlers.trackerOnly ? undefined : `${baseId}-${milestone.id}`}
+                onClick={() => {
+                  if (handlers.trackerOnly) { setOpenId(milestone.id); handlers.onSelectMilestone?.(milestone.id); return }
+                  setOpenId(open ? null : milestone.id)
+                }}
                 disableRipple
               >
                 <MilestoneMarker status={milestone.status} index={index} />
                 <Box component="span" className="timeline-stack-heading">
                   <Typography variant="titleXS" component="span">{milestone.label}</Typography>
-                  {milestone.status === 'current' && <Box component="span" className="timeline-now timeline-now--inline">Now</Box>}
+                  {milestone.status === 'current' && <Box component="span" className="timeline-now timeline-now--inline">{handlers.currentLabel ?? 'Now'}</Box>}
                 </Box>
                 <ExpandMoreRounded className="timeline-chevron" aria-hidden="true" />
               </ButtonBase>
-              {open && (
+              {open && !handlers.trackerOnly && (
                 <Box id={`${baseId}-${milestone.id}`} className="timeline-stack-body">
                   <MilestoneItems milestone={milestone} previous={data.milestones[index - 1]} nextStepId={data.nextStepId} onOpenStep={onOpenStep} {...handlers} />
                 </Box>
@@ -304,7 +361,20 @@ function byDate(a: SellerTimelineStep, b: SellerTimelineStep) {
   return a.date ? -1 : b.date ? 1 : 0
 }
 
-function MilestoneItems({ milestone, previous, nextStepId, onOpenStep, resources, team, onOpenResource, onOpenMarketing }: Handlers & { milestone: SellerMilestone; previous?: SellerMilestone; nextStepId: string; onOpenStep: OpenStep }) {
+function MilestoneItems({ milestone, previous, nextStepId, onOpenStep: openStepDetails, resources, documents, team, onOpenResource, onOpenDocument, onOpenMarketing, resourcesAsDocuments, stageInTitles, openHouses = [], onOpenOpenHouse, linkedDocuments, stageContent }: Handlers & { milestone: SellerMilestone; previous?: SellerMilestone; nextStepId: string; onOpenStep: OpenStep }) {
+  function onOpenStep(step: SellerTimelineStep, stage: SellerMilestone) {
+    if (stepKind(step) === 'document') {
+      const document = documents.find((doc) => doc.id === step.documentId)
+      const linked = linkedDocuments?.(step) ?? []
+      const file = document ?? (linked.length === 1 ? linked[0] : undefined)
+      if (file) {
+        onOpenDocument(file)
+        return
+      }
+    }
+    openStepDetails(step, stage)
+  }
+
   const locked = milestone.status === 'upcoming'
   const linkedResourceIds = new Set(milestone.steps.map((step) => step.resourceId).filter(Boolean))
   const standaloneGuides = milestone.resourceIds
@@ -318,19 +388,108 @@ function MilestoneItems({ milestone, previous, nextStepId, onOpenStep, resources
   // Collapsed by default when there is still something to do; open when everything is done.
   const [doneOpen, setDoneOpen] = useState(openSteps.length === 0)
   const doneListId = useId()
+  const cardMode = useContext(CardModeContext)
+  // Card label for the open list: the current stage's items are upcoming, earlier stages' leftovers are open, future stages are coming up.
+  const groupLabel = milestone.status === 'current' ? 'Upcoming' : milestone.status === 'complete' ? 'Open' : 'Coming up'
+  const extra = stageContent?.[milestone.id]
+  const extraContent = extra && <Box className="milestone-extra">{extra}</Box>
+  const lockedNote = (
+    <Box className="milestone-locked-note">
+      <LockOutlined aria-hidden="true" />
+      <Typography variant="bodySStandard">Opens after {previous ? previous.label.toLowerCase() : 'earlier steps'}. Feel free to review resources any time.</Typography>
+    </Box>
+  )
 
   const stepRow = (step: SellerTimelineStep) => (
-    <StepRow key={step.id} step={step} locked={locked} next={step.id === nextStepId && !isDone(step)} resources={resources} team={team} onOpen={() => onOpenStep(step, milestone)} onOpenResource={onOpenResource} />
+    <StepRow key={step.id} step={step} next={step.id === nextStepId && !isDone(step)} resources={resources} team={team} onOpen={() => onOpenStep(step, milestone)} onOpenResource={onOpenResource} calendar={!cardMode} linkedDocuments={linkedDocuments?.(step)} onOpenDocument={onOpenDocument} />
   )
+
+  if (!cardMode) {
+    // Exploration page: dates lead on the left; documents and guides sit in a lighter column on the right.
+    const isDoc = (step: SellerTimelineStep) => stepKind(step) === 'document'
+    // Open houses sort in with the stage's dates. Scheduled ones are open; finished ones are done.
+    const stageOpenHouses = openHouses.filter((openHouse) => openHouse.milestoneId === milestone.id)
+    type DatedRow = { date?: string; node: ReactNode }
+    const openHouseRow = (openHouse: OpenHouse): DatedRow => ({
+      date: openHouse.date,
+      node: <OpenHouseRow key={openHouse.id} openHouse={openHouse} team={team} calendar onOpen={() => onOpenOpenHouse?.(openHouse)} />,
+    })
+    const datedRows = (steps: SellerTimelineStep[], houses: OpenHouse[]) => [
+      ...steps.map((step): DatedRow => ({ date: step.date, node: stepRow(step) })),
+      ...houses.map(openHouseRow),
+    ].sort((a, b) => (a.date && b.date ? a.date.localeCompare(b.date) : a.date ? -1 : b.date ? 1 : 0)).map((row) => row.node)
+    const leftOpen = datedRows(openSteps.filter((step) => !isDoc(step)), stageOpenHouses.filter((openHouse) => !isOpenHouseDone(openHouse)))
+    const leftDone = datedRows(doneSteps.filter((step) => !isDoc(step)), stageOpenHouses.filter(isOpenHouseDone))
+    const docSteps = [...openSteps.filter(isDoc), ...doneSteps.filter(isDoc)]
+    const docCount = docSteps.length + standaloneGuides.length + (showMarketing ? 1 : 0)
+    // Finished stage: show what happened right away, with no toggle.
+    const allDone = leftOpen.length === 0 && leftDone.length > 0
+    const stagePrefix = stageInTitles ? <><Box component="span" className="milestone-split-stage">{milestone.label}</Box><Box component="span" aria-hidden="true" className="milestone-split-sep">·</Box></> : null
+    return (
+      <>
+      <Box className="milestone-split">
+        <Box component="section" className="milestone-split-main" aria-label="Dates">
+          <SectionLabel className="milestone-split-title">{stagePrefix}Dates</SectionLabel>
+          {locked && lockedNote}
+          {leftOpen.length > 0 && <Box component="ul" className="timeline-item-list" aria-label={locked ? `${milestone.label} items` : 'To do'}>{leftOpen}</Box>}
+          {allDone && <Box component="ul" className="timeline-item-list" aria-label="Done">{leftDone}</Box>}
+          {leftOpen.length === 0 && leftDone.length === 0 && <Typography variant="bodySStandard" color="text.secondary" className="milestone-split-empty">Nothing scheduled for this stage yet.</Typography>}
+          {leftDone.length > 0 && !allDone && (
+            <Box className="milestone-done milestone-done--split">
+              {/* The count says how much is hidden, which is what decides whether to open it. */}
+              <DisclosureButton open={doneOpen} onToggle={() => setDoneOpen(!doneOpen)} showLabel="Show done" hideLabel="Hide done" count={leftDone.length} controls={doneListId} className="milestone-done-button" />
+              {doneOpen && (
+                <Box component="ul" id={doneListId} className="timeline-item-list milestone-done-list" aria-label="Done">
+                  {leftDone}
+                </Box>
+              )}
+            </Box>
+          )}
+        </Box>
+
+        <Box component="aside" className="milestone-split-docs" aria-label={`${milestone.label} documents`}>
+          <SectionLabel className="milestone-split-title">{stagePrefix}Documents</SectionLabel>
+          {docCount === 0 && <Typography variant="bodySStandard" color="text.secondary" className="milestone-split-empty">No documents for this stage.</Typography>}
+          <Box component="ul" className="timeline-doc-list">
+            {docSteps.map((step) => {
+              const done = isDone(step)
+              // A document the team already shared and linked to this date unlocks the row.
+              const linked = linkedDocuments?.(step) ?? []
+              const docLocked = locked && !step.documentId && !linked.length
+              const next = step.id === nextStepId && !done
+              const status = linked.length ? linked.map((doc) => doc.name).join(', ') : documents.find((doc) => doc.id === step.documentId)?.status
+              return (
+                <DocumentListRow
+                  key={step.id}
+                  title={step.title}
+                  meta={docLocked ? `Shared in ${milestone.label.toLowerCase()}` : done ? 'Done' : status}
+                  tag={!done && !locked ? { label: 'File' } : undefined}
+                  done={done}
+                  locked={docLocked}
+                  label={`${step.title}. Document${done ? ', done' : ''}${next ? ', next step' : ''}`}
+                  onOpen={() => onOpenStep(step, milestone)}
+                />
+              )
+            })}
+            {showMarketing && onOpenMarketing && <DocumentListRow icon={<InsightsOutlined />} title="Listing performance" meta="Live dashboard" onOpen={onOpenMarketing} />}
+            {standaloneGuides.map((guide) => resourcesAsDocuments
+              ? <DocumentListRow key={guide.id} title={guide.title} tag={{ label: 'Resource' }} label={`Open ${guide.title}`} onOpen={() => onOpenResource(guide)} />
+              : <DocumentListRow key={guide.id} icon={<MenuBookOutlined />} title={guide.title} meta={`Guide · ${guide.readingTime}`} label={`Read ${guide.title}`} onOpen={() => onOpenResource(guide)} />)}
+          </Box>
+        </Box>
+      </Box>
+      {extraContent}
+      </>
+    )
+  }
 
   return (
     <Box className="milestone-items">
-      {locked && (
-        <Box className="milestone-locked-note">
-          <LockOutlined aria-hidden="true" />
-          <Typography variant="bodySStandard">Opens after {previous ? previous.label.toLowerCase() : 'earlier steps'}. Guides are ready now.</Typography>
-        </Box>
+
+      {cardMode && (openSteps.length > 0 || standaloneGuides.length > 0 || showMarketing) && (
+        <Typography component="h3" variant="labelS" className="milestone-group-title milestone-upcoming-title">{groupLabel}</Typography>
       )}
+      {cardMode && locked && lockedNote}
 
       {(openSteps.length > 0 || standaloneGuides.length > 0 || showMarketing) && (
         <Box component="ul" className="timeline-item-list" aria-label={locked ? `${milestone.label} items` : 'To do'}>
@@ -344,7 +503,30 @@ function MilestoneItems({ milestone, previous, nextStepId, onOpenStep, resources
         </Box>
       )}
 
-      {doneSteps.length > 0 && (
+      {cardMode && doneSteps.length > 0 && (
+        <>
+          {doneOpen && (
+            <Box className="milestone-done">
+              <Typography component="h3" variant="labelS" className="milestone-group-title">Done</Typography>
+              <Box component="ul" id={doneListId} className="timeline-item-list milestone-done-list" aria-label="Done">
+                {doneSteps.map(stepRow)}
+              </Box>
+            </Box>
+          )}
+          <ButtonBase
+            className={`timeline-collapse timeline-done-pill${doneOpen ? '' : ' is-collapsed'}`}
+            onClick={() => setDoneOpen(!doneOpen)}
+            aria-expanded={doneOpen}
+            aria-controls={doneListId}
+            disableRipple
+          >
+            <Typography variant="labelM" component="span">{doneOpen ? 'Hide done' : `Show done · ${doneSteps.length}`}</Typography>
+            <ExpandMoreRounded className="timeline-chevron" aria-hidden="true" />
+          </ButtonBase>
+        </>
+      )}
+
+      {!cardMode && doneSteps.length > 0 && (
         <Box className="milestone-done">
           <ButtonBase className={`milestone-done-toggle${doneOpen ? ' is-open' : ''}`} onClick={() => setDoneOpen(!doneOpen)} aria-expanded={doneOpen} aria-controls={doneListId} disableRipple>
             <Typography component="h3" variant="labelS" className="milestone-group-title">Done <Box component="span" className="milestone-done-count">{doneSteps.length}</Box></Typography>
@@ -357,90 +539,78 @@ function MilestoneItems({ milestone, previous, nextStepId, onOpenStep, resources
           )}
         </Box>
       )}
+      {extraContent}
     </Box>
   )
 }
 
-/** Dates get the date thumbnail. Documents and resources get their icon. Actions use a check circle instead. */
-function ItemStamp({ kind, date, done }: { kind: TimelineItemKind; date?: string; done?: boolean }) {
-  const type = timelineItemKinds[kind]
+/** Dates get the date thumbnail. Documents and resources get their icon. */
+function ItemStamp({ kind, date, done, tbd }: { kind: TimelineItemKind; date?: string; done?: boolean; tbd?: boolean }) {
+  if (tbd) return <DateStamp tbd className="timeline-stamp timeline-stamp--tbd" />
   const showDate = kind === 'date' && date
-  return (
-    <Box component="span" className={`portal-date-stamp timeline-stamp${showDate ? '' : ' timeline-stamp--icon'}${done ? ' is-done' : ''}`}>
-      {showDate ? (
-        <>
-          <Typography variant="labelS" component="span">{formatDate(date, { month: 'short' })}</Typography>
-          <Typography variant="metricM" component="span">{formatDate(date, { day: '2-digit' })}</Typography>
-        </>
-      ) : <Box component="span" className="timeline-stamp-icon" aria-hidden="true">{type.icon}</Box>}
-    </Box>
-  )
+  return <DateStamp date={showDate ? date : undefined} icon={timelineItemKinds[kind].icon} className={`timeline-stamp${done ? ' is-done' : ''}`} />
 }
 
-function StepRow({ step, locked, next, resources, team, onOpen, onOpenResource }: Pick<Handlers, 'resources' | 'team' | 'onOpenResource'> & { step: SellerTimelineStep; locked: boolean; next: boolean; onOpen: () => void }) {
+function StepRow({ step, next, resources, team, onOpen, onOpenResource, onOpenDocument, calendar = false, linkedDocuments = [] }: Pick<Handlers, 'resources' | 'team' | 'onOpenResource' | 'onOpenDocument'> & { step: SellerTimelineStep; next: boolean; onOpen: () => void; /** Split block: an add-to-calendar button replaces the resource chip. */ calendar?: boolean; /** Documents linked to this date. Document-type rows already open their document, so they skip this. */ linkedDocuments?: TransactionDocument[] }) {
   const kind = stepKind(step)
-  const { isDone, toggle } = useContext(ChecksContext)
+  const { isDone } = useContext(ChecksContext)
   const done = isDone(step)
-  // Show the tick first, then let the item settle into Done.
-  const [settling, setSettling] = useState(false)
-  const settleTimer = useRef<number | undefined>(undefined)
-  useEffect(() => () => window.clearTimeout(settleTimer.current), [])
-  const checked = done || settling
   const isYou = step.owner === 'you'
   const member = team.find((person) => person.name === step.owner)
-  const resource = resources.find((item) => item.id === step.resourceId)
-  const due = kind === 'action' && step.date ? `${step.dateLabel && !done ? `${step.dateLabel} ` : ''}${formatDate(step.date)}` : null
-
-  function onCheck() {
-    if (done) { toggle(step); return }
-    setSettling(true)
-    settleTimer.current = window.setTimeout(() => { setSettling(false); toggle(step) }, 650)
-  }
+  // In the split block the resource lives in the item's detail instead of a chip on the row.
+  const resource = calendar ? undefined : resources.find((item) => item.id === step.resourceId)
+  const showCalendar = calendar && Boolean(step.date) && !done
+  const linked = kind === 'document' ? [] : linkedDocuments
 
   return (
-    <Box component="li" className={`portal-date-row timeline-item timeline-item--${kind}${resource ? ' portal-date-row--resource' : ''}${done ? ' is-done' : ''}${checked ? ' is-checked' : ''}${next ? ' is-next' : ''}`}>
-      {kind === 'action' && (
-        <ButtonBase
-          className={`timeline-check${checked ? ' is-checked' : ''}`}
-          role="checkbox"
-          aria-checked={checked}
-          aria-label={`${step.title}: mark as ${done ? 'not done' : 'done'}`}
-          disabled={locked}
-          onClick={onCheck}
-          disableRipple
-        >
-          <CheckRounded aria-hidden="true" />
-        </ButtonBase>
-      )}
+    <Box component="li" className={`portal-date-row timeline-item timeline-item--${kind}${resource || showCalendar || linked.length ? ' portal-date-row--resource' : ''}${done ? ' is-done' : ''}${next ? ' is-next' : ''}`}>
       <ButtonBase className="portal-date-row-main" onClick={onOpen} aria-haspopup="dialog" aria-label={`${step.title}. ${timelineItemKinds[kind].label}${done ? ', done' : ''}${next ? ', next step' : ''}`} disableRipple>
-        {kind === 'action' ? <Box component="span" className="timeline-check-slot" aria-hidden="true" /> : <ItemStamp kind={kind} date={step.date} done={done} />}
-        <Box component="span" className="portal-date-copy timeline-item-copy">
-          <Box component="span" className="timeline-item-title">
-            <Typography variant="titleXS" component="span">{step.title}</Typography>
-            {next && <Box component="span" className="timeline-next-tag">Next step</Box>}
-          </Box>
-          <Typography variant="bodySStandard" color="text.secondary" component="span">{step.summary}</Typography>
-          <Typography variant="labelS" component="span" className="timeline-item-meta">
+        <ItemStamp kind={kind} date={step.date} done={done} tbd={!step.date && Boolean(step.estimate) && kind === 'date'} />
+        <DateRowCopy
+          className="timeline-item-copy"
+          metaClassName="timeline-item-meta"
+          title={step.title}
+          titleAdornment={next && <Box component="span" className="timeline-next-tag">Next step</Box>}
+          description={step.summary}
+          meta={<>
             {!isYou && member?.photoUrl && <Avatar src={member.photoUrl} alt="" className="timeline-item-avatar" />}
-            {due && <>{due}<Box component="span" aria-hidden="true">·</Box></>}
+            {/* The stamp already shows the date (or TBD), so the meta line never repeats it. */}
+            {!step.date && step.estimate && <>{step.estimate}<Box component="span" aria-hidden="true">·</Box></>}
             {isYou ? 'You' : step.owner}
-          </Typography>
-        </Box>
-      </ButtonBase>
-      {resource && (
-        <Chip
-          component="button"
-          type="button"
-          variant="outlined"
-          icon={<MenuBookOutlined />}
-          label={`Resource: ${resource.shortTitle ?? resource.title}`}
-          title={resource.title}
-          aria-label={`Read ${resource.title}`}
-          onClick={() => onOpenResource(resource)}
-          className="portal-date-resource"
+          </>}
         />
-      )}
+      </ButtonBase>
+      {linked.length > 0 ? (
+        <Box className="timeline-item-trailing">
+          {linked.length === 1
+            ? <LinkedDocumentChip document={linked[0]} onClick={() => onOpenDocument(linked[0])} />
+            : <LinkedDocumentChip label={`${linked.length} documents`} ariaLabel={`See ${linked.length} documents for ${step.title}`} onClick={onOpen} />}
+          {resource && <ResourceChip resources={[resource]} onClick={() => onOpenResource(resource)} />}
+          {showCalendar && <AddToCalendarButton title={step.title} date={step.date!} className="timeline-item-calendar" />}
+        </Box>
+      ) : <>
+        {resource && <ResourceChip resources={[resource]} onClick={() => onOpenResource(resource)} />}
+        {showCalendar && <AddToCalendarButton title={step.title} date={step.date!} className="timeline-item-calendar" />}
+      </>}
     </Box>
+  )
+}
+
+
+/** A document linked to a date: the same compact outlined pill as "Add to calendar", with a document icon. Opens the document. */
+function LinkedDocumentChip({ document, label, ariaLabel, onClick }: { document?: TransactionDocument; label?: string; ariaLabel?: string; onClick: () => void }) {
+  return (
+    <Button
+      variant="outlined"
+      size="small"
+      startIcon={<DescriptionOutlined />}
+      title={document ? `${document.name} · ${document.category}` : label}
+      aria-label={ariaLabel ?? `Open ${document?.name}`}
+      onClick={onClick}
+      className="timeline-item-document"
+    >
+      {label ?? document?.name}
+    </Button>
   )
 }
 
@@ -449,11 +619,7 @@ function ResourceRow({ title, summary, meta, onOpen }: { title: string; summary:
     <Box component="li" className="portal-date-row timeline-item timeline-item--resource">
       <ButtonBase className="portal-date-row-main" onClick={onOpen} aria-label={`Read ${title}`} disableRipple>
         <ItemStamp kind="resource" />
-        <Box component="span" className="portal-date-copy timeline-item-copy">
-          <Typography variant="titleXS" component="span">{title}</Typography>
-          <Typography variant="bodySStandard" color="text.secondary" component="span">{summary}</Typography>
-          <Typography variant="labelS" component="span" className="timeline-item-meta">{meta}</Typography>
-        </Box>
+        <DateRowCopy className="timeline-item-copy" metaClassName="timeline-item-meta" title={title} description={summary} meta={meta} />
       </ButtonBase>
     </Box>
   )
@@ -461,7 +627,7 @@ function ResourceRow({ title, summary, meta, onOpen }: { title: string; summary:
 
 /* ---------- Item detail modal ---------- */
 
-function StepModal({ item, onClose, resources, documents, team, onOpenResource, onOpenDocument, onOpenMarketing }: Handlers & { item: { step: SellerTimelineStep; milestone: SellerMilestone } | null; onClose: () => void }) {
+function StepModal({ item, today, onClose, resources, documents, team, onOpenResource, onOpenDocument }: Handlers & { item: { step: SellerTimelineStep; milestone: SellerMilestone } | null; today: string; onClose: () => void }) {
   const checks = useContext(ChecksContext)
   // Keep the last item while the dialog animates closed.
   const [shown, setShown] = useState(item)
@@ -472,61 +638,58 @@ function StepModal({ item, onClose, resources, documents, team, onOpenResource, 
   const kind = stepKind(step)
   const type = timelineItemKinds[kind]
   const done = checks.isDone(step)
-  const locked = milestone.status === 'upcoming'
-  const isYou = step.owner === 'you'
-  const member = team.find((person) => person.name === step.owner)
-  const document = documents.find((doc) => doc.id === step.documentId)
-  const resource = resources.find((guide) => guide.id === step.resourceId)
-  const when = step.date ? `${step.dateLabel && !done ? `${step.dateLabel} ` : ''}${formatDate(step.date, { weekday: 'long', month: 'long', day: 'numeric' })}` : 'Date to be confirmed'
+  // Relative to the prototype's "today", so "In 4 days" matches the timeline.
+  const days = step.date ? daysBetween(today, step.date) : null
+  const away = done ? 'Done' : days === null ? null : days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : days > 0 ? `In ${days} days` : `${-days} days ago`
 
   function then(action: () => void) {
     onClose()
     action()
   }
 
-  const actions = (
-    <>
-      {resource && <Button variant="outlined" startIcon={<MenuBookOutlined />} onClick={() => then(() => onOpenResource(resource))}>Read the guide</Button>}
-      {step.opensMarketing && onOpenMarketing && <Button variant="outlined" onClick={() => then(onOpenMarketing)}>Listing performance</Button>}
-      {kind === 'action' && !locked && <Button variant={done ? 'outlined' : 'contained'} color="primary" startIcon={<CheckRounded />} onClick={() => then(() => checks.toggle(step))}>{done ? 'Mark as not done' : 'Mark as done'}</Button>}
-      {document && !locked && <Button variant="contained" color="primary" startIcon={<DescriptionOutlined />} onClick={() => then(() => onOpenDocument(document))}>{done ? 'View document' : 'Review document'}</Button>}
-    </>
-  )
-
   return (
-    <PlaceModal open={Boolean(item)} onClose={onClose} title={step.title} size="s" actions={resource || document || step.opensMarketing || (kind === 'action' && !locked) ? actions : undefined} className="timeline-step-modal">
-      <Box className="timeline-modal-body">
-        <Box component="dl" className="timeline-modal-facts">
-          <Box className="timeline-modal-fact">
-            <Typography component="dt" variant="labelS">Type</Typography>
-            <Typography component="dd" variant="labelM" className="timeline-modal-type">{type.icon}{type.label}</Typography>
-          </Box>
-          {kind !== 'document' && (
-            <Box className="timeline-modal-fact">
-              <Typography component="dt" variant="labelS">When</Typography>
-              <Typography component="dd" variant="labelM">{when}</Typography>
-            </Box>
-          )}
-          <Box className="timeline-modal-fact">
-            <Typography component="dt" variant="labelS">Who</Typography>
-            <Typography component="dd" variant="labelM" className="timeline-modal-owner">
-              {!isYou && member?.photoUrl && <Avatar src={member.photoUrl} alt="" className="timeline-item-avatar" />}
-              {isYou ? 'You' : step.owner}
-            </Typography>
-          </Box>
-          <Box className="timeline-modal-fact">
-            <Typography component="dt" variant="labelS">Status</Typography>
-            <Typography component="dd" variant="labelM">{done ? 'Done' : locked ? `Opens in ${milestone.label.toLowerCase()}` : 'Open'}</Typography>
-          </Box>
+    <PlaceModal open={Boolean(item)} onClose={onClose} title={step.title} size="m" className="timeline-step-modal">
+      <Box className="timeline-modal-head">
+        <Box className="timeline-modal-when">
+          {kind === 'date' && step.date
+            ? <DateStamp date={step.date} />
+            : <DateStamp icon={type.icon} className="timeline-stamp" />}
         </Box>
-        <Typography variant="bodyMStandard" color="text.secondary">{step.detail ?? step.summary}</Typography>
-        {locked && (document || step.pendingDocument) && (
-          <Box className="milestone-locked-note">
-            <LockOutlined aria-hidden="true" />
-            <Typography variant="bodySStandard">{document?.name ?? step.pendingDocument} will be shared in {milestone.label.toLowerCase()}.</Typography>
-          </Box>
-        )}
+        <Box className="timeline-modal-head-copy">
+          <Eyebrow component="p">{type.label} · {milestone.label}</Eyebrow>
+          <Typography component="p" variant="titleM" className="timeline-modal-title">{step.title}</Typography>
+          <Typography variant="bodyMStandard" color="text.secondary">{step.summary}</Typography>
+          <Typography variant="labelS" color="text.secondary" className="timeline-modal-meta">
+            {kind !== 'document' && <>{whenCopy(step)}<Box component="span" aria-hidden="true">·</Box></>}
+            {away && <>{away}<Box component="span" aria-hidden="true">·</Box></>}
+            <OwnerLabel owner={step.owner} team={team} />
+          </Typography>
+        </Box>
+      </Box>
+      <Box className="timeline-modal-body">
+        <StepDetailBody item={{ step, milestone }} hideFacts team={team} documents={documents} resources={resources} onOpenDocument={(doc) => then(() => onOpenDocument(doc))} onOpenResource={(guide) => then(() => onOpenResource(guide))} />
       </Box>
     </PlaceModal>
+  )
+}
+
+/**
+ * The selected stage's detail block on its own (dates, plus a documents column),
+ * for pages that place it outside the tracker. Clicking an item calls onOpenStep.
+ */
+export function MilestoneDetailsBlock({ data, milestoneId, onOpenStep, ...handlers }: Handlers & { data: SellerTimelineData; milestoneId: MilestoneId; onOpenStep: OpenStep }) {
+  const [overrides, setOverrides] = useState<Record<string, boolean>>({})
+  const checks = useMemo<TimelineChecks>(() => ({
+    isDone: (step) => overrides[step.id] ?? defaultIsDone(step),
+    toggle: (step) => setOverrides((previous) => ({ ...previous, [step.id]: !(previous[step.id] ?? defaultIsDone(step)) })),
+  }), [overrides])
+  const index = Math.max(0, data.milestones.findIndex((milestone) => milestone.id === milestoneId))
+  const milestone = data.milestones[index]
+  return (
+    <ChecksContext.Provider value={checks}>
+      <Box className="seller-timeline seller-timeline--divider milestone-details-block">
+        <MilestoneItems key={milestone.id} milestone={milestone} previous={data.milestones[index - 1]} nextStepId={data.nextStepId} onOpenStep={onOpenStep} {...handlers} />
+      </Box>
+    </ChecksContext.Provider>
   )
 }

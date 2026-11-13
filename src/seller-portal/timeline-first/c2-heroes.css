@@ -1,0 +1,379 @@
+/* C2 hero options · see C2Heroes.tsx */
+
+.tf-hero-cine,
+.tf-hero-pass {
+  --hero-ink: var(--color-semantic-text-on-color-primary);
+  --hero-soft: color-mix(in srgb, var(--color-semantic-text-on-color-primary) 76%, transparent);
+  --hero-faint: color-mix(in srgb, var(--color-semantic-text-on-color-primary) 18%, transparent);
+  --hero-navy: var(--color-semantic-surface-reverse-primary);
+  --hero-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* The dark tracker expects these from .tf-c-hero */
+  --c-ink: var(--hero-ink);
+  --c-soft: var(--hero-soft);
+  --c-faint: var(--hero-faint);
+}
+
+/* Shared: status line, listing button, agent identity */
+.tf-hero-status.MuiTypography-root { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-6) var(--space-12); margin: 0; color: var(--hero-soft); }
+.tf-hero-status-strong { color: var(--hero-ink); font-weight: 500; }
+.tf-hero-status-sep { opacity: 0.6; }
+.tf-hero-status-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-circle);
+  background: var(--hero-ink);
+}
+.tf-hero-status-dot::after {
+  position: absolute;
+  inset: -4px;
+  border-radius: var(--radius-circle);
+  content: '';
+  border: 1px solid var(--hero-ink);
+  opacity: 0;
+  animation: tf-hero-pulse 2.8s var(--hero-ease) infinite 1.2s;
+}
+@keyframes tf-hero-pulse {
+  0% { opacity: 0.7; transform: scale(0.6); }
+  70%, 100% { opacity: 0; transform: scale(1.6); }
+}
+.tf-hero-listing.MuiButton-root { justify-self: start; margin-top: var(--space-8); }
+
+/* =========================================================
+   1 + 4 · Cinematic concierge
+   ========================================================= */
+
+.tf-hero-cine {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--hero-ink);
+  background: var(--hero-navy);
+}
+
+.tf-hero-cine-media { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+.tf-hero-cine-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 38%;
+  transform-origin: 62% 40%;
+  animation: tf-hero-kenburns 3.2s var(--hero-ease) both;
+}
+@keyframes tf-hero-kenburns {
+  from { opacity: 0; transform: scale(1.12) translate3d(1.2%, 1.2%, 0); }
+  25% { opacity: 1; }
+  to { opacity: 1; transform: scale(1.02); }
+}
+/* Darken the left for type and the bottom for the glass bar; keep the middle of the photo alive. */
+.tf-hero-cine-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, oklch(0.16 0.02 260 / 0.78) 0%, oklch(0.16 0.02 260 / 0.42) 46%, oklch(0.16 0.02 260 / 0.12) 100%),
+    linear-gradient(180deg, oklch(0.16 0.02 260 / 0.25) 0%, transparent 30%, transparent 55%, oklch(0.16 0.02 260 / 0.55) 100%);
+}
+
+.tf-hero-cine-inner.MuiContainer-root {
+  display: grid;
+  grid-template-rows: 1fr;
+  gap: var(--space-32);
+  min-height: 300px;
+  padding-top: var(--space-28);
+  padding-bottom: var(--space-32);
+}
+
+.tf-hero-cine-eyebrow.MuiTypography-root { margin: 0; color: var(--hero-soft); }
+
+.tf-hero-agent-divider { width: 1px; height: 28px; margin-inline: var(--space-4); background: var(--color-semantic-stroke-primary-light); }
+
+.tf-hero-cine-main { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-48); }
+.tf-hero-cine-copy { display: grid; gap: var(--space-16); max-width: 640px; }
+.tf-hero-cine-copy h1 { margin: 0; color: var(--hero-ink); text-wrap: balance; }
+
+/* Entrance: content settles in after the photo starts moving. */
+ .tf-hero-cine-copy, .tf-hero-cine-bar { animation: tf-hero-rise 900ms var(--hero-ease) both; }
+.tf-hero-cine-copy { animation-delay: 120ms; }
+
+.tf-hero-cine-bar { animation-delay: 320ms; }
+@keyframes tf-hero-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+/* Frosted glass bar: the tracker rides along the bottom of the photo. */
+.tf-hero-cine-bar {
+  position: relative;
+  border-top: 1px solid oklch(1 0 0 / 0.16);
+  background: color-mix(in oklch, var(--hero-navy) 58%, transparent);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+}
+.tf-hero-cine-bar-inner.MuiContainer-root { padding-top: 0; }
+/* Use the dark tracker without its own solid band. */
+.tf-hero-cine-bar .seller-timeline { margin-top: 0; }
+.tf-hero-cine-bar .seller-timeline--dark:not(.seller-timeline--stacked)::before { display: none; }
+.tf-hero-cine-bar .seller-timeline--dark:not(.seller-timeline--stacked) { padding-bottom: var(--space-12); }
+.tf-hero-cine-bar .seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stage { padding-top: var(--space-20); }
+.tf-hero-cine-bar .timeline-tracker { --tracker-pad: 18px; }
+.tf-hero-cine-bar .seller-timeline--dark:not(.seller-timeline--stacked) .timeline-now { color: var(--hero-navy); }
+
+@media (max-width: 1099.95px) {
+   .tf-hero-agent-divider{ display: none; }
+}
+
+/* Small screens: the tracker becomes the light stacked list, so the bar turns into a plain surface. */
+@media (max-width: 899.95px) {
+  .tf-hero-cine-main { flex-direction: column; align-items: flex-start; gap: var(--space-24); }
+  .tf-hero-cine-bar { border-top: 0; background: var(--color-semantic-surface-primary); backdrop-filter: none; -webkit-backdrop-filter: none; color: var(--color-semantic-text-dark); }
+  .tf-hero-cine-bar-inner.MuiContainer-root { padding-bottom: var(--space-8); }
+}
+@media (max-width: 599.95px) {
+  .tf-hero-cine-inner.MuiContainer-root { min-height: 0; padding-top: var(--space-16); gap: var(--space-40); }
+  
+  .tf-hero-cine-copy h1 { font-size: 2.25rem; }
+}
+
+/* =========================================================
+   3 · Transaction pass
+   ========================================================= */
+
+.tf-hero-pass { position: relative; isolation: isolate; overflow: hidden; }
+.tf-hero-pass-backdrop { position: absolute; inset: 0 0 auto; z-index: -1; height: 100%; overflow: hidden; }
+.tf-hero-pass-backdrop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(48px) saturate(1.2);
+  opacity: 0.55;
+  transform: scale(1.25);
+  animation: tf-hero-kenburns 3.2s var(--hero-ease) both;
+}
+.tf-hero-pass-backdrop::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  background: linear-gradient(180deg, oklch(0.16 0.02 260 / 0.35), var(--hero-navy) 92%);
+}
+
+.tf-hero-pass-inner.MuiContainer-root {
+  display: grid;
+  grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-80);
+  padding-top: var(--space-40);
+  padding-bottom: var(--space-8);
+}
+
+.tf-hero-pass-stage { perspective: 1400px; animation: tf-hero-rise 900ms var(--hero-ease) both 80ms; }
+
+/* The card: dark frosted glass with a light signature strip. */
+.tf-pass {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: var(--space-20);
+  padding: var(--space-24) var(--space-24) 0;
+  border-radius: var(--radius-l);
+  color: var(--hero-ink);
+  background: linear-gradient(150deg, oklch(1 0 0 / 0.16), oklch(1 0 0 / 0.05) 60%, oklch(1 0 0 / 0.08));
+  box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.18), inset 0 1px 0 oklch(1 0 0 / 0.3), 0 40px 80px -32px oklch(0 0 0 / 0.7);
+  backdrop-filter: blur(28px) saturate(1.4);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transform-style: preserve-3d;
+  transition: transform 500ms var(--hero-ease);
+}
+.tf-hero-pass-stage:hover .tf-pass { transition-duration: 120ms; }
+
+.tf-pass-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(600px circle at var(--mx) var(--my), oklch(1 0 0 / 0.16), transparent 45%);
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+.tf-hero-pass-stage:hover .tf-pass-sheen { opacity: 1; }
+
+.tf-pass-photo.MuiButtonBase-root { position: relative; display: block; overflow: hidden; aspect-ratio: 2 / 1; border-radius: var(--radius-m); }
+.tf-pass-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 600ms var(--hero-ease); }
+.tf-pass-photo:hover img { transform: scale(1.04); }
+.tf-pass-photo:focus-visible { outline: 2px solid var(--hero-ink); outline-offset: 3px; }
+.tf-pass-photo-label { position: absolute; right: 12px; bottom: 12px; display: inline-flex; align-items: center; gap: var(--space-6); padding: var(--space-8) var(--space-12); border-radius: var(--radius-pill); color: var(--color-semantic-text-dark); background: color-mix(in srgb, var(--color-semantic-surface-primary) 92%, transparent); backdrop-filter: blur(12px); }
+.tf-pass-photo-label svg { width: 16px; height: 16px; }
+
+.tf-pass-address { display: grid; gap: var(--space-2); }
+.tf-pass-address .MuiTypography-titleM { margin: 0; color: var(--hero-ink); }
+.tf-pass-address .MuiTypography-bodySStandard { margin: 0; color: var(--hero-soft); }
+
+.tf-pass-agent { display: flex; align-items: center; gap: var(--space-12); min-width: 0; }
+.tf-pass-agent .portal-person-actions { gap: 0; }
+.tf-pass-brand .partner-brand-lockup { --partner-team-width: 84px; --partner-brokerage-width: 66px; gap: var(--space-8); }
+.tf-pass-brand .partner-brand-lockup img { max-height: 28px; }
+.tf-pass-brand .partner-brand-divider { height: 20px; }
+
+.tf-hero-pass-copy { display: grid; gap: var(--space-16); align-content: center; animation: tf-hero-rise 900ms var(--hero-ease) both 200ms; }
+.tf-hero-pass-copy h1 { margin: 0; color: var(--hero-ink); }
+.tf-hero-pass-copy .tf-c-eyebrow.MuiTypography-root { margin: 0; }
+.tf-hero-pass-copy .tf-c-hero-sub.MuiTypography-root { margin: 0; }
+
+.tf-hero-pass .tf-c2-tracker.MuiContainer-root { position: relative; }
+
+@media (max-width: 1099.95px) {
+  .tf-hero-pass-inner.MuiContainer-root { grid-template-columns: minmax(0, 1fr); gap: var(--space-32); }
+  .tf-hero-pass-copy { order: -1; }
+  .tf-hero-pass-stage { max-width: 520px; }
+}
+@media (max-width: 599.95px) {
+  .tf-hero-pass-inner.MuiContainer-root { padding-top: var(--space-24); }
+  .tf-pass { padding: var(--space-16) var(--space-16) 0; border-radius: var(--radius-m); }
+  
+  .tf-pass-brand { display: none; }
+  .tf-hero-pass-copy h1 { font-size: 2.25rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tf-hero-cine-photo, .tf-hero-pass-backdrop img { animation: none; transform: scale(1.02); }
+  .tf-hero-pass-backdrop img { transform: scale(1.25); }
+   .tf-hero-cine-copy, .tf-hero-cine-bar, .tf-hero-pass-stage, .tf-hero-pass-copy { animation: none; }
+  .tf-hero-status-dot::after { animation: none; }
+  .tf-pass { transform: none; transition: none; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .tf-hero-cine-bar { background: var(--hero-navy); backdrop-filter: none; }
+  
+  .tf-pass { background: color-mix(in oklch, var(--hero-navy) 92%, white); backdrop-filter: none; }
+}
+
+/* Pass: agent + brand under the copy, as a light glass panel (outside the card). */
+.tf-pass { padding-bottom: var(--space-24); }
+.tf-hero-pass-agent {
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  margin-top: var(--space-16);
+  padding: var(--space-12) var(--space-20) var(--space-12) var(--space-12);
+  border-radius: var(--radius-m);
+  color: var(--color-semantic-text-dark);
+  background: color-mix(in oklch, var(--color-semantic-surface-primary) 90%, transparent);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.6), 0 16px 40px -20px oklch(0 0 0 / 0.6);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  animation: tf-hero-rise 900ms var(--hero-ease) both 300ms;
+}
+.tf-hero-pass-agent .tf-hero-agent-divider { height: 36px; }
+@media (max-width: 599.95px) {
+  .tf-hero-pass-agent { align-self: stretch; justify-self: stretch; }
+  .tf-hero-pass-agent .tf-hero-agent-divider, .tf-hero-pass-agent .tf-pass-brand { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .tf-hero-pass-agent { animation: none; } }
+@media (prefers-reduced-transparency: reduce) { .tf-hero-pass-agent { background: var(--color-semantic-surface-primary); backdrop-filter: none; } }
+
+/* Cinematic: rail agent card on the photo, bottom-aligned with the headline block. */
+.tf-hero-cine-agent.MuiPaper-root { flex: 0 0 auto; width: 360px; animation: tf-hero-rise 900ms var(--hero-ease) both 220ms; }
+@media (max-width: 899.95px) { .tf-hero-cine-agent.MuiPaper-root { width: 100%; max-width: 420px; } }
+@media (prefers-reduced-motion: reduce) { .tf-hero-cine-agent.MuiPaper-root { animation: none; } }
+
+/* =========================================================
+   Pass · light: no frosted glass, no blurred photo. White hero, then the dark tracker band.
+   Closer to the future-v1 header: copy on the left, a plain photo on the right.
+   ========================================================= */
+
+.tf-hero-pass--light { background: var(--color-primitive-base-white); }
+.tf-hero-pass--light .tf-hero-pass-backdrop { display: none; }
+
+/* Dark type on white for the hero's own content. The tracker below keeps the light-on-dark values. */
+.tf-hero-pass--light .tf-hero-pass-copy,
+.tf-hero-pass--light .tf-pass-address {
+  --hero-ink: var(--color-primitive-neutral-800);
+  --hero-soft: var(--color-primitive-neutral-600);
+  --c-ink: var(--hero-ink);
+  --c-soft: var(--hero-soft);
+}
+
+.tf-hero-pass--light .tf-hero-pass-inner.MuiContainer-root {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 560px);
+  padding-top: var(--space-48);
+  padding-bottom: var(--space-40);
+}
+.tf-hero-pass--light .tf-hero-pass-stage { order: 2; }
+
+/* The card becomes a plain photo with its address underneath. */
+.tf-hero-pass--light .tf-pass {
+  padding: 0;
+  gap: var(--space-16);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transform: none;
+}
+.tf-hero-pass--light .tf-pass-sheen { display: none; }
+.tf-hero-pass--light .tf-pass-photo.MuiButtonBase-root { aspect-ratio: 3 / 2; border-radius: var(--radius-m); }
+
+/* Agent and brand: a plain row under a hairline instead of a glass panel. */
+.tf-hero-pass--light .tf-hero-pass-agent {
+  justify-self: stretch;
+  margin-top: var(--space-16);
+  padding: var(--space-20) 0 0;
+  border-radius: 0;
+  border-top: 1px solid var(--color-primitive-neutral-200);
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+@media (max-width: 1099.95px) {
+  .tf-hero-pass--light .tf-hero-pass-inner.MuiContainer-root { grid-template-columns: minmax(0, 1fr); gap: var(--space-32); padding-top: var(--space-32); padding-bottom: var(--space-32); }
+  .tf-hero-pass--light .tf-hero-pass-stage { order: 0; }
+}
+
+.tf-hero-pass-rule { height: 1px; margin-block: var(--space-8); background: var(--color-primitive-neutral-200); }
+
+/* Cinematic: address sits with the headline, buttons side by side. */
+.tf-hero-cine-copy .tf-hero-cine-eyebrow.MuiTypography-root { margin: 0; }
+.tf-hero-cine-actions { display: flex; flex-wrap: wrap; gap: var(--space-12); margin-top: var(--space-8); }
+.tf-hero-cine-actions .tf-hero-listing.MuiButton-root { margin-top: 0; }
+/* Agent card in the rail: the listing buttons take its spot, bottom right, lined up with the status line. */
+.tf-hero-cine-side-actions { flex: 0 0 auto; animation: tf-hero-rise 900ms var(--hero-ease) both 220ms; }
+.tf-hero-cine-side-actions .tf-hero-cine-actions { margin-top: 0; justify-content: flex-end; }
+@media (max-width: 899.95px) { .tf-hero-cine-side-actions .tf-hero-cine-actions { justify-content: flex-start; } }
+@media (prefers-reduced-motion: reduce) { .tf-hero-cine-side-actions { animation: none; } }
+
+/* =========================================================
+   Cinematic · immersive: the top bar is transparent and sits on the photo.
+   ========================================================= */
+
+.tf-portal:has(.tf-hero-cine--immersive) { position: relative; }
+.tf-portal:has(.tf-hero-cine--immersive) > .portal-topbar {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 5;
+  border-bottom: 0;
+  background: transparent;
+}
+.tf-portal:has(.tf-hero-cine--immersive) .portal-topbar .place-wordmark { filter: brightness(0) invert(1); }
+.tf-portal:has(.tf-hero-cine--immersive) .portal-topbar .topbar-divider { background: oklch(1 0 0 / 0.35); }
+.tf-portal:has(.tf-hero-cine--immersive) .portal-topbar .MuiTypography-root { color: var(--hero-ink, #fff); }
+.tf-portal:has(.tf-hero-cine--immersive) .portal-topbar .portal-brand-label.MuiTypography-root,
+.tf-portal:has(.tf-hero-cine--immersive) .portal-topbar .account-name .MuiTypography-labelS { color: oklch(1 0 0 / 0.76); }
+.tf-portal:has(.tf-hero-cine--immersive) .portal-topbar .portal-brand-link:hover { background: oklch(1 0 0 / 0.14); }
+.tf-portal:has(.tf-hero-cine--immersive) .portal-topbar .account-avatar.MuiAvatar-root { color: #fff; background: oklch(1 0 0 / 0.2); }
+
+/* Room for the bar, and a soft shade at the top so it reads on any photo. */
+.tf-hero-cine--immersive .tf-hero-cine-inner.MuiContainer-root { min-height: 380px; padding-top: var(--space-80); }
+.tf-hero-cine--immersive .tf-hero-cine-scrim {
+  background:
+    linear-gradient(180deg, oklch(0.16 0.02 260 / 0.55) 0%, transparent 22%),
+    linear-gradient(90deg, oklch(0.16 0.02 260 / 0.78) 0%, oklch(0.16 0.02 260 / 0.42) 46%, oklch(0.16 0.02 260 / 0.12) 100%),
+    linear-gradient(180deg, oklch(0.16 0.02 260 / 0.25) 0%, transparent 30%, transparent 55%, oklch(0.16 0.02 260 / 0.55) 100%);
+}
+
+/* Cinematic: same content width and side padding as the nav and the page below (1480px, 24px; 18px on small screens). */
+.tf-hero-cine .tf-hero-cine-inner.MuiContainer-root,
+.tf-hero-cine .tf-hero-cine-bar-inner.MuiContainer-root { max-width: 1480px; padding-inline: var(--space-24); }
+@media (max-width: 899.95px) {
+  .tf-hero-cine .tf-hero-cine-inner.MuiContainer-root,
+  .tf-hero-cine .tf-hero-cine-bar-inner.MuiContainer-root { padding-inline: var(--space-20); }
+}

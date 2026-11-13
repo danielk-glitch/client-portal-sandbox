@@ -1,0 +1,43 @@
+.place-checkbox,
+.place-radio {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1.5px solid var(--color-semantic-stroke-primary-dark);
+  background: var(--color-semantic-surface-primary);
+  color: var(--color-semantic-text-on-color-primary);
+  transition: background-color var(--motion-hover), border-color var(--motion-hover), box-shadow var(--motion-hover);
+}
+.place-checkbox { border-radius: var(--radius-xs); }
+.place-radio { border-radius: var(--radius-circle); }
+
+.place-checkbox.is-checked {
+  border-color: var(--color-semantic-surface-reverse-primary);
+  background: var(--color-semantic-surface-reverse-primary);
+}
+.place-checkbox .MuiSvgIcon-root { width: 16px; height: 16px; }
+
+.place-radio.is-checked {
+  border: 6px solid var(--color-semantic-surface-reverse-primary);
+}
+
+/* Hover, focus, and disabled are driven by the MUI root so the hit area stays 44px. */
+.MuiCheckbox-root:hover .place-checkbox:not(.is-checked),
+.MuiRadio-root:hover .place-radio:not(.is-checked) { border-color: var(--color-semantic-text-dark); }
+.MuiCheckbox-root.Mui-focusVisible .place-checkbox,
+.MuiRadio-root.Mui-focusVisible .place-radio {
+  box-shadow: 0 0 0 2px var(--color-semantic-surface-primary), 0 0 0 4px var(--color-semantic-stroke-primary-dark);
+}
+.MuiCheckbox-root.Mui-disabled .place-checkbox,
+.MuiRadio-root.Mui-disabled .place-radio {
+  border-color: var(--color-semantic-stroke-primary);
+  background: var(--color-semantic-surface-primary-disabled);
+}
+.MuiCheckbox-root.Mui-disabled .place-checkbox.is-checked { background: var(--color-semantic-text-disabled); border-color: transparent; }
+.MuiRadio-root.Mui-disabled .place-radio.is-checked { border-color: var(--color-semantic-text-disabled); }
+
+@media (prefers-reduced-motion: reduce) {
+  .place-checkbox, .place-radio { transition: none; }
+}

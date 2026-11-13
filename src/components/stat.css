@@ -1,0 +1,8 @@
+/* Labels render as inline spans directly under a block value, so the line box alone sets their spacing. */
+.place-stat { min-width: 0; }
+.place-stat-value.MuiTypography-root,
+.place-headline-stat-value.MuiTypography-root { font-variant-numeric: tabular-nums; }
+.place-stat-label.MuiTypography-root,
+.place-headline-stat-label.MuiTypography-root,
+.place-headline-stat-context.MuiTypography-root { color: var(--color-semantic-text-primary); }
+.place-headline-stat-value.MuiTypography-root { margin-top: var(--space-8); }

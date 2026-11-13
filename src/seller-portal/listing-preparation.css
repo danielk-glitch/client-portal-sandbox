@@ -1,9 +1,9 @@
 .listing-preparation.MuiPaper-root {
   min-width: 0;
   display: grid;
-  gap: 12px;
-  padding: 32px;
-  border-radius: 14px;
+  gap: var(--space-12);
+  padding: var(--space-32);
+  border-radius: var(--radius-m);
   border: 0;
   background: var(--color-semantic-surface-reverse-secondary);
   color: var(--color-semantic-text-on-color-primary);
@@ -16,6 +16,6 @@
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
-@media (max-width: 900px) {
-  .listing-preparation.MuiPaper-root { padding: 24px; }
+@media (max-width: 899.95px) {
+  .listing-preparation.MuiPaper-root { padding: var(--space-24); }
 }

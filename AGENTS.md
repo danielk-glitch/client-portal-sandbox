@@ -20,6 +20,8 @@ The portal may favor agent or team branding slightly, while nationwide search an
 
 ## Design system and component gallery
 
-Follow `DESIGN.md` for the detailed visual direction. Reuse the semantic tokens in `src/design-tokens.css` and `src/design-tokens.ts`.
+Follow `DESIGN.md` for the detailed visual direction. Reuse the color and type tokens in `src/design-tokens.css` and `src/design-tokens.ts`, and the radius, elevation, and spacing tokens in `src/system-tokens.css` and `src/system-tokens.ts`. Never hardcode a value a token covers. Build cards with `PlaceCard`, and pick links, disclosures, labels, and tags by the use-case table in `DESIGN.md` › Controls by use case.
 
-Whenever you add or change a PLACE component or design token, update `src/internal/component-gallery/ComponentGallery.tsx` in the same change with its visual sample and relevant guidance; document variants and interaction states where they apply. List only components with project styling or implementation, not untouched MUI defaults.
+The component gallery (`src/internal/component-gallery/ComponentGallery.tsx`, at `/components`) covers system-wide foundations and components only: design tokens, theme-styled MUI components, and shared components in `src/components`. Whenever you add or change one of these, update the gallery in the same change with its visual sample and relevant guidance; document variants and interaction states where they apply. List only components with project styling or implementation, not untouched MUI defaults.
+
+Page-specific components stay with their page (`src/seller-portal`, `src/buyer-portal`, `src/team-portal`) and are not added to the gallery. `src/transaction-portal/components` is the shared transaction kit: rows, panels, and sections that the seller, buyer, and team preview views all compose from transaction data. It is not in the gallery either. A component that isn't about transaction data (a card header, a badge, an identity or brand block) belongs in `src/components` with a gallery entry. Document page and kit components with a short comment at the top of the component instead.

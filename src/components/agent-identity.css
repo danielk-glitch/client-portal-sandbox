@@ -1,0 +1,27 @@
+.agent-identity {
+  --agent-avatar-size: 48px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+.agent-identity--s { --agent-avatar-size: 44px; }
+.agent-identity--l { --agent-avatar-size: 56px; }
+.agent-identity--xl { --agent-avatar-size: 64px; gap: var(--space-16); }
+
+.agent-identity-avatar.MuiAvatar-root {
+  width: var(--agent-avatar-size);
+  height: var(--agent-avatar-size);
+  flex: 0 0 auto;
+}
+
+.agent-identity-copy {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.agent-identity--l .agent-identity-copy,
+.agent-identity--xl .agent-identity-copy { gap: var(--space-6); }
+
+.agent-identity-label.MuiTypography-root { color: var(--color-semantic-text-primary); }
+.agent-identity-name.MuiTypography-root { text-wrap: balance; }

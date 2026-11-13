@@ -1,0 +1,126 @@
+/* Buyer portal (/buyer/v1-iteration2). Page-specific blocks only; the shell and shared blocks come from the seller page.
+   Tokens only: radius, elevation, and spacing from system-tokens.css, colors from design-tokens.css. */
+
+/* ---------- Hero key dates: a quiet facts row on the photo, hairlines between facts ---------- */
+.bp-hero-keys { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, max-content); margin: var(--space-8) 0 0; padding: 0; list-style: none; }
+.bp-hero-key { min-width: 0; }
+.bp-hero-key + .bp-hero-key { border-left: 1px solid color-mix(in srgb, var(--hero-ink) 28%, transparent); }
+.bp-hero-key-button.MuiButtonBase-root { display: grid; justify-content: start; justify-items: start; gap: var(--space-2); padding: var(--space-4) var(--space-24); border-radius: var(--radius-xs); color: var(--hero-ink); text-align: left; transition: background-color var(--motion-hover); }
+.bp-hero-key:first-child .bp-hero-key-button.MuiButtonBase-root { padding-left: 0; }
+.bp-hero-key-button.MuiButtonBase-root:hover { background: color-mix(in srgb, var(--hero-ink) 10%, transparent); }
+.bp-hero-key:first-child .bp-hero-key-button.MuiButtonBase-root:hover { background: transparent; }
+.bp-hero-key-button.MuiButtonBase-root:focus-visible { outline: 2px solid var(--hero-ink); outline-offset: var(--focus-ring-offset); }
+.bp-hero-key-label.MuiTypography-root,
+.bp-hero-key-detail.MuiTypography-root { color: var(--hero-soft); }
+.bp-hero-key-date.MuiTypography-root { color: var(--hero-ink); font-variant-numeric: tabular-nums; }
+.bp-hero-key-button.MuiButtonBase-root:hover .bp-hero-key-date { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+@media (max-width: 599.95px) {
+  .bp-hero-keys { grid-auto-flow: row; grid-auto-columns: auto; }
+  .bp-hero-key + .bp-hero-key { border-left: 0; border-top: 1px solid color-mix(in srgb, var(--hero-ink) 28%, transparent); }
+  .bp-hero-key-button.MuiButtonBase-root { width: 100%; min-height: 44px; padding: var(--space-12) 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bp-hero-key-button.MuiButtonBase-root { transition: none; }
+}
+
+/* Hero status: the dot stays beside the first line when the text wraps. */
+.bp-hero-status.MuiTypography-root { flex-wrap: nowrap; align-items: flex-start; }
+.bp-hero-status .tf-hero-status-dot { flex: none; margin-top: var(--space-8); }
+
+/* ---------- Shared row anatomy for the buyer blocks (matches portal-date-row) ---------- */
+.bp-rows { margin: 0; padding: 0; list-style: none; }
+.bp-row { position: relative; padding-block: var(--padding-row-block); }
+.bp-row + .bp-row { border-top: 1px solid var(--color-semantic-stroke-primary-light); }
+.bp-row:first-child { padding-top: 0; }
+.bp-row:last-child { padding-bottom: 0; }
+.bp-row-main { position: relative; width: 100%; display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; align-items: center; gap: var(--space-20); text-align: left; color: inherit; }
+.bp-row-main.MuiButtonBase-root { display: grid; width: 100%; justify-content: stretch; border-radius: 0; font: inherit; }
+.bp-row-main.MuiButtonBase-root::after { position: absolute; inset: calc(var(--padding-row-block) * -1) calc(var(--row-hover-bleed) * -1); z-index: -1; content: ''; border-radius: var(--radius-s); background: transparent; transition: background-color var(--motion-hover); }
+.bp-row:first-child .bp-row-main.MuiButtonBase-root::after { top: calc(var(--row-hover-bleed) * -1); }
+.bp-row:last-child .bp-row-main.MuiButtonBase-root::after { bottom: calc(var(--row-hover-bleed) * -1); }
+.bp-row-main.MuiButtonBase-root:hover::after { background: var(--color-semantic-surface-primary-dark); }
+.bp-row-main.MuiButtonBase-root:focus-visible { outline: var(--focus-ring); outline-offset: 6px; }
+.bp-row-lead { display: grid; place-items: center; }
+.bp-row-copy { min-width: 0; display: grid; gap: var(--space-4); }
+.bp-row-copy > .MuiTypography-root { text-wrap: pretty; }
+.bp-row-meta.MuiTypography-root { color: var(--color-semantic-text-light); font-variant-numeric: tabular-nums; }
+.bp-row-chevron.MuiSvgIcon-root { color: var(--color-semantic-text-light); }
+
+/* ---------- Your first 10 days ---------- */
+.bp-top--card-first .tf-c2-rail { margin-top: 0; }
+.bp-ten.MuiPaper-root { display: grid; gap: var(--space-32); }
+.bp-ten-head { display: grid; gap: var(--space-8); max-width: 62ch; }
+.bp-ten-title.MuiTypography-root { margin: 0; font-variant-numeric: tabular-nums; }
+.bp-ten-sub.MuiTypography-root { text-wrap: pretty; }
+
+/* The track: a thin rail, filled to today, with a checkpoint at each deadline placed to scale. */
+.bp-ten-track { position: relative; padding-inline: var(--space-8); }
+.bp-ten-rail { position: absolute; top: 9px; left: var(--space-8); right: var(--space-8); height: 4px; border-radius: var(--radius-2xs); background: var(--color-semantic-stroke-primary-light); overflow: hidden; }
+.bp-ten-fill { height: 100%; border-radius: var(--radius-2xs); background: var(--color-semantic-surface-reverse-primary); }
+.bp-ten-points { position: relative; height: 84px; margin: 0; padding: 0; list-style: none; }
+.bp-ten-point { position: absolute; top: 0; left: var(--at); width: 120px; transform: translateX(-50%); }
+.bp-ten-point.is-first { transform: translateX(-11px); }
+.bp-ten-point.is-last { transform: translateX(calc(-100% + 11px)); }
+.bp-ten-point-button.MuiButtonBase-root { width: 100%; display: grid; justify-items: center; gap: var(--space-8); padding: 0 0 var(--space-4); border-radius: var(--radius-xs); color: inherit; text-align: center; }
+.bp-ten-point.is-first .bp-ten-point-button.MuiButtonBase-root { justify-items: start; text-align: left; }
+.bp-ten-point.is-last .bp-ten-point-button.MuiButtonBase-root { justify-items: end; text-align: right; }
+.bp-ten-point-button.MuiButtonBase-root:focus-visible { outline: var(--focus-ring); outline-offset: 4px; }
+.bp-ten-dot { width: 22px; height: 22px; display: grid; place-items: center; border-radius: var(--radius-circle); background: var(--color-semantic-surface-primary); box-shadow: inset 0 0 0 1.5px var(--color-semantic-stroke-primary); transition: box-shadow var(--motion-hover), scale var(--motion-hover); }
+.bp-ten-dot .MuiSvgIcon-root { font-size: 14px; }
+.bp-ten-point.is-done .bp-ten-dot { color: var(--color-semantic-text-on-color-light); background: var(--color-semantic-surface-reverse-primary); box-shadow: none; }
+.bp-ten-point.is-next .bp-ten-dot { box-shadow: inset 0 0 0 2px var(--color-semantic-surface-reverse-primary), 0 0 0 4px var(--color-semantic-surface-primary), 0 0 0 5px var(--color-semantic-stroke-primary-dark); }
+.bp-ten-point-button.MuiButtonBase-root:hover .bp-ten-dot { scale: 1.1; }
+.bp-ten-point-copy { display: grid; gap: var(--space-2); }
+.bp-ten-point-date.MuiTypography-root { color: var(--color-semantic-text-light); font-variant-numeric: tabular-nums; }
+.bp-ten-point.is-next .bp-ten-point-date.MuiTypography-root { color: var(--color-semantic-text-primary); }
+.bp-ten-point.is-done .bp-ten-point-label.MuiTypography-root { color: var(--color-semantic-text-dark); }
+.bp-ten-foot { padding-top: var(--space-20); border-top: 1px solid var(--color-semantic-stroke-primary-light); }
+
+/* Phones and narrow columns: the track becomes a plain list with the dots on a vertical rail. */
+@media (max-width: 767.95px) {
+  .bp-ten-track { padding-inline: 0; }
+  .bp-ten-rail { display: none; }
+  .bp-ten-points { height: auto; display: grid; gap: var(--space-16); }
+  .bp-ten-point,
+  .bp-ten-point.is-first,
+  .bp-ten-point.is-last { position: relative; left: auto; width: auto; transform: none; }
+  .bp-ten-point-button.MuiButtonBase-root,
+  .bp-ten-point.is-first .bp-ten-point-button.MuiButtonBase-root,
+  .bp-ten-point.is-last .bp-ten-point-button.MuiButtonBase-root { min-height: 44px; grid-template-columns: 22px minmax(0, 1fr); justify-items: start; align-items: center; gap: var(--space-16); text-align: left; padding: 0; }
+}
+
+/* ---------- Moving in / After closing ---------- */
+.bp-block-columns { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--space-48); }
+.bp-block-group { display: grid; align-content: start; gap: var(--gap-stack); }
+.bp-checklist { margin: 0; padding: 0; list-style: none; display: grid; }
+.bp-checklist li { position: relative; padding: var(--space-12) 0 var(--space-12) var(--space-24); text-wrap: pretty; }
+.bp-checklist li + li { border-top: 1px solid var(--color-semantic-stroke-primary-light); }
+.bp-checklist li:first-child { padding-top: 0; }
+.bp-checklist li::before { position: absolute; left: var(--space-4); top: calc(var(--space-12) + 0.55em); width: 6px; height: 6px; border-radius: var(--radius-circle); background: var(--color-semantic-text-light); content: ''; }
+.bp-checklist li:first-child::before { top: 0.55em; }
+.bp-block-foot { margin-top: var(--space-20); padding-top: var(--space-20); border-top: 1px solid var(--color-semantic-stroke-primary-light); }
+@media (max-width: 899.95px) {
+  .bp-block-columns { grid-template-columns: minmax(0, 1fr); gap: var(--space-40); }
+}
+
+/* ---------- Connect services ---------- */
+.bp-connect-slot { margin-top: var(--space-32); }
+.bp-connect.MuiPaper-root { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: var(--space-48); }
+.bp-connect-copy { display: grid; justify-items: start; gap: var(--space-8); max-width: 52ch; }
+.bp-connect-copy h2 { margin: 0; }
+.bp-connect-body.MuiTypography-root { text-wrap: pretty; }
+.bp-connect-action.MuiButton-root { margin-top: var(--space-16); }
+.bp-connect-list { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-20) var(--space-24); }
+.bp-connect-item { display: flex; align-items: center; gap: var(--space-12); min-width: 0; }
+@media (max-width: 899.95px) {
+  .bp-connect.MuiPaper-root { grid-template-columns: minmax(0, 1fr); gap: var(--space-32); }
+}
+@media (max-width: 419.95px) {
+  .bp-connect-list { grid-template-columns: minmax(0, 1fr); gap: var(--space-12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bp-ten-dot,
+  .bp-row-main.MuiButtonBase-root::after { transition: none; }
+  .bp-ten-point-button.MuiButtonBase-root:hover .bp-ten-dot { scale: 1; }
+}

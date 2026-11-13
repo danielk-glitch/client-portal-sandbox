@@ -1,18 +1,18 @@
 /* Timeline · 2 column: a narrow property column beside a wide timeline column. */
 
-.portal-main--columns.MuiContainer-root { padding-top: 40px; }
+.portal-main--columns.MuiContainer-root { padding-top: var(--space-40); }
 
 .columns-greeting {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 32px;
+  gap: var(--space-24);
+  margin-bottom: var(--space-32);
 }
 
 .columns-greeting-date.MuiTypography-root {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: var(--space-8);
   color: var(--color-semantic-text-light);
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -25,17 +25,17 @@
   display: grid;
   grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
   align-items: start;
-  gap: 24px;
+  gap: var(--space-24);
 }
 
 .columns-side,
-.columns-main { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; align-content: start; }
+.columns-main { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-24); align-content: start; }
 .columns-main > * { grid-column: 1 / -1; }
 
 .columns-main > .advertising-snapshot.MuiPaper-root,
 .columns-main > .marketing-snapshot.MuiPaper-root { margin-top: 0; }
 
-.columns-main > .transaction-sections { min-width: 0; margin-top: 16px; }
+.columns-main > .transaction-sections { min-width: 0; margin-top: var(--space-16); }
 
 @media (max-width: 1099.95px) {
   .columns-grid { grid-template-columns: minmax(0, 1fr); }
@@ -50,3 +50,20 @@
   .columns-greeting { flex-direction: column; align-items: flex-start; }
   .columns-greeting-status.MuiTypography-root { text-align: left; }
 }
+
+/* ---------- Containers: drop shadow (default) or stroke ---------- */
+
+.portal-main--containers-shadow {
+}
+
+.portal-main--containers-shadow .property-summary.MuiPaper-root,
+.portal-main--containers-shadow .advertising-snapshot.MuiPaper-root,
+.portal-main--containers-shadow .marketing-snapshot.MuiPaper-root {
+  border-color: transparent;
+  background: var(--color-semantic-surface-primary);
+  box-shadow: var(--elevation-1);
+}
+
+
+/* The timeline floats directly on the page in both container styles. */
+.portal-main--columns .seller-timeline--card { box-shadow: none; background: transparent; }

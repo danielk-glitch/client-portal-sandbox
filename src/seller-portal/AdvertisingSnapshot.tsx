@@ -1,10 +1,12 @@
-/* design-build · self-critique: Clarity5 Warmth4 Restraint5 Craft4 Variety4 SlopFree5 */
-import { Box, Paper, Typography } from '@mui/material'
-import ArrowForwardOutlined from '@mui/icons-material/ArrowForwardOutlined'
-import Favorite from '@mui/icons-material/Favorite'
-import FavoriteBorder from '@mui/icons-material/FavoriteBorder'
-import { Rating } from '@mui/material'
-import { CardActionButton } from '../components/CardActionButton'
+/**
+ * Listing performance · views trend, engagement, social reach, and the latest showing feedback, in one card.
+ */
+import { Box, Typography } from '@mui/material'
+import { PlaceCard } from '../components/PlaceCard'
+import { TextLink } from '../components/TextLink'
+import { FeedbackQuote } from '../transaction-portal/components'
+import { PortalSectionHeader } from '../components/PortalSection'
+import { HeadlineStat, Stat } from '../components/Stat'
 import type { MarketingSnapshotData } from './MarketingSnapshot'
 import type { ShowingFeedback } from './sellerTransaction'
 import './advertising-snapshot.css'
@@ -46,33 +48,22 @@ export function AdvertisingSnapshot({ data, feedback, onOpenDashboard }: Adverti
   const number = (value: number) => value.toLocaleString('en-US')
 
   return (
-    <Paper component="section" variant="outlined" className="advertising-snapshot" aria-labelledby="advertising-snapshot-title">
-      <Box className="advertising-snapshot-header">
-        <Typography component="h2" variant="titleS" id="advertising-snapshot-title">Listing performance</Typography>
-        <CardActionButton onClick={onOpenDashboard} endIcon={<ArrowForwardOutlined />}>View marketing dashboard</CardActionButton>
-      </Box>
+    <PlaceCard component="section" className="advertising-snapshot" aria-labelledby="advertising-snapshot-title">
+      <PortalSectionHeader
+        title="Listing performance"
+        titleId="advertising-snapshot-title"
+        prominent
+        action={<TextLink onClick={onOpenDashboard}>View marketing dashboard</TextLink>}
+      />
 
       <Box className="advertising-snapshot-body">
         <Box className="advertising-snapshot-primary">
-          <Box className="advertising-snapshot-hero">
-            <Typography variant="labelM" component="p">Total listing views</Typography>
-            <Typography variant="displayL" component="p" className="advertising-snapshot-total">{number(data.totalViews)}</Typography>
-            <Typography variant="bodySStandard" className="advertising-snapshot-context">Across listing sites</Typography>
-          </Box>
+          <HeadlineStat label="Total listing views" value={number(data.totalViews)} context="Across listing sites" />
           <ViewsTrend values={data.dailyViews} />
           <Box className="advertising-snapshot-supporting" aria-label="Listing engagement">
-            <Box>
-              <Typography variant="metricM" component="p">{number(data.uniqueVisitors)}</Typography>
-              <Typography variant="bodySStandard">Unique visitors</Typography>
-            </Box>
-            <Box>
-              <Typography variant="metricM" component="p">{number(data.saves)}</Typography>
-              <Typography variant="bodySStandard">Saves</Typography>
-            </Box>
-            <Box>
-              <Typography variant="metricM" component="p">{number(data.shares)}</Typography>
-              <Typography variant="bodySStandard">Shares</Typography>
-            </Box>
+            <Stat value={number(data.uniqueVisitors)} label="Unique visitors" />
+            <Stat value={number(data.saves)} label="Saves" />
+            <Stat value={number(data.shares)} label="Shares" />
           </Box>
         </Box>
 
@@ -80,17 +71,10 @@ export function AdvertisingSnapshot({ data, feedback, onOpenDashboard }: Adverti
           <Box className="advertising-snapshot-social">
             <Box className="advertising-snapshot-section-heading">
               <Typography component="h3" variant="titleXS">Social media</Typography>
-              <Typography variant="labelS">{data.socialPosts} posts</Typography>
             </Box>
             <Box className="advertising-snapshot-social-stats">
-              <Box>
-                <Typography variant="metricM" component="p">{number(data.socialReach)}</Typography>
-                <Typography variant="bodySStandard">People reached</Typography>
-              </Box>
-              <Box>
-                <Typography variant="metricM" component="p">{number(data.socialEngagements)}</Typography>
-                <Typography variant="bodySStandard">Interactions</Typography>
-              </Box>
+              <Stat value={number(data.socialReach)} label="People reached" />
+              <Stat value={number(data.socialEngagements)} label="Interactions" />
             </Box>
           </Box>
 
@@ -99,16 +83,10 @@ export function AdvertisingSnapshot({ data, feedback, onOpenDashboard }: Adverti
               <Typography component="h3" variant="titleXS">Showing feedback</Typography>
               <Typography variant="labelS">{data.showings} showings</Typography>
             </Box>
-            {latestFeedback && (
-              <Box className="advertising-snapshot-quote">
-                <Rating value={latestFeedback.interest} max={5} readOnly size="small" icon={<Favorite fontSize="inherit" />} emptyIcon={<FavoriteBorder fontSize="inherit" />} aria-label={`Interest ${latestFeedback.interest} out of 5`} />
-                <Typography variant="bodyMStandard" component="p">“{latestFeedback.feedback}”</Typography>
-                <Typography variant="bodySStandard" component="p">{latestFeedback.showingType} · {latestFeedback.date}</Typography>
-              </Box>
-            )}
+            {latestFeedback && <FeedbackQuote feedback={latestFeedback} className="advertising-snapshot-quote" />}
           </Box>
         </Box>
       </Box>
-    </Paper>
+    </PlaceCard>
   )
 }

@@ -1,130 +1,39 @@
 export type TypographyToken = {
   fontFamily: string
-  fontWeight: number
+  fontWeight: string
   fontSize: string
-  lineHeight: number
+  lineHeight: string
   letterSpacing: string
 }
 
+/** Points a text style at its CSS variables in design-tokens.css, so the values live in one place. */
+const style = (name: string): TypographyToken => ({
+  fontFamily: 'var(--font-family-sans)',
+  fontWeight: `var(--type-${name}-weight)`,
+  fontSize: `var(--type-${name}-size)`,
+  lineHeight: `var(--type-${name}-line-height)`,
+  letterSpacing: `var(--type-${name}-tracking)`,
+})
+
 // Named to match the Figma styles while remaining easy to use as MUI variants.
+// labelXS (11px) is for counts beside labels and tiny markers only; never for sentences.
 export const typographyTokens = {
-  displayL: {
-    fontFamily: 'Manrope, "Helvetica Neue", Helvetica, Arial, sans-serif',
-    fontWeight: 400,
-    fontSize: "3.5rem",
-    lineHeight: 1.071429,
-    letterSpacing: "-0.02em",
-  },
-  displayM: {
-    fontFamily: 'Manrope, "Helvetica Neue", Helvetica, Arial, sans-serif',
-    fontWeight: 400,
-    fontSize: "2.75rem",
-    lineHeight: 1.090909,
-    letterSpacing: "-0.018em",
-  },
-  displayS: {
-    fontFamily: 'Manrope, "Helvetica Neue", Helvetica, Arial, sans-serif',
-    fontWeight: 400,
-    fontSize: "2.25rem",
-    lineHeight: 1.111111,
-    letterSpacing: "-0.014em",
-  },
-  titleL: {
-    fontFamily: 'Manrope, "Helvetica Neue", Helvetica, Arial, sans-serif',
-    fontWeight: 400,
-    fontSize: "2rem",
-    lineHeight: 1.125000,
-    letterSpacing: "-0.01em",
-  },
-  titleM: {
-    fontFamily: 'Manrope, "Helvetica Neue", Helvetica, Arial, sans-serif',
-    fontWeight: 500,
-    fontSize: "1.5rem",
-    lineHeight: 1.166667,
-    letterSpacing: "-0.005em",
-  },
-  titleS: {
-    fontFamily: 'Manrope, "Helvetica Neue", Helvetica, Arial, sans-serif',
-    fontWeight: 500,
-    fontSize: "1.25rem",
-    lineHeight: 1.200000,
-    letterSpacing: "0em",
-  },
-  titleXS: {
-    fontFamily: 'Manrope, "Helvetica Neue", Helvetica, Arial, sans-serif',
-    fontWeight: 500,
-    fontSize: "1rem",
-    lineHeight: 1.250000,
-    letterSpacing: "0em",
-  },
-  bodyLStandard: {
-    fontFamily: 'Manrope, "Helvetica Neue", Helvetica, Arial, sans-serif',
-    fontWeight: 400,
-    fontSize: "1.125rem",
-    lineHeight: 1.555556,
-    letterSpacing: "0em",
-  },
-  bodyMStandard: {
-    fontFamily: 'Manrope, "Helvetica Neue", Helvetica, Arial, sans-serif',
-    fontWeight: 400,
-    fontSize: "1rem",
-    lineHeight: 1.500000,
-    letterSpacing: "0em",
-  },
-  bodySStandard: {
-    fontFamily: 'Manrope, "Helvetica Neue", Helvetica, Arial, sans-serif',
-    fontWeight: 400,
-    fontSize: "0.875rem",
-    lineHeight: 1.428571,
-    letterSpacing: "0em",
-  },
-  bodyMCompact: {
-    fontFamily: 'Manrope, "Helvetica Neue", Helvetica, Arial, sans-serif',
-    fontWeight: 400,
-    fontSize: "1rem",
-    lineHeight: 1.250000,
-    letterSpacing: "0em",
-  },
-  bodySCompact: {
-    fontFamily: 'Manrope, "Helvetica Neue", Helvetica, Arial, sans-serif',
-    fontWeight: 400,
-    fontSize: "0.875rem",
-    lineHeight: 1.285714,
-    letterSpacing: "0em",
-  },
-  labelM: {
-    fontFamily: 'Manrope, "Helvetica Neue", Helvetica, Arial, sans-serif',
-    fontWeight: 500,
-    fontSize: "0.875rem",
-    lineHeight: 1.285714,
-    letterSpacing: "0.005em",
-  },
-  labelS: {
-    fontFamily: 'Manrope, "Helvetica Neue", Helvetica, Arial, sans-serif',
-    fontWeight: 500,
-    fontSize: "0.75rem",
-    lineHeight: 1.333333,
-    letterSpacing: "0.01em",
-  },
-  metricL: {
-    fontFamily: 'Manrope, "Helvetica Neue", Helvetica, Arial, sans-serif',
-    fontWeight: 500,
-    fontSize: "2rem",
-    lineHeight: 1.125000,
-    letterSpacing: "-0.01em",
-  },
-  metricM: {
-    fontFamily: 'Manrope, "Helvetica Neue", Helvetica, Arial, sans-serif',
-    fontWeight: 500,
-    fontSize: "1.5rem",
-    lineHeight: 1.166667,
-    letterSpacing: "-0.005em",
-  },
-  metricS: {
-    fontFamily: 'Manrope, "Helvetica Neue", Helvetica, Arial, sans-serif',
-    fontWeight: 500,
-    fontSize: "1rem",
-    lineHeight: 1.250000,
-    letterSpacing: "0em",
-  },
+  displayL: style('display-l'),
+  displayM: style('display-m'),
+  displayS: style('display-s'),
+  titleL: style('title-l'),
+  titleM: style('title-m'),
+  titleS: style('title-s'),
+  titleXS: style('title-xs'),
+  bodyLStandard: style('body-l-standard'),
+  bodyMStandard: style('body-m-standard'),
+  bodySStandard: style('body-s-standard'),
+  bodyMCompact: style('body-m-compact'),
+  bodySCompact: style('body-s-compact'),
+  labelM: style('label-m'),
+  labelS: style('label-s'),
+  labelXS: style('label-xs'),
+  metricL: style('metric-l'),
+  metricM: style('metric-m'),
+  metricS: style('metric-s'),
 } satisfies Record<string, TypographyToken>

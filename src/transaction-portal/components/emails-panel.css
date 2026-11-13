@@ -1,0 +1,139 @@
+/* Emails tab and modal: see EmailsPanel.tsx */
+
+/* ---------- Tab list: the shared list-row spec (DESIGN.md › List rows) ---------- */
+.emails-list { margin: 0; padding: 0; list-style: none; }
+.emails-list-item + .emails-list-item { border-top: 1px solid var(--color-semantic-stroke-primary-light); }
+
+.emails-row.MuiButtonBase-root {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: start;
+  justify-content: stretch;
+  gap: var(--space-16);
+  padding: var(--padding-row-block) 0;
+  color: var(--color-semantic-text-dark);
+  text-align: left;
+}
+.emails-list-item:first-child > .emails-row.MuiButtonBase-root { padding-top: 0; }
+.emails-list-item:last-child > .emails-row.MuiButtonBase-root { padding-bottom: 0; }
+.emails-row.MuiButtonBase-root::after {
+  position: absolute;
+  inset: 0 calc(var(--row-hover-bleed) * -1);
+  z-index: -1;
+  content: '';
+  border-radius: var(--radius-s);
+  transition: background-color var(--motion-hover);
+}
+.emails-list-item:first-child > .emails-row.MuiButtonBase-root::after { top: calc(var(--row-hover-bleed) * -1); }
+.emails-list-item:last-child > .emails-row.MuiButtonBase-root::after { bottom: calc(var(--row-hover-bleed) * -1); }
+.emails-row.MuiButtonBase-root:hover::after { background: var(--color-semantic-surface-primary-dark); }
+.emails-row.MuiButtonBase-root:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); border-radius: var(--radius-s); }
+
+.emails-avatar.MuiAvatar-root {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  font-size: 0.875rem;
+  color: var(--color-semantic-text-dark);
+  background: var(--color-semantic-surface-secondary);
+}
+
+.emails-row-copy { min-width: 0; display: grid; gap: var(--space-4); padding-top: var(--space-2); }
+.emails-row-copy .MuiTypography-root,
+.emails-thread .MuiTypography-root { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.emails-row-people.MuiTypography-root { margin-top: var(--space-2); color: var(--color-semantic-text-light); }
+
+.emails-row-end { display: grid; justify-items: end; gap: var(--space-6); padding-top: var(--space-4); }
+.emails-row-date.MuiTypography-root { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.emails-row-clip.MuiTypography-root { display: inline-flex; align-items: center; gap: var(--space-2); }
+.emails-row-clip svg { width: 16px; height: 16px; }
+
+/* ---------- Modal: threads left, reader right ---------- */
+.emails-modal .place-modal-content.MuiDialogContent-root { padding: 0; overflow: hidden; }
+.emails-modal .place-modal-header.MuiDialogTitle-root { border-bottom: 1px solid var(--color-semantic-stroke-primary-light); padding-bottom: var(--space-20); }
+.emails-modal .MuiDialog-paper { height: min(720px, calc(100dvh - 32px)); }
+
+.emails-modal-body { height: 100%; display: grid; grid-template-columns: 340px minmax(0, 1fr); min-height: 0; }
+
+.emails-threads {
+  min-height: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--color-semantic-stroke-primary-light);
+}
+
+.emails-thread.MuiButtonBase-root {
+  width: 100%;
+  display: grid;
+  justify-content: stretch;
+  justify-items: start;
+  gap: var(--space-2);
+  padding: var(--space-16) var(--space-20);
+  color: var(--color-semantic-text-dark);
+  text-align: left;
+  border-bottom: 1px solid var(--color-semantic-stroke-primary-light);
+  transition: background-color var(--motion-hover);
+}
+.emails-thread.MuiButtonBase-root:hover { background: var(--color-semantic-surface-secondary); }
+.emails-thread.is-selected.MuiButtonBase-root { background: var(--color-semantic-surface-secondary); box-shadow: inset 3px 0 0 var(--color-semantic-surface-reverse-primary); }
+.emails-thread.MuiButtonBase-root:focus-visible { outline: var(--focus-ring); outline-offset: -2px; }
+.emails-thread-top { width: 100%; display: flex; justify-content: space-between; gap: var(--space-12); }
+.emails-thread-people.MuiTypography-root { flex: 1; }
+.emails-thread .MuiTypography-root { max-width: 100%; }
+.emails-thread-snippet.MuiTypography-root {
+  display: -webkit-box;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+.emails-thread .emails-row-clip { margin-top: var(--space-4); }
+
+.emails-reader { min-width: 0; min-height: 0; overflow-y: auto; padding: var(--space-28) var(--space-32) var(--space-32); }
+.emails-reader-subject.MuiTypography-root { margin: 0; text-wrap: pretty; }
+.emails-reader-count.MuiTypography-root { display: block; margin-top: var(--space-4); }
+.emails-reader-back.MuiButtonBase-root { display: none; }
+
+.emails-messages { margin: var(--space-24) 0 0; padding: 0; list-style: none; }
+.emails-message { padding: var(--space-24) 0; border-top: 1px solid var(--color-semantic-stroke-primary-light); }
+.emails-message:first-child { padding-top: 0; border-top: 0; }
+.emails-message-head { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: start; gap: var(--space-16); }
+.emails-message-who { min-width: 0; display: grid; gap: var(--space-2); }
+.emails-message-who .MuiTypography-root { margin: 0; overflow-wrap: anywhere; }
+.emails-message-address { margin-left: var(--space-4); font-weight: 400; color: var(--color-semantic-text-light); }
+.emails-message-date.MuiTypography-root { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.emails-message-body.MuiTypography-root { margin: var(--space-16) 0 0; max-width: 70ch; white-space: pre-wrap; text-wrap: pretty; }
+
+.emails-attachments { margin: var(--space-20) 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-8); }
+.emails-attachment {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-height: 44px;
+  padding: 0 var(--space-16) 0 var(--space-12);
+  border-radius: var(--radius-s);
+  box-shadow: inset 0 0 0 1px var(--color-semantic-stroke-primary-light);
+}
+.emails-attachment svg { width: 20px; height: 20px; color: var(--color-semantic-text-primary); }
+.emails-attachment-name.MuiTypography-root { color: var(--color-semantic-text-dark); }
+
+/* ---------- Narrow: one pane at a time ---------- */
+@media (max-width: 767.95px) {
+  .emails-modal-body { grid-template-columns: minmax(0, 1fr); }
+  .emails-modal-body .emails-reader { display: none; }
+  .emails-modal-body.is-reading .emails-threads { display: none; }
+  .emails-modal-body.is-reading .emails-reader { display: block; padding: var(--space-20) var(--space-24) var(--space-28); }
+  .emails-threads { border-right: 0; }
+  .emails-reader-back.MuiButtonBase-root { display: inline-flex; align-items: center; gap: var(--space-4); min-height: 44px; margin: calc(var(--space-8) * -1) 0 var(--space-8) calc(var(--space-8) * -1); padding: 0 var(--space-8); color: var(--color-semantic-text-dark); border-radius: var(--radius-xs); }
+  .emails-reader-back svg { width: 20px; height: 20px; }
+  .emails-message-head { grid-template-columns: 44px minmax(0, 1fr); }
+  .emails-message-date.MuiTypography-root { grid-column: 2; }
+  .emails-row.MuiButtonBase-root { grid-template-columns: 44px minmax(0, 1fr); gap: var(--space-4) var(--space-12); }
+  .emails-row-end { grid-column: 2; display: flex; align-items: center; gap: var(--space-8); padding-top: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .emails-row.MuiButtonBase-root::after, .emails-thread.MuiButtonBase-root { transition: none; }
+}

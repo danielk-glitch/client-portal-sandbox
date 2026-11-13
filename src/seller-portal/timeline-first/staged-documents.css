@@ -1,0 +1,23 @@
+/* Documents tab and linked-document chips: see StagedDocumentsPanel.tsx */
+
+.tf-docs { display: grid; gap: var(--gap-panel-group); }
+.tf-docs-filters + .tf-docs-stage { margin-top: calc(var(--gap-panel) - var(--gap-panel-group)); }
+.tf-docs-stage { display: grid; gap: var(--gap-stack); }
+.tf-docs-list { margin: 0; padding: 0; list-style: none; }
+
+/* Secondary line: file name, then the linked date. */
+.tf-docs-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-12); min-width: 0; }
+.tf-docs-file { min-width: 0; overflow-wrap: anywhere; }
+.tf-docs-date { display: inline-flex; align-items: center; gap: var(--space-4); color: var(--color-semantic-text-primary); font-variant-numeric: tabular-nums; }
+.tf-docs-date svg { width: 14px; height: 14px; }
+
+
+/* Date rows: a linked document chip, next to any calendar button. */
+.timeline-item-trailing { position: relative; z-index: 1; grid-column: 3; grid-row: 1; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-8); }
+.timeline-item-trailing .portal-date-resource.MuiChip-root { grid-column: auto; grid-row: auto; }
+.timeline-item-trailing .timeline-item-calendar.MuiButton-root { grid-column: auto; grid-row: auto; }
+@media (max-width: 599.95px) {
+  .timeline-item .timeline-item-trailing { grid-column: 2; grid-row: 2; justify-content: flex-start; }
+  .timeline-item .timeline-item-trailing .timeline-item-calendar.MuiButton-root { grid-column: auto; grid-row: auto; }
+}
+

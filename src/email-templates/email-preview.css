@@ -19,7 +19,7 @@
   margin: 0 auto;
   background: var(--color-semantic-surface-primary);
   color: var(--color-semantic-text-dark);
-  box-shadow: var(--elevation-raised);
+  box-shadow: var(--elevation-1);
   font-family: inherit;
 }
 
@@ -66,7 +66,7 @@
 .email-agent div span { color: var(--color-semantic-text-primary); }
 .email-agent-action.MuiIconButton-root { width: 44px; height: 44px; color: var(--color-semantic-text-primary); background: transparent; }
 .email-agent-action.MuiIconButton-root:hover { color: var(--color-semantic-text-dark); background: var(--color-semantic-surface-secondary-dark); }
-.email-agent-action.MuiIconButton-root:focus-visible { outline: 2px solid var(--color-semantic-stroke-primary-dark); outline-offset: 2px; }
+.email-agent-action.MuiIconButton-root:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
 .email-footer a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 
 .email-progress { margin-top: 36px; }
@@ -82,7 +82,7 @@
 .email-footer-note { margin-top: 28px !important; padding-top: 16px; border-top: 1px solid var(--color-semantic-stroke-primary); color: var(--color-semantic-text-primary); font-size: 10px; line-height: 1.6; }
 .email-footer-preferences { display: inline-block; margin-top: 8px; color: var(--color-semantic-text-primary) !important; font-size: 10px; }
 
-@media (max-width: 560px) {
+@media (max-width: 599.95px) {
   .email-brand-row { padding: 16px 24px; min-height: 72px; --partner-team-width: 112px; --partner-brokerage-width: 96px; }
   .email-hero { grid-template-columns: 1fr; }
   .email-hero-copy { padding: 32px 28px; }

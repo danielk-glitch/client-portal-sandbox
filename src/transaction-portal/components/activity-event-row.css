@@ -9,8 +9,8 @@
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr);
   align-items: start;
-  gap: 16px;
-  padding-block: 24px;
+  gap: var(--space-16);
+  padding-block: var(--padding-row-block);
 }
 
 .activity-event-row:first-child {
@@ -27,9 +27,9 @@
 
 .activity-event-copy {
   min-width: 0;
-  padding-top: 2px;
+  padding-top: var(--space-2);
   display: grid;
-  gap: 6px;
+  gap: var(--space-6);
 }
 
 .activity-event-heading {
@@ -37,7 +37,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
-  gap: 8px 16px;
+  gap: var(--space-8) var(--space-16);
 }
 
 .activity-event-actor.MuiTypography-root {
@@ -52,20 +52,36 @@
 }
 
 .activity-event-row--compact {
-  grid-template-columns: 32px minmax(0, 1fr);
-  gap: 12px;
-  padding-block: 16px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  padding-block: var(--space-20);
 }
 
-.activity-event-row--compact .activity-event-copy { gap: 4px; }
+.activity-event-row--compact .activity-event-copy { gap: var(--space-6); padding-top: 0; }
+
+/* Only the title keeps full color. Everything else steps back. */
+.activity-event-row--compact .activity-event-copy > .MuiTypography-bodySStandard,
+.activity-event-row--compact .activity-event-actor.MuiTypography-root,
+.activity-event-row--compact .activity-event-date.MuiTypography-root,
+.activity-event-row--compact .activity-event-meta .MuiTypography-root { color: var(--color-semantic-text-light); }
+.activity-event-row--compact .activity-event-copy > .MuiTypography-bodySStandard {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
 .activity-event-row--compact .activity-event-heading { grid-template-columns: minmax(0, 1fr); }
 .activity-event-row--compact .activity-event-date.MuiTypography-root { max-width: none; text-align: left; }
 .activity-event-row--compact .activity-event-copy > .MuiTypography-root { text-wrap: pretty; }
-.activity-event-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-top: 2px; }
+.activity-event-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-4) var(--space-8); margin-top: var(--space-2); }
 
-@media (max-width: 760px) {
+@media (max-width: 767.95px) {
   .activity-event-row--standard {
     grid-template-columns: 44px minmax(0, 1fr);
-    gap: 12px;
+    gap: var(--space-12);
   }
+  /* Narrow screens: the date drops to the last line, like every other list row's trailing date. */
+  .activity-event-row--standard .activity-event-heading { display: contents; }
+  .activity-event-row--standard .activity-event-date.MuiTypography-root { order: 9; max-width: none; text-align: left; }
 }

@@ -18,12 +18,18 @@ import OtherHousesOutlined from '@mui/icons-material/OtherHousesOutlined'
 import { typographyTokens } from '../design-tokens'
 import { ComponentGallery } from './component-gallery/ComponentGallery'
 import { SellerPortal } from '../seller-portal/SellerPortal'
+import { currentSellerTransaction } from '../seller-portal/currentSellerTransaction'
+import { TimelineFirstPortal } from '../seller-portal/timeline-first/TimelineFirstPortal'
+import { BuyerPortal } from '../buyer-portal/BuyerPortal'
 import { futureMarketingSnapshot, futureSellerTransaction } from '../seller-portal/futureSellerTransaction'
+import { sampleMarketActivity } from '../seller-portal/market-activity/marketActivityData'
 import { EmailGallery } from './email-gallery/EmailGallery'
-import '../presentation-dark.css'
+import './presentation-dark.css'
 import { ClientPortalPreview } from '../team-portal/ClientPortalPreview'
 import { TeamPortal } from '../team-portal/TeamPortal'
 import { teamViews } from '../team-portal/teamData'
+import { TransactionsIndex } from '../client-account/TransactionsIndex'
+import { ClientProfile } from '../client-account/ClientProfile'
 
 type PrototypePage = {
   number: string
@@ -43,7 +49,7 @@ const prototypePages: PrototypePage[] = [
     actionLabel: 'Open seller portal',
     icon: <OtherHousesOutlined />,
     featured: true,
-    href: '/seller/future-v1',
+    href: '/seller/v1-iteration2',
   },
   {
     number: '02',
@@ -56,10 +62,10 @@ const prototypePages: PrototypePage[] = [
   {
     number: '03',
     title: 'Latest buyer portal',
-    description: 'A steady guide from accepted offer through closing day.',
-    actionLabel: 'View buyer preview',
+    description: 'A steady guide from signed contract through closing day and move-in.',
+    actionLabel: 'Open buyer portal',
     icon: <HomeOutlined />,
-    href: '/buyer',
+    href: '/buyer/v1-iteration2',
   },
 ]
 
@@ -68,12 +74,28 @@ type PrototypeView = {
   href: string
 }
 
+const buyerViews: PrototypeView[] = [
+  { label: 'Future Vision', href: '/buyer/v1-iteration2' },
+]
+
 const sellerViews: PrototypeView[] = [
-  { label: 'Current Functionality', href: '/seller' },
-  { label: 'Future v1', href: '/seller/future-v1' },
-  { label: 'Alternate styling', href: '/seller/future-v1-polestar' },
-  { label: 'Timeline Exploration', href: '/seller/timeline-exploration' },
-  { label: 'Timeline · 2 column', href: '/seller/timeline-columns' },
+  { label: 'MVP', href: '/seller' },
+  { label: 'Future Vision', href: '/seller/v1-iteration2' },
+  { label: 'Transactions index', href: '/transactions' },
+  { label: 'Profile', href: '/profile' },
+]
+
+type ArchivedExploration = PrototypeView & { audience: 'Seller' | 'Buyer' | 'Team' }
+
+/** Retired explorations, kept for reference. Tag each with who the portal view is for. */
+const archivedExplorations: ArchivedExploration[] = [
+  { label: 'Future v1', href: '/seller/future-v1', audience: 'Seller' },
+  { label: 'Timeline Exploration', href: '/seller/timeline-exploration', audience: 'Seller' },
+  { label: 'Timeline · 2 column', href: '/seller/timeline-columns', audience: 'Seller' },
+  { label: 'Timeline first A · Tracker rail', href: '/seller/timeline-first-a', audience: 'Seller' },
+  { label: 'Timeline first B · Agenda', href: '/seller/timeline-first-b', audience: 'Seller' },
+  { label: 'Timeline first C · Calendar', href: '/seller/timeline-first-c', audience: 'Seller' },
+  { label: 'Polestar Style Exploration', href: '/seller/future-v1-polestar', audience: 'Seller' },
 ]
 
 const resources = [
@@ -90,13 +112,13 @@ function App() {
     return <ClientPortalPreview buyerPortal={<BuyerPortalPreview />} />
   }
   if (currentPath === '/team' || currentPath.startsWith('/team/')) return <TeamPortal />
-  if (currentPath === '/seller') return <SellerPortal />
-  if (currentPath === '/seller/listing') return <SellerPortal initialListingOpen />
+  if (currentPath === '/seller') return <SellerPortal transaction={currentSellerTransaction} documentRows listingPerformanceTabs defaultHeader="light-compact" headerPreparation />
+  if (currentPath === '/seller/listing') return <SellerPortal transaction={currentSellerTransaction} documentRows listingPerformanceTabs defaultHeader="light-compact" headerPreparation initialListingOpen />
   if (currentPath === '/seller/future-v1') {
-    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} basePath="/seller/future-v1" />
+    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} marketActivity={sampleMarketActivity} basePath="/seller/future-v1" />
   }
   if (currentPath === '/seller/future-v1/listing') {
-    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} basePath="/seller/future-v1" initialListingOpen />
+    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} marketActivity={sampleMarketActivity} basePath="/seller/future-v1" initialListingOpen />
   }
   if (currentPath === '/seller/future-v1-polestar') {
     return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} basePath="/seller/future-v1-polestar" visualTheme="polestar" />
@@ -105,19 +127,26 @@ function App() {
     return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} basePath="/seller/future-v1-polestar" visualTheme="polestar" initialListingOpen />
   }
   if (currentPath === '/seller/timeline-columns') {
-    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} basePath="/seller/timeline-columns" layout="timeline-columns" />
+    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} marketActivity={sampleMarketActivity} basePath="/seller/timeline-columns" layout="timeline-columns" />
   }
   if (currentPath === '/seller/timeline-columns/listing') {
-    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} basePath="/seller/timeline-columns" layout="timeline-columns" initialListingOpen />
+    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} marketActivity={sampleMarketActivity} basePath="/seller/timeline-columns" layout="timeline-columns" initialListingOpen />
   }
   if (currentPath === '/seller/timeline-exploration') {
-    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} basePath="/seller/timeline-exploration" layout="timeline" />
+    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} marketActivity={sampleMarketActivity} basePath="/seller/timeline-exploration" layout="timeline" />
   }
   if (currentPath === '/seller/timeline-exploration/listing') {
-    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} basePath="/seller/timeline-exploration" layout="timeline" initialListingOpen />
+    return <SellerPortal transaction={futureSellerTransaction} marketingSnapshot={futureMarketingSnapshot} marketActivity={sampleMarketActivity} basePath="/seller/timeline-exploration" layout="timeline" initialListingOpen />
   }
+  if (currentPath === '/seller/timeline-first-a') return <TimelineFirstPortal direction="a" />
+  if (currentPath === '/seller/timeline-first-b') return <TimelineFirstPortal direction="b" />
+  if (currentPath === '/seller/timeline-first-c') return <TimelineFirstPortal direction="c" />
+  if (currentPath === '/seller/v1-iteration2') return <TimelineFirstPortal direction="c2" />
+  if (currentPath === '/transactions') return <TransactionsIndex />
+  if (currentPath === '/profile') return <ClientProfile />
   if (currentPath === '/components') return <ComponentGallery />
   if (currentPath === '/buyer') return <BuyerPortalPreview />
+  if (currentPath === '/buyer/v1-iteration2') return <BuyerPortal />
   if (currentPath === '/seller/future-vision') {
     return <UpcomingPage eyebrow="Seller transaction" title="Future Vision" description="A space for the next direction of the seller portal." />
   }
@@ -231,10 +260,10 @@ function SandboxGallery() {
                     bgcolor: 'var(--color-semantic-surface-secondary)',
                     color: 'text.primary',
                     textDecoration: 'none',
-                    transition: 'background-color 160ms ease',
+                    transition: 'background-color var(--motion-hover)',
                     '&:hover': { bgcolor: 'var(--color-semantic-surface-secondary-dark)' },
                     '&:active': { bgcolor: 'var(--color-semantic-surface-secondary-darkest)' },
-                    '&:focus-visible': { outline: '2px solid var(--color-semantic-stroke-primary-dark)', outlineOffset: 3 },
+                    '&:focus-visible': { outline: 'var(--focus-ring)', outlineOffset: 3 },
                     '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
                   }}
                 >
@@ -284,7 +313,7 @@ function SandboxGallery() {
         <Box
           component="section"
           aria-labelledby="view-index-title"
-          sx={{ borderTop: 1, borderColor: 'divider', pt: { xs: 5, md: 6 }, pb: { xs: 9, md: 11 } }}
+          sx={{ borderTop: 1, borderColor: 'divider', pt: { xs: 5, md: 6 }, pb: { xs: 6, md: 8 } }}
         >
           <Stack spacing={1} sx={{ mb: 3 }}>
             <Typography component="h2" id="view-index-title" variant="titleM">
@@ -303,9 +332,27 @@ function SandboxGallery() {
             }}
           >
             <PrototypeViewGroup title="Seller" items={sellerViews} />
-            <PrototypeViewGroup title="Buyer" items={[]} />
+            <PrototypeViewGroup title="Buyer" items={buyerViews} />
             <PrototypeViewGroup title="Team" items={teamViews} />
             <PrototypeViewGroup title="Communication" items={[{ label: 'Email templates', href: '/email-templates' }]} />
+          </Box>
+        </Box>
+
+        <Box
+          component="section"
+          aria-labelledby="archived-title"
+          sx={{ borderTop: 1, borderColor: 'divider', pt: { xs: 5, md: 6 }, pb: { xs: 9, md: 11 } }}
+        >
+          <Stack spacing={1} sx={{ mb: 3 }}>
+            <Typography component="h2" id="archived-title" variant="titleM">
+              Archived explorations
+            </Typography>
+            <Typography variant="bodySStandard" color="text.secondary">
+              Earlier directions, kept for reference. Each is tagged by who it is for.
+            </Typography>
+          </Stack>
+          <Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none', maxWidth: 560, borderBottom: 1, borderColor: 'divider' }}>
+            {archivedExplorations.map((item) => <ViewLinkRow key={item.label} label={item.label} href={item.href} tag={item.audience} />)}
           </Box>
         </Box>
       </Container>
@@ -322,7 +369,7 @@ function SandboxGallery() {
 }
 
 function PrototypeViewGroup({ title, items }: { title: 'Seller' | 'Buyer' | 'Team' | 'Communication'; items: PrototypeView[] }) {
-  const headingId = `${title.toLowerCase()}-views-title`
+  const headingId = `${title.toLowerCase().replace(/\s+/g, "-")}-views-title`
 
   return (
     <Box component="section" aria-labelledby={headingId} sx={{ minWidth: 0 }}>
@@ -332,34 +379,51 @@ function PrototypeViewGroup({ title, items }: { title: 'Seller' | 'Buyer' | 'Tea
       {items.length > 0 && (
         <Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none' }}>
           {items.map((item) => (
-            <Box component="li" key={item.label} sx={{ minWidth: 0, borderTop: 1, borderColor: 'divider' }}>
-              <Box
-                component="a"
-                href={item.href}
-                sx={{
-                  minHeight: 56,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: 1,
-                  px: 1,
-                  mx: -1,
-                  color: 'text.primary',
-                  textDecoration: 'none',
-                  borderRadius: 1,
-                  transition: 'background-color 150ms ease',
-                  '&:hover': { bgcolor: 'var(--color-semantic-surface-secondary)' },
-                  '&:focus-visible': { outline: '2px solid var(--color-semantic-stroke-primary-dark)', outlineOffset: 2 },
-                  '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
-                }}
-              >
-                <Typography variant="bodyMStandard">{item.label}</Typography>
-                <ArrowForwardOutlined aria-hidden="true" sx={{ fontSize: 18, flexShrink: 0 }} />
-              </Box>
-            </Box>
+            <ViewLinkRow key={item.label} label={item.label} href={item.href} />
           ))}
         </Box>
       )}
+    </Box>
+  )
+}
+
+function ViewLinkRow({ label, href, tag }: { label: string; href: string; tag?: string }) {
+  return (
+    <Box component="li" sx={{ minWidth: 0, borderTop: 1, borderColor: 'divider' }}>
+      <Box
+        component="a"
+        href={href}
+        sx={{
+          minHeight: 56,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 1,
+          px: 1,
+          mx: -1,
+          color: 'text.primary',
+          textDecoration: 'none',
+          borderRadius: 1,
+          transition: 'background-color var(--motion-hover)',
+          '&:hover': { bgcolor: 'var(--color-semantic-surface-secondary)' },
+          '&:focus-visible': { outline: 'var(--focus-ring)', outlineOffset: 2 },
+          '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+        }}
+      >
+        <Typography variant="bodyMStandard" sx={{ minWidth: 0 }}>{label}</Typography>
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', flexShrink: 0 }}>
+          {tag && (
+            <Typography
+              variant="labelS"
+              component="span"
+              sx={{ px: 1.5, py: 0.5, borderRadius: 999, color: 'var(--color-semantic-text-on-color-primary)', bgcolor: 'var(--color-semantic-surface-reverse-secondary)' }}
+            >
+              {tag}
+            </Typography>
+          )}
+          <ArrowForwardOutlined aria-hidden="true" sx={{ fontSize: 18 }} />
+        </Stack>
+      </Box>
     </Box>
   )
 }
@@ -369,7 +433,7 @@ function UpcomingPage({ eyebrow, title, description }: { eyebrow: string; title:
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary' }}>
       <Box component="header" sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Container maxWidth="lg" sx={{ minHeight: 72, display: 'flex', alignItems: 'center' }}>
-          <Box component="a" href="/" sx={{ minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 1.5, color: 'text.primary', textDecoration: 'none', borderRadius: 1, '&:focus-visible': { outline: '2px solid var(--color-semantic-stroke-primary-dark)', outlineOffset: 3 } }}>
+          <Box component="a" href="/" sx={{ minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 1.5, color: 'text.primary', textDecoration: 'none', borderRadius: 1, '&:focus-visible': { outline: 'var(--focus-ring)', outlineOffset: 3 } }}>
             <ArrowBackOutlined aria-hidden="true" sx={{ fontSize: 20 }} />
             <Typography variant="titleS">PLACE client portal</Typography>
           </Box>
@@ -409,7 +473,7 @@ function BuyerPortalPreview() {
               color: 'text.primary',
               textDecoration: 'none',
               borderRadius: 1,
-              '&:focus-visible': { outline: '2px solid var(--color-semantic-stroke-primary-dark)', outlineOffset: 3 },
+              '&:focus-visible': { outline: 'var(--focus-ring)', outlineOffset: 3 },
             }}
           >
             <ArrowBackOutlined aria-hidden="true" sx={{ fontSize: 20 }} />
@@ -453,10 +517,10 @@ function DestinationCard({ page }: { page: PrototypePage }) {
         color: 'text.primary',
         textDecoration: 'none',
         cursor: 'pointer',
-        transition: 'background-color 160ms ease',
+        transition: 'background-color var(--motion-hover)',
         '&:hover': { bgcolor: 'var(--color-semantic-surface-secondary-dark)' },
         '&:active': { bgcolor: 'var(--color-semantic-surface-secondary-darkest)' },
-        '&:focus-visible': { outline: '2px solid var(--color-semantic-stroke-primary-dark)', outlineOffset: 3 },
+        '&:focus-visible': { outline: 'var(--focus-ring)', outlineOffset: 3 },
         '&:hover .destination-card-arrow, &:focus-visible .destination-card-arrow': {
           transform: 'translateX(3px)',
           color: 'text.primary',

@@ -19,6 +19,7 @@
     "@mui/material": "^9.4.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-pdf": "^10.5.0",
     "sonner": "^2.0.7"
   },
   "devDependencies": {

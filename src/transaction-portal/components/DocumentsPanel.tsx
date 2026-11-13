@@ -1,45 +1,35 @@
 /* design-build · self-critique: Clarity5 Warmth4 Restraint5 Craft4 Variety3 SlopFree5 */
-import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { Box, Typography } from '@mui/material'
-import { toast } from 'sonner'
 import { DocumentCard } from './DocumentCard'
 import { PaginatedTabList } from './PaginatedTabList'
 import type { TransactionDocument } from '../types'
+import { useDocumentPins, type DocumentPins } from './useDocumentPins'
 
-export function DocumentsPanel({ documents, storageKey, onOpen, readOnly = false }: {
+export function DocumentsPanel({ documents, storageKey, onOpen, readOnly = false, pins: sharedPins, renderRow, pinning = true }: {
   documents: TransactionDocument[]
+  pins?: DocumentPins
   readOnly?: boolean
   storageKey: string
   onOpen: (document: TransactionDocument) => void
+  /** Shows the unpinned documents as list rows (one per document) instead of preview cards. */
+  renderRow?: (document: TransactionDocument) => ReactNode
+  /** Pinning on by default. Off: no pinned group, and every document is listed in one group in its original order. */
+  pinning?: boolean
 }) {
-  const [pinnedIds, setPinnedIds] = useState<string[]>(() => {
-    try {
-      const stored: unknown = JSON.parse(window.localStorage.getItem(storageKey) ?? '[]')
-      return Array.isArray(stored) ? stored.filter((id): id is string => typeof id === 'string') : []
-    } catch {
-      return []
-    }
-  })
-  const pinned = documents.filter(document => pinnedIds.includes(document.id))
-  const remaining = documents.filter(document => !pinnedIds.includes(document.id))
-
-  function togglePin(document: TransactionDocument) {
-    if (readOnly) return
-    const wasPinned = pinnedIds.includes(document.id)
-    const next = wasPinned ? pinnedIds.filter(id => id !== document.id) : [...pinnedIds, document.id]
-    setPinnedIds(next)
-    try {
-      window.localStorage.setItem(storageKey, JSON.stringify(next))
-    } catch {
-      toast('Your pins will stay for this visit. Browser storage is unavailable.')
-    }
-    toast(wasPinned ? 'Document unpinned' : 'Document pinned to the top')
-  }
+  const localPins = useDocumentPins(storageKey)
+  const { pinnedIds, togglePin } = sharedPins ?? localPins
+  const pinned = pinning ? documents.filter(document => pinnedIds.includes(document.id)) : []
+  const remaining = pinning ? documents.filter(document => !pinnedIds.includes(document.id)) : documents
 
   function cards(items: TransactionDocument[]) {
     return <Box component="ul" className="document-grid">{items.map(document => (
       <DocumentCard key={document.id} document={document} readOnly={readOnly} pinned={pinnedIds.includes(document.id)} onPin={togglePin} onPreview={onOpen} />
     ))}</Box>
+  }
+
+  function rows(items: TransactionDocument[]) {
+    return <Box component="ul" className="document-row-list">{items.map(renderRow!)}</Box>
   }
 
   return (
@@ -50,7 +40,7 @@ export function DocumentsPanel({ documents, storageKey, onOpen, readOnly = false
       </Box>}
       {remaining.length > 0 && <Box>
         <Typography component="h3" variant="titleXS" className="document-group-title">{pinned.length ? 'Other documents' : 'All documents'} <Typography component="span" variant="labelS" color="text.secondary">{remaining.length}</Typography></Typography>
-        <PaginatedTabList items={remaining} itemName="documents" ariaLabel="Document pages">{cards}</PaginatedTabList>
+        <PaginatedTabList items={remaining} itemName="documents" ariaLabel="Document pages">{renderRow ? rows : cards}</PaginatedTabList>
       </Box>}
     </Box>
   )

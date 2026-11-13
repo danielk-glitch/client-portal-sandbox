@@ -3,24 +3,23 @@
   align-items: center;
   flex: 0 0 auto;
   max-width: 100%;
-  padding: 4px;
-  border-radius: 999px;
+  padding: var(--space-4);
+  border-radius: var(--radius-pill);
   background: var(--color-semantic-surface-secondary);
 }
 
 .segmented-switch-option {
   min-height: 40px;
-  padding: 0 20px;
+  padding: 0 var(--space-20);
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--color-semantic-text-primary);
-  font: inherit;
-  font-size: 13px;
-  font-weight: 500;
+  font: var(--type-label-m);
+  letter-spacing: var(--type-label-m-tracking);
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color 160ms ease, color 160ms ease;
+  transition: background-color var(--motion-hover), color var(--motion-hover);
 }
 
 .segmented-switch-option:hover:not(:disabled):not([aria-pressed="true"]) {
@@ -33,8 +32,8 @@
 }
 
 .segmented-switch-option:focus-visible {
-  outline: 2px solid var(--color-semantic-stroke-primary-dark);
-  outline-offset: 2px;
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .segmented-switch-option:disabled {
@@ -44,7 +43,7 @@
 
 .segmented-switch--s .segmented-switch-option {
   min-height: 36px;
-  padding-inline: 16px;
+  padding-inline: var(--space-16);
 }
 
 @media (prefers-reduced-motion: reduce) {

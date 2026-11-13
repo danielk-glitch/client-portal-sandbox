@@ -1,0 +1,179 @@
+/* Market activity block. The card surface comes from PlaceCard. */
+.market-activity.MuiPaper-root { margin-top: var(--gap-card); padding-bottom: var(--space-12); }
+
+.market-activity .portal-section-heading-row .MuiTypography-labelS { color: var(--color-semantic-text-primary); }
+
+/* Inline (inside the timeline stage): no card, a hairline above, eyebrow heading. */
+.market-activity--inline {
+  min-width: 0;
+  padding-top: var(--space-32);
+  border-top: 1px solid var(--color-semantic-stroke-primary-light);
+  color: var(--color-semantic-text-dark);
+}
+.market-activity-inline-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-16); }
+.market-activity-inline-heading-copy { display: grid; gap: var(--space-6); min-width: 0; }
+.market-activity-inline-subtitle.MuiTypography-root { color: var(--color-semantic-text-primary); }
+
+.market-activity-list { margin-top: var(--space-20); }
+
+.market-activity-empty.MuiTypography-root {
+  max-width: 60ch;
+  margin-top: var(--space-24);
+}
+
+/* Photo-led rail; a partial next card makes horizontal scrolling discoverable. */
+.market-activity-controls { display: flex; gap: var(--space-4); }
+.market-activity-carousel {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: min(280px, 85%);
+  gap: var(--space-16);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  /* Room around the cards so their shadows aren't clipped by the scroller. */
+  --ma-rail-bleed: var(--space-8);
+  margin: calc(var(--space-8) * -1) calc(var(--ma-rail-bleed) * -1) 0;
+  padding: var(--space-8) var(--ma-rail-bleed) var(--space-24);
+  scroll-padding-inline: var(--ma-rail-bleed);
+  list-style: none;
+  cursor: grab;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-semantic-stroke-primary) transparent;
+}
+/* While dragging: follow the pointer exactly, no snapping, no text or image selection. */
+/* Soft edge fade, only on a side that has more homes to scroll to. Registered so the fade eases in and out. */
+@property --ma-fade-start { syntax: '<length>'; inherits: false; initial-value: 0px; }
+@property --ma-fade-end { syntax: '<length>'; inherits: false; initial-value: 0px; }
+.market-activity-carousel {
+  mask-image: linear-gradient(90deg, transparent, #000 var(--ma-fade-start), #000 calc(100% - var(--ma-fade-end)), transparent);
+  transition: --ma-fade-start 200ms ease-out, --ma-fade-end 200ms ease-out;
+}
+.market-activity-carousel[data-fade-start] { --ma-fade-start: 40px; }
+.market-activity-carousel[data-fade-end] { --ma-fade-end: 40px; }
+/* A mask would clip the keyboard focus ring, so the fade steps aside while the rail has focus. */
+.market-activity-carousel:focus-visible { mask-image: none; }
+@media (prefers-reduced-motion: reduce) {
+  .market-activity-carousel { transition: none; }
+}
+.market-activity-carousel.is-dragging { cursor: grabbing; scroll-snap-type: none; user-select: none; }
+.market-activity-carousel.is-dragging * { pointer-events: none; }
+.market-activity-carousel:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 4px;
+  border-radius: var(--radius-s);
+}
+.competing-listing {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  scroll-snap-align: start;
+  border-radius: var(--radius-m);
+  background: var(--color-primitive-base-white);
+  box-shadow: var(--elevation-1);
+}
+.competing-listing-photo {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  color: var(--color-semantic-text-light);
+  background: var(--color-semantic-surface-secondary);
+}
+.competing-listing-photo img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.competing-listing-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-20);
+}
+.competing-listing-price.MuiTypography-root {
+  color: var(--color-semantic-text-dark);
+  font-variant-numeric: tabular-nums;
+}
+.competing-listing-address.MuiTypography-root { text-wrap: pretty; }
+.competing-listing-facts.MuiTypography-root,
+.competing-listing-change.MuiTypography-root {
+  color: var(--color-semantic-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.competing-listing-facts > span { white-space: nowrap; }
+.competing-listing-change.MuiTypography-root { margin-top: var(--space-6); }
+
+
+.competing-listing-open.MuiButtonBase-root {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+  text-align: left;
+  border-radius: inherit;
+  color: inherit;
+  transition: scale var(--motion-press);
+}
+.competing-listing-open.MuiButtonBase-root:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: -3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .competing-listing-open.MuiButtonBase-root { transition: none; }
+}
+
+
+/* Status tag on the photo, top left. White fill so it reads on any photo. */
+.competing-listing-tag.place-tag {
+  position: absolute;
+  top: var(--space-12);
+  left: var(--space-12);
+}
+
+/* Hover: the photo dims and the bare arrow slides up out of a mask. */
+.competing-listing-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: oklch(0 0 0 / 0.36);
+  opacity: 0;
+  transition: opacity 260ms ease;
+  pointer-events: none;
+}
+.competing-listing-open-mask {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 1;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  overflow: hidden; /* the mask: the icon is clipped until it has risen into view */
+  color: var(--color-semantic-text-on-color-primary);
+  opacity: 0;
+  transition: opacity 210ms ease;
+}
+.competing-listing-open-icon.MuiSvgIcon-root {
+  width: 32px;
+  height: 32px;
+  transform: translateY(150%);
+  transition: transform 416ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.competing-listing-open:hover .competing-listing-photo::after,
+.competing-listing-open:focus-visible .competing-listing-photo::after { opacity: 1; }
+.competing-listing-open:hover .competing-listing-open-mask,
+.competing-listing-open:focus-visible .competing-listing-open-mask { opacity: 1; }
+.competing-listing-open:hover .competing-listing-open-icon.MuiSvgIcon-root,
+.competing-listing-open:focus-visible .competing-listing-open-icon.MuiSvgIcon-root { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .competing-listing-open-icon.MuiSvgIcon-root { transition: none; }
+}
+

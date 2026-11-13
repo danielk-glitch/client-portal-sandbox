@@ -1,0 +1,519 @@
+diff --git a/src/seller-portal/OpenHouseModal.tsx b/src/seller-portal/OpenHouseModal.tsx
+new file mode 100644
+index 0000000..2c00aa2
+--- /dev/null
++++ b/src/seller-portal/OpenHouseModal.tsx
+@@ -0,0 +1,101 @@
++/**
++ * Open house modal · the client-facing detail for one open house.
++ * - Done: results lead (visitors, leads), then the facts, then the host's notes.
++ * - Scheduled: facts, notes, and a quiet line saying results arrive afterward. Footer offers add to calendar.
++ */
++import { useState } from 'react'
++import { Avatar, Box, Typography } from '@mui/material'
++import { PlaceModal } from '../components/PlaceModal'
++import type { TeamMember } from '../transaction-portal/types'
++import { AddToCalendarButton } from './AddToCalendarButton'
++import { isOpenHouseDone, openHouseTime, openHouseTitle, type OpenHouse } from './openHouses'
++import './open-house.css'
++
++function formatDay(iso: string, options: Intl.DateTimeFormatOptions) {
++  return new Intl.DateTimeFormat('en-US', { ...options, timeZone: 'UTC' }).format(new Date(`${iso}T12:00:00Z`))
++}
++
++function daysBetween(from: string, to: string) {
++  return Math.round((new Date(`${to}T12:00:00Z`).getTime() - new Date(`${from}T12:00:00Z`).getTime()) / 86400000)
++}
++
++export function OpenHouseModal({ openHouse, stageLabel, team, today, onClose }: {
++  openHouse: OpenHouse | null
++  /** The stage the open house belongs to, e.g. "Active listing". */
++  stageLabel?: string
++  team: TeamMember[]
++  /** The prototype's "today", so "In 4 days" matches the rest of the page. */
++  today: string
++  onClose: () => void
++}) {
++  // Keep the last open house while the dialog animates closed.
++  const [shown, setShown] = useState(openHouse)
++  if (openHouse && openHouse !== shown) setShown(openHouse)
++  const current = openHouse ?? shown
++  if (!current) return null
++
++  const done = isOpenHouseDone(current)
++  const title = openHouseTitle(current)
++  const host = team.find((person) => person.name === current.host)
++  const hostFirstName = current.host.split(' ')[0]
++  const days = daysBetween(today, current.date)
++  const status = done ? 'Done' : days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : days > 0 ? `In ${days} days` : 'Scheduled'
++  const description = [stageLabel, formatDay(current.date, { weekday: 'long', month: 'long', day: 'numeric' })].filter(Boolean).join(' · ')
++
++  return (
++    <PlaceModal
++      open={Boolean(openHouse)}
++      onClose={onClose}
++      title={title}
++      description={description}
++      size="m"
++      className="open-house-modal"
++      actions={done ? undefined : <AddToCalendarButton title={title} date={current.date} />}
++    >
++      <Box className="open-house-detail">
++        {done && (
++          <Box component="section" aria-labelledby="open-house-results-title" className="open-house-group">
++            <Typography component="h3" variant="labelS" id="open-house-results-title" className="open-house-group-title">Results</Typography>
++            <Box component="dl" className="open-house-stats">
++              <Box className="open-house-stat">
++                <Typography component="dt" variant="labelM" color="text.secondary">Visitors</Typography>
++                <Typography component="dd" variant="metricL">{current.attendees ?? 0}</Typography>
++              </Box>
++              <Box className="open-house-stat">
++                <Typography component="dt" variant="labelM" color="text.secondary">Leads</Typography>
++                <Typography component="dd" variant="metricL">{current.leads ?? 0}</Typography>
++              </Box>
++            </Box>
++            <Typography variant="bodySStandard" color="text.secondary">Leads are visitors who left their contact info or asked {hostFirstName} to follow up.</Typography>
++          </Box>
++        )}
++
++        <Box component="dl" className="open-house-facts">
++          <Box><Typography component="dt" variant="labelS">Date</Typography><Typography component="dd" variant="labelM">{formatDay(current.date, { weekday: 'short', month: 'short', day: 'numeric' })}</Typography></Box>
++          <Box><Typography component="dt" variant="labelS">Time</Typography><Typography component="dd" variant="labelM">{openHouseTime(current)}</Typography></Box>
++          <Box>
++            <Typography component="dt" variant="labelS">Host</Typography>
++            <Typography component="dd" variant="labelM" className="open-house-host">
++              {host?.photoUrl && <Avatar src={host.photoUrl} alt="" className="open-house-host-avatar" />}
++              {current.host}
++            </Typography>
++          </Box>
++          <Box><Typography component="dt" variant="labelS">Status</Typography><Typography component="dd" variant="labelM">{status}</Typography></Box>
++        </Box>
++
++        {current.notes && (
++          <Box component="section" aria-labelledby="open-house-notes-title" className="open-house-group">
++            <Typography component="h3" variant="labelS" id="open-house-notes-title" className="open-house-group-title">Notes from {hostFirstName}</Typography>
++            <Typography variant="bodyMStandard" className="open-house-notes">{current.notes}</Typography>
++          </Box>
++        )}
++
++        {!done && (
++          <Typography variant="bodySStandard" color="text.secondary" className="open-house-pending">
++            Visitor and lead counts show up here after the open house.
++          </Typography>
++        )}
++      </Box>
++    </PlaceModal>
++  )
++}
+diff --git a/src/seller-portal/OpenHouseRow.tsx b/src/seller-portal/OpenHouseRow.tsx
+new file mode 100644
+index 0000000..7a1596d
+--- /dev/null
++++ b/src/seller-portal/OpenHouseRow.tsx
+@@ -0,0 +1,61 @@
++/**
++ * Open house row · one open house in a stage's "Dates & action items" list or the Open houses tab.
++ * Same anatomy as a date row: date bubble, title, a time line, then a quiet meta line.
++ * - Scheduled: meta shows the host. Optional add-to-calendar button on the right.
++ * - Done: meta shows the host plus visitors and leads, so results read at a glance.
++ * The whole row opens the open house modal.
++ */
++import { Avatar, Box, ButtonBase } from '@mui/material'
++import { DateRowCopy, DateStamp } from '../transaction-portal/components'
++import type { TeamMember } from '../transaction-portal/types'
++import { AddToCalendarButton } from './AddToCalendarButton'
++import { isOpenHouseDone, openHouseTime, openHouseTitle, type OpenHouse } from './openHouses'
++import './open-house.css'
++
++function weekday(iso: string) {
++  return new Intl.DateTimeFormat('en-US', { weekday: 'long', timeZone: 'UTC' }).format(new Date(`${iso}T12:00:00Z`))
++}
++
++const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`
++
++export function OpenHouseRow({ openHouse, team, onOpen, calendar = false }: {
++  openHouse: OpenHouse
++  team: TeamMember[]
++  onOpen: () => void
++  /** Show an add-to-calendar button while the open house is still scheduled. */
++  calendar?: boolean
++}) {
++  const done = isOpenHouseDone(openHouse)
++  const title = openHouseTitle(openHouse)
++  const host = team.find((person) => person.name === openHouse.host)
++  const showCalendar = calendar && !done
++  const results = done && openHouse.attendees !== undefined
++    ? `${plural(openHouse.attendees, 'visitor')} · ${plural(openHouse.leads ?? 0, 'lead')}`
++    : null
++
++  return (
++    <Box component="li" className={`portal-date-row timeline-item timeline-item--open-house${showCalendar ? ' portal-date-row--resource' : ''}${done ? ' is-done' : ''}`}>
++      <ButtonBase
++        className="portal-date-row-main"
++        onClick={onOpen}
++        aria-haspopup="dialog"
++        aria-label={`${title}, ${weekday(openHouse.date)} ${openHouseTime(openHouse)}${results ? `, ${results}` : ''}`}
++        disableRipple
++      >
++        <DateStamp date={openHouse.date} className={`timeline-stamp${done ? ' is-done' : ''}`} />
++        <DateRowCopy
++          className="timeline-item-copy"
++          metaClassName="timeline-item-meta"
++          title={title}
++          description={`${weekday(openHouse.date)} · ${openHouseTime(openHouse)}`}
++          meta={<>
++            {host?.photoUrl && <Avatar src={host.photoUrl} alt="" className="timeline-item-avatar" />}
++            {done ? openHouse.host : `Hosted by ${openHouse.host}`}
++            {results && <><Box component="span" aria-hidden="true">·</Box><Box component="span" className="open-house-results">{results}</Box></>}
++          </>}
++        />
++      </ButtonBase>
++      {showCalendar && <AddToCalendarButton title={title} date={openHouse.date} className="timeline-item-calendar" />}
++    </Box>
++  )
++}
+diff --git a/src/seller-portal/SellerTimeline.tsx b/src/seller-portal/SellerTimeline.tsx
+index 8623f5b..c0ac056 100644
+--- a/src/seller-portal/SellerTimeline.tsx
++++ b/src/seller-portal/SellerTimeline.tsx
+@@ -16,6 +16,8 @@ import { DateRowCopy, DateStamp, ResourceChip } from '../transaction-portal/comp
+ import type { TeamMember, TransactionDocument, TransactionResource } from '../transaction-portal/types'
+ import type { MilestoneId, SellerMilestone, SellerTimelineData, SellerTimelineStep, TimelineItemKind, TimelineStatus } from './sellerTimelineData'
+ import { OwnerLabel, StepDetailBody, whenCopy } from './timeline-first/TimelineFirstParts'
++import { OpenHouseRow } from './OpenHouseRow'
++import { isOpenHouseDone, type OpenHouse } from './openHouses'
+ import './seller-timeline.css'
+ 
+ /** divider and dark sit on the page under a hero; card sits inside a column layout. */
+@@ -47,9 +49,12 @@ type SellerTimelineProps = {
+   stageInTitles?: boolean
+   /** A small link beside the "Transaction timeline" label, separated by a dot (e.g. "Full timeline"). */
+   headingAction?: ReactNode
++  /** Open houses show as rows in their stage's dates list, sorted in with the other dates. */
++  openHouses?: OpenHouse[]
++  onOpenOpenHouse?: (openHouse: OpenHouse) => void
+ }
+ 
+-type Handlers = Pick<SellerTimelineProps, 'resources' | 'documents' | 'team' | 'onOpenResource' | 'onOpenDocument' | 'onOpenMarketing' | 'trackerOnly' | 'onSelectMilestone' | 'currentLabel' | 'resourcesAsDocuments' | 'stageInTitles' | 'headingAction'>
++type Handlers = Pick<SellerTimelineProps, 'resources' | 'documents' | 'team' | 'onOpenResource' | 'onOpenDocument' | 'onOpenMarketing' | 'trackerOnly' | 'onSelectMilestone' | 'currentLabel' | 'resourcesAsDocuments' | 'stageInTitles' | 'headingAction' | 'openHouses' | 'onOpenOpenHouse'>
+ 
+ const statusCopy: Record<TimelineStatus, string> = { complete: 'Complete', current: 'Current stage', upcoming: 'Upcoming' }
+ 
+@@ -340,7 +345,7 @@ function byDate(a: SellerTimelineStep, b: SellerTimelineStep) {
+   return a.date ? -1 : b.date ? 1 : 0
+ }
+ 
+-function MilestoneItems({ milestone, previous, nextStepId, onOpenStep, resources, documents, team, onOpenResource, onOpenMarketing, resourcesAsDocuments, stageInTitles }: Handlers & { milestone: SellerMilestone; previous?: SellerMilestone; nextStepId: string; onOpenStep: OpenStep }) {
++function MilestoneItems({ milestone, previous, nextStepId, onOpenStep, resources, documents, team, onOpenResource, onOpenMarketing, resourcesAsDocuments, stageInTitles, openHouses = [], onOpenOpenHouse }: Handlers & { milestone: SellerMilestone; previous?: SellerMilestone; nextStepId: string; onOpenStep: OpenStep }) {
+   const locked = milestone.status === 'upcoming'
+   const linkedResourceIds = new Set(milestone.steps.map((step) => step.resourceId).filter(Boolean))
+   const standaloneGuides = milestone.resourceIds
+@@ -371,8 +376,19 @@ function MilestoneItems({ milestone, previous, nextStepId, onOpenStep, resources
+   if (!cardMode) {
+     // Exploration page: dates and action items lead on the left; documents and guides sit in a lighter column on the right.
+     const isDoc = (step: SellerTimelineStep) => stepKind(step) === 'document'
+-    const leftOpen = openSteps.filter((step) => !isDoc(step))
+-    const leftDone = doneSteps.filter((step) => !isDoc(step))
++    // Open houses sort in with the stage's dates. Scheduled ones are open; finished ones are done.
++    const stageOpenHouses = openHouses.filter((openHouse) => openHouse.milestoneId === milestone.id)
++    type DatedRow = { date?: string; node: ReactNode }
++    const openHouseRow = (openHouse: OpenHouse): DatedRow => ({
++      date: openHouse.date,
++      node: <OpenHouseRow key={openHouse.id} openHouse={openHouse} team={team} calendar onOpen={() => onOpenOpenHouse?.(openHouse)} />,
++    })
++    const datedRows = (steps: SellerTimelineStep[], houses: OpenHouse[]) => [
++      ...steps.map((step): DatedRow => ({ date: step.date, node: stepRow(step) })),
++      ...houses.map(openHouseRow),
++    ].sort((a, b) => (a.date && b.date ? a.date.localeCompare(b.date) : a.date ? -1 : b.date ? 1 : 0)).map((row) => row.node)
++    const leftOpen = datedRows(openSteps.filter((step) => !isDoc(step)), stageOpenHouses.filter((openHouse) => !isOpenHouseDone(openHouse)))
++    const leftDone = datedRows(doneSteps.filter((step) => !isDoc(step)), stageOpenHouses.filter(isOpenHouseDone))
+     const docSteps = [...openSteps.filter(isDoc), ...doneSteps.filter(isDoc)]
+     const docCount = docSteps.length + standaloneGuides.length + (showMarketing ? 1 : 0)
+     // Finished stage: show what happened right away, with no toggle.
+@@ -383,8 +399,8 @@ function MilestoneItems({ milestone, previous, nextStepId, onOpenStep, resources
+         <Box component="section" className="milestone-split-main" aria-label="Dates and action items">
+           <Typography component="h3" variant="labelS" className="milestone-split-title">{stagePrefix}Dates & action items <Box component="span" className="milestone-done-count">{allDone ? leftDone.length : leftOpen.length}</Box></Typography>
+           {locked && lockedNote}
+-          {leftOpen.length > 0 && <Box component="ul" className="timeline-item-list" aria-label={locked ? `${milestone.label} items` : 'To do'}>{leftOpen.map(stepRow)}</Box>}
+-          {allDone && <Box component="ul" className="timeline-item-list" aria-label="Done">{leftDone.map(stepRow)}</Box>}
++          {leftOpen.length > 0 && <Box component="ul" className="timeline-item-list" aria-label={locked ? `${milestone.label} items` : 'To do'}>{leftOpen}</Box>}
++          {allDone && <Box component="ul" className="timeline-item-list" aria-label="Done">{leftDone}</Box>}
+           {leftOpen.length === 0 && leftDone.length === 0 && <Typography variant="bodySStandard" color="text.secondary" className="milestone-split-empty">Nothing scheduled for this stage yet.</Typography>}
+           {leftDone.length > 0 && !allDone && (
+             <Box className="milestone-done milestone-done--split">
+@@ -402,7 +418,7 @@ function MilestoneItems({ milestone, previous, nextStepId, onOpenStep, resources
+               </Button>
+               {doneOpen && (
+                 <Box component="ul" id={doneListId} className="timeline-item-list milestone-done-list" aria-label="Done">
+-                  {leftDone.map(stepRow)}
++                  {leftDone}
+                 </Box>
+               )}
+             </Box>
+diff --git a/src/seller-portal/open-house.css b/src/seller-portal/open-house.css
+new file mode 100644
+index 0000000..1de5b95
+--- /dev/null
++++ b/src/seller-portal/open-house.css
+@@ -0,0 +1,59 @@
++/* ---------- Open house row: results sit a step darker than the rest of the meta ---------- */
++
++.timeline-item--open-house .open-house-results { color: var(--color-semantic-text-primary); }
++
++/* ---------- Open houses tab ---------- */
++
++.open-house-panel { display: grid; gap: 24px; }
++.open-house-summary.MuiTypography-root { font-variant-numeric: tabular-nums; }
++.open-house-panel .timeline-item-list { gap: 0; }
++.open-house-panel .timeline-item.portal-date-row { padding: 20px 0; border-bottom: 1px solid var(--color-semantic-stroke-primary-lightest); }
++.open-house-panel .timeline-item.portal-date-row:last-child { border-bottom: 0; }
++.open-house-panel .timeline-item .portal-date-row-main::after { inset: -12px -16px; border-radius: 16px; }
++
++/* ---------- Modal ---------- */
++
++.open-house-detail { display: grid; gap: 24px; }
++
++.open-house-group { display: grid; gap: 12px; }
++.open-house-group-title.MuiTypography-root {
++  margin: 0;
++  color: var(--color-semantic-text-light);
++  text-transform: uppercase;
++  letter-spacing: 0.12em;
++}
++
++.open-house-stats {
++  display: grid;
++  grid-template-columns: repeat(2, minmax(0, 1fr));
++  gap: 12px;
++  margin: 0;
++}
++.open-house-stat {
++  display: grid;
++  gap: 4px;
++  padding: 20px;
++  border: 1px solid var(--color-semantic-stroke-primary-light);
++  border-radius: 16px;
++}
++.open-house-stat dd { margin: 0; color: var(--color-semantic-text-dark); font-variant-numeric: tabular-nums; }
++
++.open-house-facts {
++  display: grid;
++  grid-template-columns: repeat(2, minmax(0, 1fr));
++  gap: 16px 24px;
++  margin: 0;
++  padding: 20px;
++  border-radius: 16px;
++  background: var(--color-semantic-surface-secondary);
++}
++.open-house-facts dt { color: var(--color-semantic-text-light); }
++.open-house-facts dd { margin: 4px 0 0; color: var(--color-semantic-text-dark); font-variant-numeric: tabular-nums; }
++.open-house-host.MuiTypography-root { display: inline-flex; align-items: center; gap: 6px; }
++.open-house-host-avatar.MuiAvatar-root { width: 20px; height: 20px; }
++
++.open-house-notes.MuiTypography-root { max-width: 62ch; color: var(--color-semantic-text-dark); text-wrap: pretty; }
++
++@media (max-width: 599.95px) {
++  .open-house-facts { grid-template-columns: minmax(0, 1fr); }
++}
+diff --git a/src/seller-portal/openHouses.ts b/src/seller-portal/openHouses.ts
+new file mode 100644
+index 0000000..4f543d7
+--- /dev/null
++++ b/src/seller-portal/openHouses.ts
+@@ -0,0 +1,84 @@
++/**
++ * Open houses · client-facing data.
++ * Each open house belongs to a stage (almost always Active listing) and shows up as a row in that
++ * stage's "Dates & action items" list, plus in the "Open houses" tab for reference later.
++ * Results (visitors and leads) only exist once the open house is done.
++ */
++import type { MilestoneId } from './sellerTimelineData'
++
++export type OpenHouse = {
++  id: string
++  milestoneId: MilestoneId
++  /** Defaults to "Open house". */
++  title?: string
++  /** ISO day. */
++  date: string
++  /** 24-hour "HH:MM". */
++  startTime: string
++  endTime: string
++  /** Team member name. */
++  host: string
++  status: 'scheduled' | 'complete'
++  /** Notes the team chose to share with the client. */
++  notes?: string
++  /** Only once complete. */
++  attendees?: number
++  /** Only once complete. Visitors who left contact info or asked for follow-up. */
++  leads?: number
++}
++
++export const openHouseTitle = (openHouse: OpenHouse) => openHouse.title ?? 'Open house'
++
++function clock(time: string) {
++  const [hours, minutes] = time.split(':').map(Number)
++  return { label: `${hours % 12 || 12}${minutes ? `:${String(minutes).padStart(2, '0')}` : ''}`, period: hours < 12 ? 'AM' : 'PM' }
++}
++
++/** "1 – 4 PM", "11:30 AM – 1 PM". */
++export function openHouseTime({ startTime, endTime }: Pick<OpenHouse, 'startTime' | 'endTime'>) {
++  const start = clock(startTime)
++  const end = clock(endTime)
++  return start.period === end.period ? `${start.label} – ${end.label} ${end.period}` : `${start.label} ${start.period} – ${end.label} ${end.period}`
++}
++
++export const isOpenHouseDone = (openHouse: OpenHouse) => openHouse.status === 'complete'
++
++/** Pending sale: every open house happened during Active listing. */
++export const pendingOpenHouses: OpenHouse[] = [
++  {
++    id: 'oh-sep-05',
++    milestoneId: 'active-listing',
++    date: '2026-09-05',
++    startTime: '13:00',
++    endTime: '16:00',
++    host: 'Avery Coleman',
++    status: 'complete',
++    attendees: 38,
++    leads: 6,
++    notes: 'Steady traffic all afternoon, mostly local buyers already touring the neighborhood. The kitchen and the garage workshop got the most comments. A few people asked about the roof’s age, so I’ve added the 2019 permit to your documents.',
++  },
++  {
++    id: 'oh-sep-06',
++    milestoneId: 'active-listing',
++    date: '2026-09-06',
++    startTime: '12:00',
++    endTime: '15:00',
++    host: 'Avery Coleman',
++    status: 'complete',
++    attendees: 21,
++    leads: 3,
++    notes: 'Quieter than Saturday, but the visitors were serious. One couple came back after touring on Saturday and asked about a second showing.',
++  },
++  {
++    id: 'oh-sep-20',
++    milestoneId: 'active-listing',
++    date: '2026-09-20',
++    startTime: '12:00',
++    endTime: '14:00',
++    host: 'Avery Coleman',
++    status: 'complete',
++    attendees: 15,
++    leads: 2,
++    notes: 'Smaller group, mostly buyers who found the listing online this week. One visitor’s agent followed up the next morning.',
++  },
++]
+diff --git a/src/seller-portal/timeline-first/DirectionC2.tsx b/src/seller-portal/timeline-first/DirectionC2.tsx
+index d7f13f7..69b573a 100644
+--- a/src/seller-portal/timeline-first/DirectionC2.tsx
++++ b/src/seller-portal/timeline-first/DirectionC2.tsx
+@@ -9,7 +9,8 @@
+  *   1. "This stage": follows the stage picked in the tracker. What's coming up next (expand to read
+  *      everything, no CTAs), then the timeline exploration's stage block (dates & action items, documents).
+  *   2. "Listing and transaction details": always the same regardless of stage. Listing performance,
+- *      team and viewers, and tabs for activity, documents, team work, and notes.
++ *      team and viewers, and tabs for activity, documents, open houses, team work, and notes.
++ * - Open houses: rows in their stage's dates list and in their own tab. Either opens the open house modal.
+  * - Right rail beside zone 1: recent updates, then the agent and brand lockups.
+  * - V1 data: resources are documents with an optional team-set tag (none, Resource, File).
+  */
+@@ -47,6 +48,9 @@ import { ActivityFeed, OwnerLabel, SectionTabs, StepDetailBody, TeamTodoList, Up
+ import { SegmentedSwitch } from '../../components/SegmentedSwitch'
+ import { buildTaggedDocuments, byTag, detailWithDocuments, documentRowTag, documentTagCopy, resourceDocumentId, type DocumentTag, type TaggedDocument } from './taggedDocuments'
+ import type { DirectionContext } from './TimelineFirstPortal'
++import { OpenHouseRow } from '../OpenHouseRow'
++import { OpenHouseModal } from '../OpenHouseModal'
++import { isOpenHouseDone, pendingOpenHouses, type OpenHouse } from '../openHouses'
+ 
+ const stageStatusCopy = { complete: 'Done', current: 'Current', upcoming: 'Upcoming' } as const
+ 
+@@ -79,6 +83,8 @@ export function DirectionC2({ transaction, timeline, openDocument, openResource,
+   const documents = useMemo(() => buildTaggedDocuments(transaction.documents, transaction.resources ?? []), [transaction.documents, transaction.resources])
+   const [marketingSection, setMarketingSection] = useState<MarketingDashboardSection | null>(null)
+   const [modalItem, setModalItem] = useState<OpenItem | null>(null)
++  const [openHouse, setOpenHouse] = useState<OpenHouse | null>(null)
++  const openHouses = pendingOpenHouses
+   const [shown, setShown] = useState<OpenItem | null>(null)
+   const stage = timeline.milestones.find((milestone) => milestone.id === stageId) ?? current
+   const stageIndex = timeline.milestones.indexOf(stage)
+@@ -202,6 +208,8 @@ export function DirectionC2({ transaction, timeline, openDocument, openResource,
+                 team={transaction.team}
+                 onOpenResource={openGuideAsDocument}
+                 onOpenDocument={openDocument}
++                openHouses={openHouses}
++                onOpenOpenHouse={setOpenHouse}
+               />
+             </Box>
+           </Box>
+@@ -247,6 +255,7 @@ export function DirectionC2({ transaction, timeline, openDocument, openResource,
+             tabs={[
+               { id: 'activity', label: 'Activity', content: <ActivityPanel events={transaction.timeline} /> },
+               { id: 'documents', label: 'Documents', content: <TaggedDocumentsPanel documents={documents} onOpen={openDocument} /> },
++              { id: 'open-houses', label: 'Open houses', content: <OpenHousesPanel openHouses={openHouses} team={transaction.team} onOpen={setOpenHouse} /> },
+               { id: 'team', label: 'Team to-dos', content: <TeamTodoList todos={teamTodos} team={transaction.team} intro="The work your team is doing for you, across every stage." /> },
+               { id: 'notes', label: 'Notes', content: <Stack spacing={2} className="notes-list">{transaction.notes.map((note) => <TeamNoteCard key={note.id} note={note} />)}</Stack> },
+             ]}
+@@ -366,6 +375,14 @@ export function DirectionC2({ transaction, timeline, openDocument, openResource,
+         </Box>
+       </Dialog>
+ 
++      <OpenHouseModal
++        openHouse={openHouse}
++        stageLabel={timeline.milestones.find((milestone) => milestone.id === openHouse?.milestoneId)?.label}
++        team={transaction.team}
++        today={timeline.today}
++        onClose={() => setOpenHouse(null)}
++      />
++
+       {shown && (
+         <PlaceModal open={Boolean(modalItem)} onClose={() => setModalItem(null)} title={shown.step.title} description={`${shown.milestone.label} · ${whenCopy(shown.step, true)}`} size="m" className="tf-c-modal">
+           <StepDetailBody item={shown} {...documentProps(documents)} introEyebrow="Details" showAfter={false} team={transaction.team} onOpenDocument={(doc) => { setModalItem(null); openDocument(doc) }} />
+@@ -499,6 +516,32 @@ function TaggedDocumentsPanel({ documents, onOpen }: { documents: TaggedDocument
+   )
+ }
+ 
++/* ---------- Open houses tab: every open house in the sale, upcoming first, then most recent ---------- */
++
++function OpenHousesPanel({ openHouses, team, onOpen }: { openHouses: OpenHouse[]; team: DirectionContext['transaction']['team']; onOpen: (openHouse: OpenHouse) => void }) {
++  const upcoming = openHouses.filter((openHouse) => !isOpenHouseDone(openHouse)).sort((a, b) => a.date.localeCompare(b.date))
++  const past = openHouses.filter(isOpenHouseDone).sort((a, b) => b.date.localeCompare(a.date))
++  const visitors = past.reduce((total, openHouse) => total + (openHouse.attendees ?? 0), 0)
++  const leads = past.reduce((total, openHouse) => total + (openHouse.leads ?? 0), 0)
++
++  if (!openHouses.length) {
++    return <Typography variant="bodySStandard" color="text.secondary">No open houses yet. Your agent will add them here once they’re scheduled.</Typography>
++  }
++
++  return (
++    <Box className="open-house-panel">
++      {past.length > 0 && (
++        <Typography variant="labelM" color="text.secondary" className="open-house-summary">
++          {past.length} {past.length === 1 ? 'open house' : 'open houses'} held · {visitors} visitors · {leads} leads
++        </Typography>
++      )}
++      <Box component="ul" className="timeline-item-list" aria-label="Open houses">
++        {[...upcoming, ...past].map((item) => <OpenHouseRow key={item.id} openHouse={item} team={team} calendar onOpen={() => onOpen(item)} />)}
++      </Box>
++    </Box>
++  )
++}
++
+ /* ---------- Sticky header: appears once the hero scrolls away ---------- */
+ 
+ function StickyTransactionHeader({ visible, transaction, onOpenListing }: { visible: boolean; transaction: DirectionContext['transaction']; onOpenListing: () => void }) {
+diff --git a/src/seller-portal/timeline-first/timelineFirstData.ts b/src/seller-portal/timeline-first/timelineFirstData.ts
+index 7241e92..4ea8b5e 100644
+--- a/src/seller-portal/timeline-first/timelineFirstData.ts
++++ b/src/seller-portal/timeline-first/timelineFirstData.ts
+@@ -29,7 +29,8 @@ const extraPendingSteps: SellerTimelineStep[] = [
+ 
+ function withPending(milestone: SellerMilestone): SellerMilestone {
+   const label = milestone.id === 'under-contract' ? 'Pending' : milestone.label
+-  const steps = milestone.steps.map((step) => {
++  // Open houses have their own rows now (see openHouses.ts), so the single placeholder step goes.
++  const steps = milestone.steps.filter((step) => step.id !== 'al-open-house').map((step) => {
+     const estimate = unscheduled[step.id]
+     return estimate ? { ...step, date: undefined, dateLabel: undefined, estimate } : step
+   })

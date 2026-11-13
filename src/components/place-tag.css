@@ -1,0 +1,28 @@
+/* PlaceTag: see PlaceTag.tsx */
+.place-tag {
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: 0 var(--space-12);
+  border-radius: var(--radius-pill);
+  font: var(--type-label-s);
+  line-height: 1;
+  letter-spacing: var(--type-label-s-tracking);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.place-tag--quiet {
+  color: var(--color-semantic-text-primary);
+  background: var(--color-semantic-surface-primary);
+  box-shadow: inset 0 0 0 1px var(--color-semantic-stroke-primary);
+}
+
+.place-tag--strong {
+  color: var(--color-semantic-text-on-color-primary);
+  background: var(--color-semantic-surface-reverse-primary);
+}
+
+.place-tag-icon { display: inline-grid; place-items: center; }
+.place-tag-icon svg { width: 14px; height: 14px; }

@@ -1,37 +1,60 @@
 /* design-build · self-critique: Clarity5 Warmth4 Restraint5 Craft4 Variety4 SlopFree5 */
-import { Avatar, Box, Button, Chip, Divider, IconButton, Stack, Typography } from '@mui/material'
+import { Box, Button, Divider, IconButton, Stack, Typography } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import ArrowBackOutlined from '@mui/icons-material/ArrowBackOutlined'
 import CloseOutlined from '@mui/icons-material/CloseOutlined'
 import GridViewOutlined from '@mui/icons-material/GridViewOutlined'
 import ImageOutlined from '@mui/icons-material/ImageOutlined'
-import type { ListingFact, SellerTransaction } from './sellerTransaction'
-import { PartnerBrandLockup } from '../transaction-portal/components/PartnerBrandLockup'
+import type { SellerTransaction } from './sellerTransaction'
+import { AgentIdentity } from '../components/AgentIdentity'
+import { PartnerBrandLockup } from '../components/PartnerBrandLockup'
+import { Eyebrow } from '../components/Eyebrow'
+import { FactList } from '../components/FactList'
 import { PlaceSheet } from '../components/PlaceSheet'
+import { PlaceTag } from '../components/PlaceTag'
 import './listing-details.css'
+
+/** Shared listing overlay data. Nearby homes can omit details unavailable in the market feed. */
+export type ListingDetailsData = {
+  listing: Pick<SellerTransaction['listing'], 'address' | 'city' | 'price' | 'photoUrl' | 'photos'>
+    & Partial<Pick<SellerTransaction['listing'], 'state' | 'postalCode' | 'dataSource' | 'published' | 'expiration' | 'daysOnMarket' | 'lastUpdated'>>
+    & { status: string }
+  details: Pick<SellerTransaction['details'], 'property' | 'listingFacts' | 'interiorDetails' | 'exteriorDetails' | 'financialDetails'>
+    & Partial<Pick<SellerTransaction['details'], 'dateListed' | 'approximateMapPin' | 'listingDescription'>>
+  priceLabel?: string
+}
 
 type ListingDetailsSheetProps = {
   open: boolean
   onClose: () => void
-  transaction: SellerTransaction
-}
+  /** The role line above the agent. Buyers see "Your agent". */
+  agentLabel?: string
+} & ({ transaction: SellerTransaction; data?: never } | { data: ListingDetailsData; transaction?: never })
 
 const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 
-export function ListingDetailsSheet({ open, onClose, transaction }: ListingDetailsSheetProps) {
+export function ListingDetailsSheet({ open, onClose, transaction, data, agentLabel }: ListingDetailsSheetProps) {
   const [photoView, setPhotoView] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const backButtonRef = useRef<HTMLButtonElement>(null)
   const showAllButtonRef = useRef<HTMLButtonElement>(null)
-  const { listing, details, teamBrand } = transaction
-  const leadAgent = transaction.team.find((member) => member.id === teamBrand.leadAgentId)
+  const { listing, details } = data ?? transaction
+  const teamBrand = transaction?.teamBrand
+  const leadAgent = transaction?.team.find((member) => member.id === teamBrand?.leadAgentId)
+  const nearby = Boolean(data)
   const photos = listing.photos.length > 0
     ? listing.photos
     : listing.photoUrl ? [{ url: listing.photoUrl, alt: `Exterior of ${listing.address}` }] : []
-  const highlights = details.property.filter(({ label }) => ['Bedrooms', 'Bathrooms', 'Interior size', 'Lot size'].includes(label))
+  const highlights = nearby ? details.property : details.property.filter(({ label }) => ['Bedrooms', 'Bathrooms', 'Interior size', 'Lot size'].includes(label))
   const mlsNumber = details.listingFacts.find(({ label }) => label === 'MLS #')?.value
-  const { latitude, longitude, zoom } = details.approximateMapPin
-  const mapUrl = `https://www.google.com/maps?q=${latitude},${longitude}&z=${zoom}&output=embed`
+  const pin = details.approximateMapPin
+  const mapUrl = pin ? `https://www.google.com/maps?q=${pin.latitude},${pin.longitude}&z=${pin.zoom}&output=embed` : undefined
+  const listingInformation = [
+    ...(details.dateListed ? [{ label: 'Date listed', value: details.dateListed }] : []),
+    ...(listing.daysOnMarket !== undefined ? [{ label: 'Days on market', value: String(listing.daysOnMarket) }] : []),
+    ...(listing.expiration ? [{ label: 'Expiration', value: listing.expiration }] : []),
+    ...(listing.lastUpdated ? [{ label: 'Last updated', value: listing.lastUpdated }] : []),
+  ]
 
   useEffect(() => {
     if (!open) setPhotoView(false)
@@ -102,7 +125,7 @@ export function ListingDetailsSheet({ open, onClose, transaction }: ListingDetai
                     onClick={showPhotos}
                     className="listing-sheet-see-all"
                   >
-                    See all {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
+                    {photos.length === 1 ? 'View photo' : `See all ${photos.length} photos`}
                   </Button>
                 </>
               ) : (
@@ -115,18 +138,20 @@ export function ListingDetailsSheet({ open, onClose, transaction }: ListingDetai
             <Box className="listing-sheet-content">
               <Box className="listing-sheet-intro">
                 <Box>
-                  {mlsNumber && <Typography variant="labelS" className="listing-sheet-eyebrow">MLS # {mlsNumber}</Typography>}
+                  {nearby && <Eyebrow>Nearby home</Eyebrow>}
+                  {mlsNumber && <Eyebrow>MLS # {mlsNumber}</Eyebrow>}
                   <Typography component="h1" variant="titleL" className="listing-sheet-address">{listing.address}</Typography>
                   <Typography variant="bodyMStandard" color="text.secondary">
-                    {listing.city}, {listing.state} {listing.postalCode}
+                    {[listing.city, listing.state].filter(Boolean).join(', ')} {listing.postalCode}
                   </Typography>
                 </Box>
                 <Box className="listing-sheet-price-group">
+                  {data?.priceLabel && <Typography variant="labelM" color="text.secondary">{data.priceLabel}</Typography>}
                   <Typography variant="titleM" className="listing-sheet-price">{currency.format(listing.price)}</Typography>
                   <Stack direction="row" spacing={1} sx={{ justifyContent: { xs: 'flex-start', md: 'flex-end' }, flexWrap: 'wrap' }}>
-                    <Chip size="small" label={listing.status} className="listing-sheet-status" />
-                    <Chip size="small" label={listing.published ? 'Published' : 'Not published'} variant="outlined" className="listing-sheet-published" />
-                    <Chip size="small" label={`Source: ${listing.dataSource}`} variant="outlined" className="listing-sheet-source" />
+                    <PlaceTag className="listing-sheet-status">{listing.status}</PlaceTag>
+                    {!nearby && <PlaceTag className="listing-sheet-published">{listing.published ? 'Published' : 'Not published'}</PlaceTag>}
+                    {!nearby && <PlaceTag className="listing-sheet-source">{`Source: ${listing.dataSource}`}</PlaceTag>}
                   </Stack>
                 </Box>
               </Box>
@@ -140,6 +165,7 @@ export function ListingDetailsSheet({ open, onClose, transaction }: ListingDetai
                 ))}
               </Box>
 
+              {details.listingDescription && <>
               <Box className="listing-sheet-story-grid">
                 <Box component="section" aria-labelledby="listing-description-title" className="listing-sheet-about">
                   <Typography component="h2" variant="titleM" id="listing-description-title">Listing Description</Typography>
@@ -148,45 +174,43 @@ export function ListingDetailsSheet({ open, onClose, transaction }: ListingDetai
                   </Typography>
                 </Box>
               </Box>
-
               <Divider />
+              </>}
 
               <Box component="section" aria-labelledby="listing-facts-title" className="listing-sheet-detail-section">
                 <Typography component="h2" variant="titleS" id="listing-facts-title">Listing facts</Typography>
-                <FactList facts={details.listingFacts} columns />
+                <FactList layout="rows" columns={2} facts={details.listingFacts} className="listing-sheet-fact-list" />
               </Box>
 
+              {(details.interiorDetails.length > 0 || details.exteriorDetails.length > 0) && <>
               <Divider />
-
               <Box className="listing-sheet-detail-columns listing-sheet-detail-section">
-                <Box component="section" aria-labelledby="listing-interior-title">
+                {details.interiorDetails.length > 0 && <Box component="section" aria-labelledby="listing-interior-title">
                   <Typography component="h2" variant="titleS" id="listing-interior-title">Interior details</Typography>
-                  <FactList facts={details.interiorDetails} />
-                </Box>
-                <Box component="section" aria-labelledby="listing-exterior-title">
+                  <FactList layout="rows" facts={details.interiorDetails} className="listing-sheet-fact-list" />
+                </Box>}
+                {details.exteriorDetails.length > 0 && <Box component="section" aria-labelledby="listing-exterior-title">
                   <Typography component="h2" variant="titleS" id="listing-exterior-title">Exterior details</Typography>
-                  <FactList facts={details.exteriorDetails} />
-                </Box>
+                  <FactList layout="rows" facts={details.exteriorDetails} className="listing-sheet-fact-list" />
+                </Box>}
               </Box>
+              </>}
 
+              {(details.financialDetails.length > 0 || listingInformation.length > 0) && <>
               <Divider />
-
               <Box className="listing-sheet-detail-columns listing-sheet-detail-section listing-sheet-overview-columns">
-                <Box component="section" aria-labelledby="listing-financial-title">
+                {details.financialDetails.length > 0 && <Box component="section" aria-labelledby="listing-financial-title">
                   <Typography component="h2" variant="titleS" id="listing-financial-title">Financial details</Typography>
-                  <FactList facts={details.financialDetails} />
-                </Box>
-                <Box component="section" aria-labelledby="listing-information-title">
+                  <FactList layout="rows" facts={details.financialDetails} className="listing-sheet-fact-list" />
+                </Box>}
+                {listingInformation.length > 0 && <Box component="section" aria-labelledby="listing-information-title">
                   <Typography component="h2" variant="titleS" id="listing-information-title">Listing information</Typography>
-                  <FactList facts={[
-                    { label: 'Date listed', value: details.dateListed },
-                    { label: 'Days on market', value: String(listing.daysOnMarket) },
-                    { label: 'Expiration', value: listing.expiration },
-                    { label: 'Last updated', value: listing.lastUpdated },
-                  ]} />
-                </Box>
+                  <FactList layout="rows" className="listing-sheet-fact-list" facts={listingInformation} />
+                </Box>}
               </Box>
+              </>}
 
+              {mapUrl && <>
               <Divider />
 
               <Box component="section" aria-labelledby="listing-location-title" className="listing-sheet-detail-section listing-sheet-map-section">
@@ -209,15 +233,11 @@ export function ListingDetailsSheet({ open, onClose, transaction }: ListingDetai
                 </Box>
               </Box>
 
-              {leadAgent && (
+              </>}
+
+              {leadAgent && teamBrand && (
                 <Box className="listing-sheet-agent">
-                  <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-                    <Avatar src={leadAgent.photoUrl} alt={leadAgent.name} className="listing-sheet-agent-avatar">{leadAgent.initials}</Avatar>
-                    <Box className="listing-sheet-agent-copy">
-                      <Typography variant="labelS" color="text.secondary">Your listing agent</Typography>
-                      <Typography variant="titleXS">{leadAgent.name}</Typography>
-                    </Box>
-                  </Stack>
+                  <AgentIdentity agent={leadAgent} size="m" label={agentLabel} />
                   <PartnerBrandLockup brand={teamBrand} />
                 </Box>
               )}
@@ -255,19 +275,6 @@ function PhotoFeed({ photos }: { photos: ListingPhoto[] }) {
               className="listing-photo-feed-image"
             />
           ))}
-        </Box>
-      ))}
-    </Box>
-  )
-}
-
-function FactList({ facts, columns = false }: { facts: ListingFact[]; columns?: boolean }) {
-  return (
-    <Box component="dl" className={`listing-sheet-fact-list${columns ? ' listing-sheet-fact-list-columns' : ''}`}>
-      {facts.map(({ label, value }) => (
-        <Box key={label} className="listing-sheet-fact">
-          <Typography component="dt" variant="bodySStandard" color="text.secondary">{label}</Typography>
-          <Typography component="dd" variant="bodySStandard">{value}</Typography>
         </Box>
       ))}
     </Box>

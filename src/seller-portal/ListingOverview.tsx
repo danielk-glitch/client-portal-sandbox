@@ -1,15 +1,20 @@
-import { Avatar, Box, Button, Chip, Paper, Stack, Typography } from '@mui/material'
+import { Box, Button, Chip, Paper, Stack, Typography } from '@mui/material'
 import HomeOutlined from '@mui/icons-material/HomeOutlined'
 import ImageOutlined from '@mui/icons-material/ImageOutlined'
 import ArrowOutwardOutlined from '@mui/icons-material/ArrowOutwardOutlined'
 import ContentCopyOutlined from '@mui/icons-material/ContentCopyOutlined'
 import { toast } from 'sonner'
-import { PortalOutlineTag } from '../components/PortalOutlineTag'
-import { PartnerBrandLockup, PersonContactActions } from '../transaction-portal/components'
+import { Eyebrow } from '../components/Eyebrow'
+import { PlaceTag } from '../components/PlaceTag'
+import { PersonContactActions } from '../transaction-portal/components'
+import { AgentIdentity } from '../components/AgentIdentity'
+import { PartnerBrandLockup } from '../components/PartnerBrandLockup'
+import { ListingPreparation } from './ListingPreparation'
 import type { SellerTransaction } from './sellerTransaction'
 import './seller-portal.css'
 
-export type ListingOverviewVariant = 'card' | 'full' | 'light' | 'light-bottom' | 'no-listing'
+/** light-compact: a shorter light split. The team and brokerage logos take the place of the agent's phone and email buttons, and the photo is only a little taller than the text beside it. */
+export type ListingOverviewVariant = 'card' | 'full' | 'light' | 'light-bottom' | 'light-compact' | 'no-listing'
 
 export type HeaderListingLink = 'first-party' | 'idx-mvp'
 export const idxListingUrl = 'https://www.josiahubben.com/search/washington/bothell/bothell/17913-38th-dr-unit-20-bid-21-2541015'
@@ -20,19 +25,28 @@ type ListingOverviewProps = {
   variant?: ListingOverviewVariant
   polestarLayout?: boolean
   listingLink?: HeaderListingLink
+  /** Shorter header: a smaller photo and no team or brokerage logos. */
+  compact?: boolean
+  /** Before listing only: the "Before your home goes live" message sits in the header where the photo would be, and the team and brokerage logos replace the agent's call and email buttons. */
+  preparation?: { title: string; body: string }
 }
 
-export function ListingOverview({ transaction, onSeeListing, variant = 'card', polestarLayout = false, listingLink = 'first-party' }: ListingOverviewProps) {
+export function ListingOverview({ transaction, onSeeListing, variant = 'card', polestarLayout = false, listingLink = 'first-party', compact = false, preparation }: ListingOverviewProps) {
   const { listing } = transaction
   const leadAgent = transaction.team.find((member) => member.id === transaction.teamBrand.leadAgentId)
   const address = `${listing.address}, ${listing.city}, ${listing.state} ${listing.postalCode}`
   const showPolestarCardLayout = polestarLayout && variant === 'card'
-  const isLightVariant = variant === 'light' || variant === 'light-bottom'
+  const isLightVariant = variant === 'light' || variant === 'light-bottom' || variant === 'light-compact'
   const isNoListing = variant === 'no-listing'
+  const preparationInHeader = isNoListing && !!preparation
 
   return (
-    <Paper component="section" aria-label="Listing overview" className={`listing-overview listing-overview--${variant}${variant === 'light-bottom' ? ' listing-overview--light' : ''}`}>
-      {isNoListing ? (
+    <Paper component="section" aria-label="Listing overview" className={`listing-overview listing-overview--${variant}${variant === 'light-bottom' || variant === 'light-compact' ? ' listing-overview--light' : ''}${compact ? ' listing-overview--compact' : ''}${preparationInHeader ? ' listing-overview--no-listing-compact' : ''}`}>
+      {preparationInHeader ? (
+        <Box className="listing-preparation-slot">
+          <ListingPreparation message={preparation} />
+        </Box>
+      ) : isNoListing ? (
         <Box className="listing-no-listing-brand">
           <PartnerBrandLockup brand={transaction.teamBrand} />
         </Box>
@@ -51,18 +65,18 @@ export function ListingOverview({ transaction, onSeeListing, variant = 'card', p
         )}
       </Box>}
       <Box className="listing-summary">
-        {variant === 'light-bottom' && (
+        {variant === 'light-bottom' && !compact && (
           <Box className="listing-light-brand">
             <PartnerBrandLockup brand={transaction.teamBrand} />
           </Box>
         )}
         <Box className="listing-summary-header">
-          <Typography variant="labelS" className="eyebrow">Seller transaction</Typography>
+          <Eyebrow className="eyebrow">Seller transaction</Eyebrow>
           {((variant === 'card' && !showPolestarCardLayout) || (variant === 'full' && !leadAgent)) && <PartnerBrandLockup brand={transaction.teamBrand} />}
         </Box>
         <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', flexWrap: 'wrap' }} className="listing-statuses">
           <Chip label={listing.status} size="small" icon={<HomeOutlined />} className="status-chip" />
-          <PortalOutlineTag label={listing.published ? 'Published' : 'Not published'} className="published-chip" />
+          <PlaceTag className="published-chip">{listing.published ? 'Published' : 'Not published'}</PlaceTag>
         </Stack>
         <Typography variant={variant === 'card' ? 'titleL' : 'displayS'} component="h1" className="listing-address">
           {listing.address}
@@ -79,26 +93,16 @@ export function ListingOverview({ transaction, onSeeListing, variant = 'card', p
         )}
         {isLightVariant && leadAgent && (
           <Box className="listing-light-agent">
-            <ListingAgentDetails agent={leadAgent} inline={variant === 'light-bottom'} />
+            <ListingAgentDetails agent={leadAgent} inline={variant === 'light-bottom' || variant === 'light-compact'} brand={variant === 'light-compact' ? transaction.teamBrand : undefined} />
           </Box>
         )}
         {isNoListing && (
           <Box className="listing-no-listing-footer">
-            {leadAgent && <ListingAgentDetails agent={leadAgent} inline />}
+            {leadAgent && <ListingAgentDetails agent={leadAgent} inline brand={preparationInHeader ? transaction.teamBrand : undefined} />}
           </Box>
         )}
         {variant === 'card' && <Box className="listing-feature-footer">
-          {leadAgent && variant === 'card' && (
-            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', minWidth: 0 }}>
-              <Avatar src={leadAgent.photoUrl} alt={leadAgent.name} className="listing-agent-avatar">
-                {leadAgent.initials}
-              </Avatar>
-              <Box sx={{ minWidth: 0 }}>
-                <Typography variant="labelS" className="people-kicker">Your listing agent</Typography>
-                <Typography variant="titleXS" className="listing-agent-name">{leadAgent.name}</Typography>
-              </Box>
-            </Stack>
-          )}
+          {leadAgent && <AgentIdentity agent={leadAgent} size="l" eyebrow className="listing-card-agent" />}
           {showPolestarCardLayout ? (
             <PartnerBrandLockup brand={transaction.teamBrand} />
           ) : (
@@ -115,19 +119,11 @@ export function ListingOverview({ transaction, onSeeListing, variant = 'card', p
   )
 }
 
-function ListingAgentDetails({ agent, inline = false }: { agent: SellerTransaction['team'][number]; inline?: boolean }) {
+function ListingAgentDetails({ agent, inline = false, brand }: { agent: SellerTransaction['team'][number]; inline?: boolean; /** Inline only: shows the team and brokerage logos where the contact buttons would be. */ brand?: SellerTransaction['teamBrand'] }) {
   return (
     <Box className={`listing-agent-feature-info${inline ? ' listing-agent-feature-info--inline' : ''}`}>
-      <Stack direction="row" spacing={1.75} sx={{ alignItems: 'center', minWidth: 0 }}>
-        <Avatar src={agent.photoUrl} alt={agent.name} className="listing-agent-feature-avatar">
-          {agent.initials}
-        </Avatar>
-        <Box sx={{ minWidth: 0 }}>
-          <Typography variant="labelS" className="listing-agent-feature-label">Your listing agent</Typography>
-          <Typography variant="titleS" className="listing-agent-feature-name">{agent.name}</Typography>
-        </Box>
-      </Stack>
-      {inline ? <PersonContactActions person={agent} /> : (agent.phone || agent.email) && (
+      <AgentIdentity agent={agent} size="xl" />
+      {inline ? (brand ? <PartnerBrandLockup brand={brand} /> : <PersonContactActions person={agent} />) : (agent.phone || agent.email) && (
         <Box className="listing-agent-feature-contacts">
           {agent.phone && (
             <Box className="listing-agent-feature-contact">

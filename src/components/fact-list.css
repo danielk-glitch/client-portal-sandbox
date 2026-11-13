@@ -1,0 +1,32 @@
+/* Layout defaults use :where() so a parent's class can adjust spacing without fighting specificity. */
+:where(.place-fact-list) { margin: 0; }
+:where(.place-fact) { min-width: 0; }
+:where(.place-fact) :where(dt, dd) { min-width: 0; margin: 0; }
+.place-fact dd { font-variant-numeric: tabular-nums; }
+
+/* grid: label above value */
+:where(.place-fact-list--grid) { display: grid; gap: var(--space-12) var(--space-16); }
+:where(.place-fact-list--grid.place-fact-list--two-column) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+:where(.place-fact-list--grid .place-fact) { display: grid; gap: var(--space-4); }
+.place-fact-list--grid .place-fact-label.MuiTypography-root { color: var(--color-semantic-text-light); }
+.place-fact-list--grid .place-fact-value.MuiTypography-root { color: var(--color-semantic-text-dark); }
+
+/* rows: label left, value right */
+:where(.place-fact-list--rows.place-fact-list--two-column) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: clamp(40px, 6vw, 104px);
+}
+:where(.place-fact-list--rows .place-fact) {
+  padding-block: 11px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-24);
+}
+.place-fact-list--rows .place-fact-label.MuiTypography-root { color: var(--color-semantic-text-primary); }
+.place-fact-list--rows .place-fact dd { text-align: right; overflow-wrap: anywhere; }
+
+@media (max-width: 767.95px) {
+  :where(.place-fact-list--rows.place-fact-list--two-column) { grid-template-columns: 1fr; }
+}

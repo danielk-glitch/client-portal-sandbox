@@ -1,0 +1,85 @@
+/* Important notes: plain-text rows divided by hairlines, like the activity rows they replace. */
+.important-notes-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.important-note + .important-note {
+  border-top: 1px solid var(--color-semantic-stroke-primary-light);
+}
+
+.important-note-button.MuiButtonBase-root {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-content: stretch;
+  gap: var(--space-8);
+  padding-block: var(--space-20);
+  text-align: left;
+  justify-items: start;
+  border-radius: var(--radius-xs);
+}
+
+.important-note:first-child .important-note-button.MuiButtonBase-root { padding-top: 0; }
+.important-note:last-child .important-note-button.MuiButtonBase-root { padding-bottom: 0; }
+
+.important-note-button.MuiButtonBase-root:focus-visible {
+  outline: 2px solid var(--color-semantic-text-dark);
+  outline-offset: 4px;
+}
+
+.important-note-text.MuiTypography-root {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  color: var(--color-semantic-text-primary);
+  text-wrap: pretty;
+}
+
+.important-note-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4) var(--space-8);
+}
+
+.important-note-meta .MuiTypography-root { color: var(--color-semantic-text-light); }
+.important-note-date.MuiTypography-root { font-variant-numeric: tabular-nums; }
+
+.important-note-star.MuiSvgIcon-root {
+  width: 14px;
+  height: 14px;
+  color: var(--color-semantic-text-dark);
+}
+
+/* "See all notes": a TextLink under the last note, behind the same hairline that separates the notes. */
+.important-notes-more {
+  margin-top: var(--space-20);
+  padding-top: var(--space-20);
+  border-top: 1px solid var(--color-semantic-stroke-primary-light);
+}
+
+.important-note-full.MuiTypography-root {
+  margin: 0;
+  max-width: 70ch;
+  white-space: pre-wrap;
+}
+
+/* Row hover: the shared list-row fill, divider to divider (the button's own padding spans that), bleeding past the column edge.
+   The first and last notes have no padding on their outer side, so their fill reaches out by the bleed instead. The text never moves. */
+.important-note-button.MuiButtonBase-root { position: relative; isolation: isolate; }
+.important-note-button::after {
+  position: absolute;
+  inset: 0 calc(var(--row-hover-bleed) * -1);
+  z-index: -1;
+  content: '';
+  border-radius: var(--radius-s);
+  background: transparent;
+  transition: background-color 140ms ease;
+}
+.important-note:first-child .important-note-button::after { top: calc(var(--row-hover-bleed) * -1); }
+.important-note:last-child .important-note-button::after { bottom: calc(var(--row-hover-bleed) * -1); }
+.important-note-button:hover::after { background: var(--color-semantic-surface-primary-dark); }

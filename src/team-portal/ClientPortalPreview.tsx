@@ -42,7 +42,7 @@ export function ClientPortalPreview({ buyerPortal }: { buyerPortal: ReactNode })
   </Box>
 }
 
-export function ClientPreviewBanner({ clientLabel }: { clientLabel: string }) {
+function ClientPreviewBanner({ clientLabel }: { clientLabel: string }) {
   return (
     <Box component="aside" aria-label="Client preview" className="client-preview-banner">
       <Button component="a" href="/team" startIcon={<ArrowBackOutlined />} className="client-preview-back">Back to team workspace</Button>

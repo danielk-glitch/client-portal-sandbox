@@ -18,25 +18,15 @@
   --timeline-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --timeline-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   position: relative;
-  margin-top: 48px;
+  margin-top: var(--space-48);
 }
 
-.seller-timeline .sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
+.timeline-stage { position: relative; padding-top: var(--space-40); }
 
-.timeline-stage { position: relative; padding-top: 40px; }
-
+/* Wider tracking than the standard eyebrow: this one is centered over a full-bleed tracker. */
 .seller-timeline-eyebrow.MuiTypography-root {
-  display: block;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-4);
   text-align: center;
-  text-transform: uppercase;
   letter-spacing: 0.16em;
   color: var(--tl-text-muted);
 }
@@ -66,7 +56,7 @@
   --tl-glow: color-mix(in srgb, var(--color-semantic-surface-primary) 12%, transparent);
   --tl-shadow: oklch(0 0 0 / 0.4);
   isolation: isolate;
-  padding-bottom: 64px;
+  padding-bottom: var(--space-64);
   color: var(--tl-text-strong);
 }
 
@@ -83,7 +73,7 @@
   pointer-events: none;
 }
 
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stage { padding-top: 56px; }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stage { padding-top: var(--space-56); }
 .seller-timeline--dark:not(.seller-timeline--stacked) .seller-timeline-eyebrow.MuiTypography-root { color: color-mix(in srgb, var(--color-semantic-text-on-color-primary) 90%, transparent); }
 
 /* The listing performance card overlaps the bottom of the band. */
@@ -93,7 +83,7 @@
   z-index: 1;
   margin-top: -88px;
   border-color: transparent;
-  box-shadow: var(--elevation-hero);
+  box-shadow: var(--elevation-3);
 }
 
 /* In dark, the progress fill is a soft white so a pure white glint still reads on top of it. */
@@ -110,12 +100,9 @@
 .seller-timeline--dark:not(.seller-timeline--stacked) .milestone-done { border-top-color: var(--tl-hairline); }
 .seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .portal-date-row-main:hover::after { background: color-mix(in srgb, var(--color-semantic-surface-primary) 7%, transparent); }
 .seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .portal-date-row-main:focus-visible { outline-color: var(--tl-ring-strong); }
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stamp.portal-date-stamp { color: var(--tl-text-strong); background: color-mix(in srgb, var(--color-semantic-surface-primary) 10%, transparent); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stamp.portal-date-stamp { color: var(--tl-text-strong); }
 .seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stamp.portal-date-stamp .MuiTypography-root:first-child { color: var(--tl-text); }
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stamp.is-done { color: var(--tl-text); background: color-mix(in srgb, var(--color-semantic-surface-primary) 5%, transparent); }
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .portal-date-row-main:hover .timeline-stamp { background: color-mix(in srgb, var(--color-semantic-surface-primary) 16%, transparent); }
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stamp-badge { color: var(--tl-text-strong); background: var(--tl-band); box-shadow: 0 0 0 2px var(--tl-band), inset 0 0 0 1px var(--tl-ring); }
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stamp-badge--done { color: var(--tl-band); background: var(--tl-ink); box-shadow: 0 0 0 2px var(--tl-band); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-stamp.is-done { color: var(--tl-text); }
 .seller-timeline--dark:not(.seller-timeline--stacked) .timeline-next-tag { color: var(--tl-band); background: var(--tl-ink); }
 .seller-timeline--dark:not(.seller-timeline--stacked) .portal-date-resource.MuiChip-root { color: var(--tl-text); border-color: color-mix(in srgb, var(--color-semantic-surface-primary) 26%, transparent); background: transparent; }
 .seller-timeline--dark:not(.seller-timeline--stacked) .portal-date-resource.MuiChip-root:hover { color: var(--tl-text-strong); background: color-mix(in srgb, var(--color-semantic-surface-primary) 10%, transparent); }
@@ -125,13 +112,14 @@
 
 .timeline-tracker {
   --col: calc(100% / var(--timeline-columns));
-  --rail-y: 76px; /* padding 28 + "Now" row 26 + half the 44px marker box */
+  --tracker-pad: 28px;
+  --rail-y: calc(var(--tracker-pad) + 22px); /* top padding + half the 44px marker box */
   --edge-fade: min(180px, 12vw);
   position: relative;
   isolation: isolate;
   display: grid;
   grid-template-columns: repeat(var(--timeline-columns), minmax(0, 1fr));
-  padding: 28px 0 8px;
+  padding: var(--tracker-pad) 0 var(--space-8);
 }
 
 /* Full-bleed track that fades into the page at both edges. */
@@ -168,10 +156,10 @@
   width: min(240px, var(--col));
   height: 180px;
   translate: -50% 0;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   background: radial-gradient(closest-side, var(--tl-glow), transparent);
   pointer-events: none;
-  animation: timeline-bloom 700ms var(--timeline-ease) both;
+  animation: timeline-bloom 480ms var(--timeline-ease) both;
 }
 
 @keyframes timeline-bloom {
@@ -188,7 +176,7 @@
   width: 160px;
   height: 3px;
   translate: -50% 0;
-  border-radius: 2px;
+  border-radius: var(--radius-2xs);
   background: linear-gradient(90deg, transparent, var(--tl-glint) 50%, transparent);
   pointer-events: none;
   animation:
@@ -212,7 +200,7 @@
   display: grid;
   justify-items: center;
   align-content: start;
-  padding: 0 8px 16px;
+  padding: 0 var(--space-8) var(--space-16);
   text-align: center;
   color: var(--tl-text-muted);
   background: none;
@@ -223,14 +211,14 @@
 .timeline-node:focus-visible .timeline-marker {
   outline: 2px solid var(--tl-ring-strong);
   outline-offset: 6px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
 }
 
 .timeline-now {
   height: 18px;
-  margin-bottom: 8px;
-  padding: 0 8px;
-  border-radius: 999px;
+  margin-bottom: var(--space-8);
+  padding: 0 var(--space-8);
+  border-radius: var(--radius-pill);
   font-size: 0.625rem;
   font-weight: 500;
   line-height: 18px;
@@ -243,18 +231,18 @@
 .timeline-now:empty { visibility: hidden; }
 
 .timeline-node-label.MuiTypography-root {
-  margin-top: 14px;
+  margin-top: var(--space-16);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--tl-text-muted);
-  transition: color 200ms ease, letter-spacing 300ms var(--timeline-ease);
+  transition: color var(--motion-reveal), letter-spacing 300ms var(--timeline-ease);
 }
 
 .timeline-node--complete .timeline-node-label.MuiTypography-root,
 .timeline-node--current .timeline-node-label.MuiTypography-root { color: var(--tl-text); }
 
 .timeline-node-caption.MuiTypography-root {
-  margin-top: 4px;
+  margin-top: var(--space-4);
   font-variant-numeric: tabular-nums;
   color: var(--tl-text-muted);
   opacity: 0;
@@ -266,9 +254,9 @@
 .timeline-node.MuiButtonBase-root::after {
   width: 24px;
   height: 2px;
-  margin-top: 12px;
+  margin-top: var(--space-12);
   content: '';
-  border-radius: 2px;
+  border-radius: var(--radius-2xs);
   background: var(--tl-ink);
   scale: 0 1;
   transition: scale 360ms var(--timeline-spring);
@@ -280,6 +268,8 @@
 
 .timeline-node:hover .timeline-node-label.MuiTypography-root { color: var(--tl-text-strong); }
 .timeline-node:hover .timeline-node-caption.MuiTypography-root { opacity: 1; translate: 0 0; }
+/* The current stage always shows its caption: "Current · 2 of 8 done". */
+.timeline-node--current .timeline-node-caption.MuiTypography-root { opacity: 1; translate: 0 0; color: var(--tl-text); }
 
 /* ---------- Markers ---------- */
 
@@ -296,17 +286,17 @@
   position: absolute;
   inset: 8px;
   content: '';
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   background: var(--tl-surface);
   box-shadow: inset 0 0 0 1.5px var(--tl-ring), 0 0 0 0 var(--tl-halo);
-  transition: scale 420ms var(--timeline-spring), box-shadow 300ms ease, background-color 200ms ease;
+  transition: scale 420ms var(--timeline-spring), box-shadow 300ms ease, background-color var(--motion-reveal);
 }
 
 .timeline-marker > * { position: relative; transition: scale 420ms var(--timeline-spring); }
 .timeline-marker svg { width: 16px; height: 16px; }
 
 .timeline-marker-number {
-  font-size: 0.6875rem;
+  font-size: var(--type-label-xs-size);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   color: var(--tl-text-muted);
@@ -320,7 +310,7 @@
 .timeline-marker-dot {
   width: 10px;
   height: 10px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   background: var(--tl-ink);
 }
 
@@ -329,7 +319,7 @@
   position: absolute;
   inset: 8px;
   content: '';
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   border: 2px solid var(--tl-ink);
   opacity: 0;
   animation: timeline-pulse 2.8s var(--timeline-ease) infinite;
@@ -374,7 +364,7 @@
 
 .timeline-panel {
   max-width: 920px;
-  margin: 40px auto 0;
+  margin: var(--space-40) auto 0;
   animation: timeline-panel-in 360ms var(--timeline-ease);
 }
 
@@ -383,13 +373,13 @@
   to { opacity: 1; translate: 0 0; }
 }
 
-.milestone-items { display: grid; gap: 28px; }
+.milestone-items { display: grid; gap: var(--space-28); }
 
 .milestone-locked-note {
-  margin-left: 28px;
+  margin-left: var(--space-28);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-8);
   color: var(--color-semantic-text-light);
 }
 
@@ -397,31 +387,31 @@
 
 .milestone-group-title.MuiTypography-root {
   display: block;
-  margin: 0 0 4px 28px;
+  margin: 0 0 var(--space-4) var(--space-28);
   color: var(--color-semantic-text-light);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
 
-.milestone-done { padding-top: 16px; border-top: 1px solid var(--color-semantic-stroke-primary-lightest); }
+.milestone-done { padding-top: var(--space-16); border-top: 1px solid var(--color-semantic-stroke-primary-light); }
 
 /* Collapsible Done group: the header is the toggle. */
 .milestone-done-toggle.MuiButtonBase-root {
   min-height: 44px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 12px 4px 0;
-  border-radius: 8px;
+  gap: var(--space-6);
+  padding: var(--space-4) var(--space-12) var(--space-4) 0;
+  border-radius: var(--radius-xs);
   color: var(--color-semantic-text-light);
 }
 .milestone-done-toggle .milestone-group-title.MuiTypography-root { margin-bottom: 0; color: inherit; }
 .milestone-done-toggle:hover { color: var(--color-semantic-text-dark); }
-.milestone-done-toggle:focus-visible { outline: 2px solid var(--color-semantic-stroke-primary-darkest); outline-offset: 2px; }
+.milestone-done-toggle:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
 .milestone-done-toggle.is-open .timeline-chevron { rotate: 180deg; }
 .milestone-done-toggle .timeline-chevron { margin-top: 0; color: inherit; }
-.milestone-done-count { margin-left: 4px; font-variant-numeric: tabular-nums; opacity: 0.7; }
-.milestone-done-list { margin-top: 8px; animation: timeline-panel-in 260ms var(--timeline-ease); }
+.milestone-done-count { margin-left: var(--space-4); font-variant-numeric: tabular-nums; opacity: 0.7; }
+.milestone-done-list { margin-top: var(--space-8); animation: timeline-panel-in 260ms var(--timeline-ease); }
 .seller-timeline--dark:not(.seller-timeline--stacked) .milestone-done-toggle.MuiButtonBase-root { color: var(--tl-text-muted); }
 .seller-timeline--dark:not(.seller-timeline--stacked) .milestone-done-toggle:hover { color: var(--tl-text-strong); }
 .seller-timeline--dark:not(.seller-timeline--stacked) .milestone-done-toggle:focus-visible { outline-color: var(--tl-ring-strong); }
@@ -432,110 +422,54 @@
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 8px;
+  gap: var(--space-8);
 }
 
 /* Generous padding inside each item; the hover fill spans the full padded row. */
-.timeline-item.portal-date-row { padding: 24px 28px; gap: 24px; align-items: center; }
-.timeline-item .portal-date-row-main.MuiButtonBase-root { column-gap: 24px; }
-.timeline-item .portal-date-row-main::after { inset: -24px -28px; border-radius: 18px; }
-.timeline-item-copy.portal-date-copy { gap: 4px; }
+.timeline-item.portal-date-row { padding: var(--space-24) var(--space-28); gap: var(--space-24); align-items: center; }
+.timeline-item .portal-date-row-main.MuiButtonBase-root { column-gap: var(--space-24); align-items: center; }
+.timeline-item .portal-date-row-main::after { inset: -24px -28px; border-radius: var(--radius-m); }
 
-.timeline-item .portal-date-row-main.MuiButtonBase-root { align-items: center; }
-
-
-.timeline-item-title {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px 10px;
-  margin-bottom: 2px;
-}
+.timeline-item:not(.timeline-item--resource) .portal-date-title { margin-bottom: var(--space-2); }
 
 .timeline-item-meta.MuiTypography-root {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 6px;
+  gap: var(--space-6);
+  margin-top: var(--space-6);
   color: var(--color-semantic-text-light);
 }
 
 .timeline-item-avatar.MuiAvatar-root { width: 18px; height: 18px; }
 
 .timeline-next-tag {
-  padding: 1px 8px;
-  border-radius: 999px;
-  font-size: 0.6875rem;
+  padding: 1px var(--space-8);
+  border-radius: var(--radius-pill);
+  font-size: var(--type-label-xs-size);
   font-weight: 500;
   line-height: 1.6;
   color: var(--color-semantic-text-on-color-primary);
   background: var(--color-semantic-surface-reverse-primary);
 }
 
-.timeline-item.is-done .timeline-item-title .MuiTypography-root { color: var(--color-semantic-text-primary); }
+.timeline-item.is-done .portal-date-title .MuiTypography-root { color: var(--color-semantic-text-primary); }
 
 /* Stamp: date or type icon, with a small type badge. */
-.timeline-stamp.portal-date-stamp { overflow: visible; transition: box-shadow 200ms ease, background-color 200ms ease; }
+.timeline-stamp.portal-date-stamp { overflow: visible; transition: box-shadow var(--motion-reveal), background-color var(--motion-reveal); }
 
-.timeline-stamp--icon { color: var(--color-semantic-text-primary); }
-.timeline-stamp-icon { display: grid; place-items: center; }
-.timeline-stamp-icon svg { width: 24px; height: 24px; }
-
-.timeline-stamp-badge {
-  position: absolute;
-  right: -10px;
-  bottom: -4px;
-  width: 24px;
-  height: 24px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  color: var(--color-semantic-text-primary);
-  background: var(--color-semantic-surface-primary);
-  box-shadow: 0 0 0 2px var(--color-semantic-surface-primary), inset 0 0 0 1px var(--color-semantic-stroke-primary-light);
-}
-
-.timeline-stamp-badge svg { width: 14px; height: 14px; }
-
-.timeline-stamp-badge--done {
-  color: var(--color-semantic-text-on-color-primary);
-  background: var(--color-semantic-surface-reverse-primary);
-  box-shadow: 0 0 0 2px var(--color-semantic-surface-primary);
-}
-
-.timeline-stamp.is-done { color: var(--color-semantic-text-primary); background: var(--color-semantic-surface-primary-dark); }
-
-.timeline-item .portal-date-row-main:hover .timeline-stamp { background: var(--color-semantic-surface-secondary-dark); }
+.timeline-stamp.is-done { color: var(--color-semantic-text-primary); }
 
 /* ---------- Item modal ---------- */
 
-.timeline-modal-body { display: grid; gap: 20px; }
-
-.timeline-modal-facts {
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px 24px;
-  padding: 16px 20px;
-  border-radius: 12px;
-  background: var(--color-semantic-surface-primary-dark);
-}
-
-.timeline-modal-fact { display: grid; gap: 4px; min-width: 0; }
-.timeline-modal-fact dt { color: var(--color-semantic-text-light); text-transform: uppercase; letter-spacing: 0.08em; }
-.timeline-modal-fact dd { margin: 0; color: var(--color-semantic-text-dark); }
-
-.timeline-modal-type.MuiTypography-root,
-.timeline-modal-owner.MuiTypography-root { display: inline-flex; align-items: center; gap: 6px; }
-.timeline-modal-type svg { width: 16px; height: 16px; color: var(--color-semantic-text-primary); }
+.timeline-modal-body { display: grid; gap: var(--space-20); }
 
 /* ---------- Stacked (mobile): vertical rail ---------- */
 
-.seller-timeline--stacked .timeline-stage { padding-top: 32px; padding-bottom: 8px; }
+.seller-timeline--stacked .timeline-stage { padding-top: var(--space-32); padding-bottom: var(--space-8); }
 
 .timeline-stack {
   position: relative;
-  margin: 24px 0 0;
+  margin: var(--space-24) 0 0;
   padding: 0;
   list-style: none;
   display: grid;
@@ -560,16 +494,16 @@
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr) 20px;
   align-items: center;
-  gap: 12px;
-  padding: 8px 0;
+  gap: var(--space-12);
+  padding: var(--space-8) 0;
   text-align: left;
   color: inherit;
 }
 
 .timeline-stack-header:focus-visible { outline: none; }
-.timeline-stack-header:focus-visible .timeline-marker { outline: 2px solid var(--tl-ring-strong); outline-offset: 4px; border-radius: 50%; }
+.timeline-stack-header:focus-visible .timeline-marker { outline: 2px solid var(--tl-ring-strong); outline-offset: 4px; border-radius: var(--radius-circle); }
 
-.timeline-stack-heading { display: flex; align-items: center; gap: 10px; }
+.timeline-stack-heading { display: flex; align-items: center; gap: var(--space-12); }
 
 .timeline-stack-item--upcoming .timeline-stack-heading .MuiTypography-root { color: var(--color-semantic-text-primary); }
 
@@ -579,13 +513,13 @@
 .timeline-stack-item.is-open .timeline-marker > * { scale: 1.15; }
 
 .timeline-stack-body {
-  padding: 8px 0 28px;
+  padding: var(--space-8) 0 var(--space-28);
   animation: timeline-panel-in 260ms var(--timeline-ease);
 }
 
-.timeline-stack-body .timeline-item-list { gap: 4px; }
-.timeline-stack-body .timeline-item.portal-date-row { padding: 18px 12px; gap: 16px 18px; }
-.timeline-stack-body .timeline-item .portal-date-row-main::after { inset: -18px -12px; border-radius: 14px; }
+.timeline-stack-body .timeline-item-list { gap: var(--space-4); }
+.timeline-stack-body .timeline-item.portal-date-row { padding: var(--space-20) var(--space-12); gap: var(--space-16) var(--space-20); }
+.timeline-stack-body .timeline-item .portal-date-row-main::after { inset: -18px -12px; border-radius: var(--radius-m); }
 
 .timeline-chevron {
   width: 20px;
@@ -615,52 +549,6 @@
 
 /* ---------- Action items: a check circle in place of the thumbnail ---------- */
 
-.timeline-check-slot { width: var(--date-stamp-size, 64px); height: 44px; }
-
-/* Sits in the same grid cell as the thumbnail, above the row button. */
-.timeline-check.MuiButtonBase-root {
-  position: relative;
-  z-index: 2;
-  grid-column: 1;
-  grid-row: 1;
-  align-self: center;
-  justify-self: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  color: transparent;
-  background: var(--color-semantic-surface-primary);
-  box-shadow: inset 0 0 0 1.5px var(--color-semantic-stroke-primary-dark);
-  transition: background-color 180ms ease, box-shadow 180ms ease, color 120ms ease, scale 260ms var(--timeline-spring);
-}
-
-.timeline-check::before {
-  /* Larger touch target than the visible circle. */
-  position: absolute;
-  inset: -6px;
-  content: '';
-  border-radius: 50%;
-}
-
-.timeline-check svg { width: 20px; height: 20px; scale: 0.4; transition: scale 260ms var(--timeline-spring); }
-.timeline-check:hover:not(.is-checked) { color: var(--color-semantic-text-light); box-shadow: inset 0 0 0 1.5px var(--color-semantic-stroke-primary-darkest); }
-.timeline-check:hover:not(.is-checked) svg { scale: 0.8; }
-.timeline-check:active { scale: 0.92; }
-.timeline-check:focus-visible { outline: 2px solid var(--color-semantic-stroke-primary-darkest); outline-offset: 3px; }
-
-.timeline-check.is-checked {
-  color: var(--color-semantic-text-on-color-primary);
-  background: var(--color-semantic-surface-reverse-primary);
-  box-shadow: none;
-  animation: timeline-check-pop 320ms var(--timeline-spring);
-}
-.timeline-check.is-checked svg { scale: 1; }
-
-.timeline-check.Mui-disabled {
-  background: transparent;
-  box-shadow: inset 0 0 0 1.5px var(--color-semantic-stroke-primary-light);
-}
-
 @keyframes timeline-check-pop {
   0% { scale: 0.85; }
   60% { scale: 1.1; }
@@ -668,51 +556,13 @@
 }
 
 /* Checked actions read as finished. */
-.timeline-item--action.is-checked .timeline-item-title .MuiTypography-root {
+.timeline-item--action.is-checked .portal-date-title .MuiTypography-root {
   color: var(--color-semantic-text-primary);
-  text-decoration: line-through;
-  text-decoration-color: var(--color-semantic-stroke-primary);
 }
 
-@media (max-width: 600px) {
-  .timeline-item--action.portal-date-row--resource .timeline-check.MuiButtonBase-root { grid-row: 1 / span 2; align-self: start; margin-top: 16px; }
-}
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item--action.is-checked .portal-date-title .MuiTypography-root { color: var(--tl-text); text-decoration-color: var(--tl-ring); }
 
-/* Dark band */
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-check.MuiButtonBase-root { background: transparent; box-shadow: inset 0 0 0 1.5px var(--tl-ring); }
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-check:hover:not(.is-checked) { color: var(--tl-text-muted); box-shadow: inset 0 0 0 1.5px var(--tl-ring-strong); }
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-check.is-checked { color: var(--tl-band); background: var(--tl-ink); box-shadow: none; }
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-check.Mui-disabled { box-shadow: inset 0 0 0 1.5px var(--tl-hairline); }
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-check:focus-visible { outline-color: var(--tl-ring-strong); }
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item--action.is-checked .timeline-item-title .MuiTypography-root { color: var(--tl-text); text-decoration-color: var(--tl-ring); }
-
-@media (prefers-reduced-motion: reduce) {
-  .timeline-check.MuiButtonBase-root,
-  .timeline-check svg { transition: none; }
-  .timeline-check.is-checked { animation: none; }
-}
-
-/* ---------- Thumbnail weight: no fills; dates get a hairline, icons stand alone ---------- */
-
-.timeline-item .timeline-stamp.portal-date-stamp,
-.timeline-item .timeline-stamp.portal-date-stamp.is-done,
-.timeline-item .portal-date-row-main:hover .timeline-stamp.portal-date-stamp {
-  background: transparent;
-  box-shadow: none;
-}
-
-.timeline-item .timeline-stamp.portal-date-stamp:not(.timeline-stamp--icon) {
-  box-shadow: inset 0 0 0 1px var(--color-semantic-stroke-primary-light);
-}
-
-.timeline-item .portal-date-row-main:hover .timeline-stamp.portal-date-stamp:not(.timeline-stamp--icon) {
-  box-shadow: inset 0 0 0 1px var(--color-semantic-stroke-primary);
-}
-
-.timeline-item .timeline-stamp--icon { color: var(--color-semantic-text-primary); }
-.timeline-item .timeline-stamp-icon svg { width: 28px; height: 28px; }
-.timeline-item .portal-date-row-main:hover .timeline-stamp--icon { color: var(--color-semantic-text-dark); }
-
+/* Dark band: the stamp keeps its hairline in the band's palette. */
 .seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .timeline-stamp.portal-date-stamp,
 .seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .timeline-stamp.portal-date-stamp.is-done,
 .seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .portal-date-row-main:hover .timeline-stamp.portal-date-stamp {
@@ -720,40 +570,40 @@
   box-shadow: none;
 }
 
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .timeline-stamp.portal-date-stamp:not(.timeline-stamp--icon) {
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .timeline-stamp.portal-date-stamp:not(.portal-date-stamp--icon) {
   box-shadow: inset 0 0 0 1px var(--tl-track);
 }
 
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .portal-date-row-main:hover .timeline-stamp.portal-date-stamp:not(.timeline-stamp--icon) {
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .portal-date-row-main:hover .timeline-stamp.portal-date-stamp:not(.portal-date-stamp--icon) {
   box-shadow: inset 0 0 0 1px var(--tl-ring);
 }
 
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .timeline-stamp--icon { color: var(--tl-text); }
-.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .portal-date-row-main:hover .timeline-stamp--icon { color: var(--tl-text-strong); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .portal-date-stamp--icon { color: var(--tl-text); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-item .portal-date-row-main:hover .portal-date-stamp--icon { color: var(--tl-text-strong); }
 
 /* ---------- Collapsible details: collapsed shows only the tracker ---------- */
 
 .timeline-collapse.MuiButtonBase-root {
   position: relative;
   min-height: 36px;
-  margin: 32px auto 0;
+  margin: var(--space-32) auto 0;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 12px 6px 16px;
-  border-radius: 999px;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-12) var(--space-6) var(--space-16);
+  border-radius: var(--radius-pill);
   color: var(--tl-text-muted);
   box-shadow: inset 0 0 0 1px var(--tl-track);
-  transition: color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  transition: color var(--motion-hover), box-shadow var(--motion-hover), background-color var(--motion-hover);
 }
 
 .timeline-collapse:hover { color: var(--tl-text-strong); box-shadow: inset 0 0 0 1px var(--tl-ring); }
-.timeline-collapse:focus-visible { outline: 2px solid var(--tl-ring-strong); outline-offset: 2px; }
+.timeline-collapse:focus-visible { outline: 2px solid var(--tl-ring-strong); outline-offset: var(--focus-ring-offset); }
 .timeline-collapse .timeline-chevron { color: inherit; rotate: 180deg; }
 .timeline-collapse.is-collapsed .timeline-chevron { rotate: 0deg; }
 /* Collapsed, the toggle tucks up under the tracker. */
-.timeline-collapse.is-collapsed.MuiButtonBase-root { margin-top: 4px; }
-.timeline-collapse.MuiButtonBase-root { transition: color 160ms ease, box-shadow 160ms ease, margin-top 420ms var(--timeline-ease); }
+.timeline-collapse.is-collapsed.MuiButtonBase-root { margin-top: var(--space-4); }
+.timeline-collapse.MuiButtonBase-root { transition: color var(--motion-hover), box-shadow var(--motion-hover), margin-top 420ms var(--timeline-ease); }
 
 .timeline-panel-shell {
   display: grid;
@@ -765,14 +615,14 @@
 .timeline-panel-shell.is-collapsed {
   grid-template-rows: 0fr;
   opacity: 0;
-  transition: grid-template-rows 420ms var(--timeline-ease), opacity 200ms ease;
+  transition: grid-template-rows 420ms var(--timeline-ease), opacity var(--motion-reveal);
 }
 
 /* The list sits well inside the clip, so row hover fills and focus rings are never cut off. */
-.timeline-panel-clip { min-height: 0; overflow: hidden; padding-bottom: 4px; }
+.timeline-panel-clip { min-height: 0; overflow: hidden; padding-bottom: var(--space-4); }
 
 /* Collapsed: a little breathing room under the toggle. The dark band keeps its bottom padding for the card overhang. */
-.seller-timeline--divider:has(.timeline-panel-shell.is-collapsed) { padding-bottom: 8px; }
+.seller-timeline--divider:has(.timeline-panel-shell.is-collapsed) { padding-bottom: var(--space-8); }
 
 @media (prefers-reduced-motion: reduce) {
   .timeline-panel-shell,
@@ -786,25 +636,176 @@
 .seller-timeline--card {
   margin-top: 0;
   overflow: hidden;
-  padding-bottom: 28px;
-  border: 1px solid var(--color-semantic-stroke-primary-light);
-  border-radius: 14px;
+  padding-bottom: var(--space-28);
+  border-radius: var(--radius-m);
   background: var(--color-semantic-surface-primary);
 }
 
-.seller-timeline--card .timeline-stage { padding-top: 32px; }
-.seller-timeline--card .seller-timeline-heading { display: grid; gap: 6px; padding-inline: 32px; }
-.seller-timeline--card .seller-timeline-eyebrow.MuiTypography-root { margin: 0; text-align: left; }
+.seller-timeline--card .timeline-stage { padding-top: var(--space-32); }
+.seller-timeline--card .seller-timeline-heading { display: grid; justify-items: center; gap: var(--space-6); padding-inline: var(--space-32); text-align: center; }
+.seller-timeline--card .seller-timeline-eyebrow.MuiTypography-root { margin: 0; text-align: center; }
 .seller-timeline--card .seller-timeline-countdown.MuiTypography-root { display: block; color: var(--color-semantic-text-dark); font-variant-numeric: tabular-nums; }
 
 /* The rail fades at the card's edges rather than the viewport's. */
-.seller-timeline--card .timeline-tracker { --edge-fade: 56px; margin-top: 8px; }
+.seller-timeline--card .timeline-tracker { --edge-fade: 56px; margin-top: var(--space-8); }
 .seller-timeline--card .timeline-rail { left: 0; width: 100%; }
 .seller-timeline--card .timeline-rail-fill { left: 0; width: calc(var(--col) / 2 + var(--timeline-progress) * (100% - var(--col))); }
 
-.seller-timeline--card .timeline-panel { max-width: none; margin-top: 24px; padding-inline: 8px; }
-.seller-timeline--card .timeline-collapse.MuiButtonBase-root { margin-top: 24px; }
-.seller-timeline--card .timeline-collapse.is-collapsed.MuiButtonBase-root { margin-top: 4px; }
+.seller-timeline--card .timeline-panel { max-width: none; margin-top: var(--space-24); padding-inline: var(--space-8); }
+.seller-timeline--card .timeline-collapse.MuiButtonBase-root { margin-top: var(--space-24); }
+.seller-timeline--card .timeline-collapse.is-collapsed.MuiButtonBase-root { margin-top: var(--space-4); }
 
-.seller-timeline--card.seller-timeline--stacked { padding: 0 20px 20px; }
+.seller-timeline--card.seller-timeline--stacked { padding: 0 var(--space-20) var(--space-20); }
 .seller-timeline--card.seller-timeline--stacked .seller-timeline-heading { padding-inline: 0; }
+
+/* Card: an "Upcoming" label over the open items, and a Done pill under the list. */
+/* ── UPCOMING ── : hairlines on both sides, 12px from the label. */
+.seller-timeline--card .milestone-upcoming-title.MuiTypography-root {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  margin: 0 0 calc(var(--space-12) * -1);
+  text-align: center;
+}
+.seller-timeline--card .milestone-upcoming-title::before,
+.seller-timeline--card .milestone-upcoming-title::after {
+  flex: 1;
+  height: 1px;
+  content: '';
+}
+/* Outer ends fade out, like the tracker rail above. */
+.seller-timeline--card .milestone-upcoming-title::before { background: linear-gradient(90deg, transparent, var(--color-semantic-stroke-primary-light) 56px); }
+.seller-timeline--card .milestone-upcoming-title::after { background: linear-gradient(270deg, transparent, var(--color-semantic-stroke-primary-light) 56px); }
+
+/* Coming up: the locked note sits centered under the label. */
+.seller-timeline--card .milestone-locked-note { justify-content: center; margin: 0; text-align: center; }
+
+/* 16px more breathing room above and below the timeline. */
+.seller-timeline--card .timeline-stage { padding-top: var(--space-48); }
+.seller-timeline--card { padding-bottom: var(--space-48); }
+.seller-timeline--card .timeline-done-pill.MuiButtonBase-root,
+.seller-timeline--card .timeline-done-pill.is-collapsed.MuiButtonBase-root { margin: 0 auto; }
+.seller-timeline--card .milestone-done { padding-top: var(--space-24); }
+.seller-timeline--card .milestone-done .milestone-group-title.MuiTypography-root { margin-bottom: var(--space-8); }
+
+/* ---------- Exploration page: dates & action items left, documents right ---------- */
+
+.seller-timeline:not(.seller-timeline--card) .timeline-panel { max-width: 1200px; }
+
+.milestone-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(260px, 1fr);
+  align-items: start;
+  gap: var(--space-56);
+}
+
+/* Stage extras (Market activity) sit full width below the stage's dates and documents. */
+.milestone-extra { min-width: 0; margin-top: var(--space-48); }
+.milestone-items > .milestone-extra { margin-top: var(--space-32); }
+/* Phones: the stage rail runs down the left edge. Cover it behind the block and line up with the documents column. */
+.timeline-stack-body .milestone-extra { position: relative; z-index: 1; margin-top: var(--space-32); padding-left: var(--space-16); background: var(--tl-surface); }
+/* Inside the timeline, Market activity follows the timeline's palette so it reads on the light page and the dark band. */
+.milestone-extra .market-activity--inline,
+.milestone-extra .market-activity--inline .competing-listing-price { color: var(--tl-text-strong); }
+.milestone-extra .market-activity--inline,
+.milestone-extra .market-activity--inline .portal-row-list > li + li { border-color: var(--tl-hairline, var(--color-semantic-stroke-primary-light)); }
+.milestone-extra .place-eyebrow.MuiTypography-root { color: var(--tl-text-muted); }
+.milestone-extra .market-activity-inline-subtitle.MuiTypography-root,
+.milestone-extra .market-activity-empty.MuiTypography-root,
+.milestone-extra .competing-listing-facts.MuiTypography-root,
+.milestone-extra .competing-listing-change.MuiTypography-root { color: var(--tl-text); }
+.milestone-extra .competing-listing { background: var(--tl-halo); color: var(--tl-text-strong); }
+.milestone-extra .market-activity-controls .place-icon-button { color: var(--tl-text-strong); }
+.milestone-extra .market-activity-controls .place-icon-button.Mui-disabled { opacity: 0.35; }
+.milestone-extra .competing-listing-photo { color: var(--tl-text-muted); background: var(--tl-halo); }
+.milestone-extra .place-tag { color: var(--tl-text-strong); background: transparent; box-shadow: inset 0 0 0 1px var(--tl-ring); }
+
+.milestone-split-main,
+.milestone-split-docs { min-width: 0; display: grid; gap: var(--gap-stack); align-content: start; }
+
+/* Column labels are SectionLabels. In the timeline's own palette (the dark band), they follow it. */
+.seller-timeline--dark:not(.seller-timeline--stacked) .milestone-split-title .section-label-text.MuiTypography-root { color: var(--tl-text-muted); }
+
+/* Documents sit lower in the hierarchy: plain, compact rows on a quiet hairline list. */
+.milestone-split-docs { padding-top: 0; }
+
+.timeline-doc-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline-doc-list > li + li { border-top: 1px solid var(--color-semantic-stroke-primary-light); }
+
+@media (max-width: 899.95px) {
+  .milestone-split { grid-template-columns: minmax(0, 1fr); gap: var(--space-32); }
+}
+
+/* Dark band */
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-doc-list,
+.seller-timeline--dark:not(.seller-timeline--stacked) .timeline-doc-list > li { border-color: var(--tl-hairline); }
+
+/* ---------- Item modal: C2 "what's coming up next" detail ---------- */
+
+.timeline-step-modal .place-modal-heading { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+/* The close button floats top-right so the head below can lead the dialog. */
+.timeline-step-modal .place-modal-header.MuiDialogTitle-root { position: absolute; top: 16px; right: 16px; z-index: 1; padding: 0; }
+.timeline-step-modal .place-modal-content.MuiDialogContent-root { padding-top: var(--space-32); }
+
+.timeline-modal-head {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: var(--space-20);
+  align-items: start;
+  padding-bottom: var(--space-24);
+  border-bottom: 1px solid var(--color-semantic-stroke-primary-light);
+}
+
+.timeline-modal-head-copy { min-width: 0; display: grid; gap: var(--space-6); padding-right: var(--space-32); }
+.timeline-modal-title.MuiTypography-root { margin: 0; }
+.timeline-modal-meta.MuiTypography-root { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-6); margin-top: var(--space-4); font-variant-numeric: tabular-nums; }
+
+.timeline-step-modal .timeline-modal-body { padding-top: var(--space-24); }
+
+/* Document rows on the dark band */
+.seller-timeline--dark:not(.seller-timeline--stacked) .document-list-row { color: var(--tl-text-strong); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .document-list-row-icon { color: var(--tl-text); background: var(--tl-hairline); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .document-list-row-meta.MuiTypography-root,
+.seller-timeline--dark:not(.seller-timeline--stacked) .document-list-row-go { color: var(--tl-text-muted); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .document-list-row.MuiButtonBase-root:hover::after { background: var(--tl-hairline); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .place-tag--strong { color: var(--tl-band); background: var(--tl-ink); }
+.seller-timeline--dark:not(.seller-timeline--stacked) .document-list-row-item,
+.seller-timeline--dark:not(.seller-timeline--stacked) ul:has(> .document-list-row-item) { border-color: var(--tl-hairline); }
+
+/* Stage detail block placed on its own (C2) */
+.seller-timeline.milestone-details-block { margin-top: 0; }
+
+/* ---------- Split block: Done as a secondary button, optional stage name in labels ---------- */
+
+.milestone-done--split { display: grid; justify-items: start; gap: var(--space-8); padding-top: 0; border-top: 0; }
+.milestone-done--split .milestone-done-list { width: 100%; }
+
+.milestone-split-stage { color: var(--color-semantic-text-dark); }
+.milestone-split-sep { margin: 0 var(--space-2); }
+
+/* Split block: rows follow the shared list-row spec (DESIGN.md › List rows). Content sits flush with the
+   section label, rows are divided by hairlines, and the hover fill comes from the base date row. */
+.milestone-split .timeline-item-list { gap: 0; }
+.milestone-split .timeline-item-list > li + li { border-top: 1px solid var(--color-semantic-stroke-primary-light); }
+.milestone-split .timeline-item.portal-date-row { padding: var(--padding-row-block) 0; }
+.milestone-split .timeline-item.portal-date-row:first-child { padding-top: 0; }
+.milestone-split .timeline-item.portal-date-row:last-child { padding-bottom: 0; }
+.milestone-split .timeline-item .portal-date-row-main::after { inset: calc(var(--padding-row-block) * -1) calc(var(--row-hover-bleed) * -1); }
+.milestone-split .timeline-item:first-child .portal-date-row-main::after { top: calc(var(--row-hover-bleed) * -1); }
+.milestone-split .timeline-item:last-child .portal-date-row-main::after { bottom: calc(var(--row-hover-bleed) * -1); }
+.milestone-split .milestone-locked-note { margin-left: 0; }
+
+/* Heading with an action: "Transaction timeline · Full timeline", centered as one line. */
+.seller-timeline-heading-row { display: flex; align-items: baseline; justify-content: center; gap: var(--space-12); margin-bottom: var(--space-4); }
+.seller-timeline-heading-row .seller-timeline-eyebrow.MuiTypography-root { margin: 0; }
+.seller-timeline-heading-sep { color: var(--tl-text-muted); }
+
+/* Static tracker: stages are display only, so no pointer or hover behavior. */
+.timeline-tracker--static .timeline-node.MuiButtonBase-root,
+.timeline-stack--static .timeline-stack-header.MuiButtonBase-root { pointer-events: none; cursor: default; }
+.timeline-stack--static .timeline-chevron { display: none; }

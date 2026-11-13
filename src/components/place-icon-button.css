@@ -3,7 +3,7 @@
   height: 44px;
   color: var(--color-semantic-text-primary);
   background: transparent;
-  transition: background-color 140ms ease, color 140ms ease;
+  transition: background-color var(--motion-hover), color var(--motion-hover), scale var(--motion-press);
 }
 
 .place-icon-button.MuiIconButton-root:hover,
@@ -18,8 +18,8 @@
 
 .place-icon-button.MuiIconButton-root:focus-visible,
 .place-icon-button.MuiIconButton-root[data-state="focus"] {
-  outline: 2px solid var(--color-semantic-stroke-primary-dark);
-  outline-offset: 2px;
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .place-icon-button.MuiIconButton-root.Mui-disabled {

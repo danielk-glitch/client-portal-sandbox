@@ -1,10 +1,11 @@
 import type { TransactionResource } from '../transaction-portal/types'
 import { sellerResources } from './sellerResources'
 
-export type MilestoneId = 'pre-listing' | 'active-listing' | 'under-contract' | 'closing'
+/** Seller stages, then buyer stages. Both sides share 'closing'. */
+export type MilestoneId = 'pre-listing' | 'active-listing' | 'under-contract' | 'closing' | 'inspection-period' | 'financing' | 'move-in'
 export type TimelineStatus = 'complete' | 'current' | 'upcoming'
-/** Each type gets one icon. Resources come from milestone.resourceIds. */
-export type TimelineItemKind = 'action' | 'date' | 'document' | 'resource'
+/** Each type gets one icon. Resources come from milestone.resourceIds. There are no action items: anything that isn't a document is a date. */
+export type TimelineItemKind = 'date' | 'document' | 'resource'
 
 export type SellerTimelineStep = {
   id: string
@@ -14,10 +15,12 @@ export type SellerTimelineStep = {
   date?: string
   /** How the date should read: "Due Oct 8", "Planned Sep 1". Defaults to the plain date. */
   dateLabel?: 'Due' | 'Planned' | 'Expected' | 'Scheduled'
+  /** Shown in place of a date that isn't scheduled yet, such as "About 3 days before closing". */
+  estimate?: string
   /** "you" for the seller, otherwise a team member or outside party name. */
   owner: 'you' | string
   status: TimelineStatus
-  /** Defaults: document when a document is attached, action when owned by you, otherwise date. */
+  /** Defaults: document when a document is attached, otherwise date. */
   kind?: Exclude<TimelineItemKind, 'resource'>
   detail?: string
   resourceId?: string
@@ -33,6 +36,8 @@ export type SellerMilestone = {
   status: TimelineStatus
   startDate?: string
   endDate?: string
+  /** Overrides the "From <start date>" caption on an upcoming stage's marker. The dates above still place it on the calendar. */
+  caption?: string
   summary: string
   steps: SellerTimelineStep[]
   resourceIds: string[]
@@ -116,9 +121,16 @@ const timelineOnlyResources: TransactionResource[] = [
   },
 ]
 
-export const timelineResources: TransactionResource[] = [...timelineOnlyResources, ...sellerResources]
+/** The stage is called "Pending" in the portal, so the guide that explains it uses that word too. */
+const withPendingWording = (guide: TransactionResource): TransactionResource => guide.id !== 'contingencies' ? guide : {
+  ...guide,
+  title: 'What “pending” means',
+  sections: guide.sections.map((section) => ({ ...section, body: section.body?.replace('Under contract means', 'Pending means') })),
+}
 
-/** Under contract. The prototype's "today" is October 6, 2026. */
+export const timelineResources: TransactionResource[] = [...timelineOnlyResources, ...sellerResources].map(withPendingWording)
+
+/** Pending (the "under contract" stage). The prototype's "today" is October 6, 2026. */
 export const underContractTimeline: SellerTimelineData = {
   today: '2026-10-06',
   nextStepId: 'uc-disclosures',
@@ -159,7 +171,7 @@ export const underContractTimeline: SellerTimelineData = {
     },
     {
       id: 'under-contract',
-      label: 'Under contract',
+      label: 'Pending',
       status: 'current',
       startDate: '2026-10-02',
       endDate: '2026-10-24',
@@ -181,6 +193,7 @@ export const underContractTimeline: SellerTimelineData = {
       status: 'upcoming',
       startDate: '2026-10-24',
       endDate: '2026-11-06',
+      caption: 'From Nov 6',
       summary: 'Final paperwork, the walkthrough, and handing over the keys.',
       resourceIds: ['closing', 'moving-out'],
       steps: [
@@ -237,7 +250,7 @@ export const beforeListingTimeline: SellerTimelineData = {
     },
     {
       id: 'under-contract',
-      label: 'Under contract',
+      label: 'Pending',
       status: 'upcoming',
       summary: 'The buyer completes inspections and financing while deadlines in your contract play out.',
       resourceIds: ['contingencies', 'inspection', 'appraisal', 'earnest-money'],
@@ -263,5 +276,32 @@ export const beforeListingTimeline: SellerTimelineData = {
         { id: 'bl-cl-keys', title: 'Hand over the keys', summary: 'Leave keys, openers, and manuals for the new owners.', owner: 'you', status: 'upcoming' },
       ],
     },
+  ],
+}
+
+/**
+ * Listed: live since Sep 1, no offer yet. "Today" is October 6, 2026, matching the market activity mock.
+ * Pre-listing comes from the pending view; Pending and Closing reuse the before-listing stages, which have no dates yet.
+ */
+const pendingPreListing = underContractTimeline.milestones.find((milestone) => milestone.id === 'pre-listing')!
+const pendingActiveListing = underContractTimeline.milestones.find((milestone) => milestone.id === 'active-listing')!
+export const listedTimeline: SellerTimelineData = {
+  today: '2026-10-06',
+  nextStepId: 'al-pricing',
+  milestones: [
+    pendingPreListing,
+    {
+      ...pendingActiveListing,
+      status: 'current',
+      endDate: undefined,
+      summary: 'Your home is live for buyers, with marketing, showings, and feedback.',
+      steps: [
+        ...pendingActiveListing.steps.filter((step) => step.id !== 'al-offer'),
+        { id: 'al-pricing', title: 'Pricing check-in', summary: 'Avery walks through showing feedback and nearby market activity with you.', date: '2026-10-08', dateLabel: 'Scheduled', owner: 'Avery Coleman', status: 'current', resourceId: 'pricing' },
+        { id: 'al-open-house-2', title: 'Second open house', summary: '12:00 to 3:00 PM. Plan to be away from the home.', date: '2026-10-11', dateLabel: 'Scheduled', owner: 'Avery Coleman', status: 'upcoming', resourceId: 'showings' },
+        { id: 'al-offers', title: 'Review offers', summary: 'Compare terms with Avery as offers come in.', estimate: 'As offers arrive', owner: 'you', status: 'upcoming', resourceId: 'reviewing-offers' },
+      ],
+    },
+    ...beforeListingTimeline.milestones.filter((milestone) => milestone.id === 'under-contract' || milestone.id === 'closing'),
   ],
 }

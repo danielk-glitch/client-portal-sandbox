@@ -1,0 +1,37 @@
+/* Documents tab and linked-document chips: see StagedDocumentsPanel.tsx */
+
+.tf-docs { display: grid; gap: 40px; }
+.tf-docs-stage { display: grid; gap: 12px; }
+.tf-docs-stage-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.tf-docs-stage-head h3 { margin: 0; }
+.tf-docs-count.MuiTypography-root { margin-left: auto; font-variant-numeric: tabular-nums; }
+.tf-docs-list { margin: 0; padding: 0; list-style: none; }
+
+/* Secondary line: file name, then the linked date. */
+.tf-docs-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; min-width: 0; }
+.tf-docs-file { min-width: 0; overflow-wrap: anywhere; }
+.tf-docs-date { display: inline-flex; align-items: center; gap: 4px; color: var(--color-semantic-text-primary); font-variant-numeric: tabular-nums; }
+.tf-docs-date svg { width: 14px; height: 14px; }
+
+@media (max-width: 600px) {
+  .tf-docs { gap: 32px; }
+  .tf-docs-count.MuiTypography-root { margin-left: 0; flex-basis: 100%; }
+}
+
+/* Date rows: a linked document chip, next to any calendar button. */
+.timeline-item-trailing { position: relative; z-index: 1; grid-column: 3; grid-row: 1; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+.timeline-item-trailing .portal-date-resource.MuiChip-root { grid-column: auto; grid-row: auto; }
+.timeline-item-trailing .timeline-item-calendar.MuiButton-root { grid-column: auto; grid-row: auto; }
+@media (max-width: 600px) {
+  .timeline-item .timeline-item-trailing { grid-column: 2; grid-row: 2; justify-content: flex-start; }
+  .timeline-item .timeline-item-trailing .timeline-item-calendar.MuiButton-root { grid-column: auto; grid-row: auto; }
+}
+
+/* Stage filter pills: theme outlined button when off, primary contained when selected. */
+.tf-docs-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: -8px; }
+.tf-docs-filter.MuiButton-root { gap: 8px; }
+.tf-docs-filter-count { opacity: 0.6; font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) {
+  .tf-docs-filters { flex-wrap: nowrap; overflow-x: auto; margin-inline: -16px; padding-inline: 16px; scrollbar-width: none; }
+  .tf-docs-filter.MuiButton-root { flex: none; }
+}

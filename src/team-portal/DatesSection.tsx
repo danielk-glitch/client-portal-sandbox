@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { Autocomplete, Box, Button, Checkbox, Chip, FormControlLabel, Stack, TextField, Typography } from '@mui/material'
+import { Autocomplete, Box, Button, Checkbox, Chip, FormControlLabel, IconButton, Stack, TextField, Typography } from '@mui/material'
+import AddRounded from '@mui/icons-material/AddRounded'
+import CloseRounded from '@mui/icons-material/CloseRounded'
 import EditOutlined from '@mui/icons-material/EditOutlined'
 import InfoOutlined from '@mui/icons-material/InfoOutlined'
 import { toast } from 'sonner'
 import { PlaceModal } from '../components/PlaceModal'
-import type { TransactionResource, UpcomingDate } from '../transaction-portal/types'
+import type { DateLink, TransactionResource, UpcomingDate } from '../transaction-portal/types'
 import { DateEventList, DateEventRow } from '../transaction-portal/components'
 import { futureSellerTransaction } from '../seller-portal/futureSellerTransaction'
 import { cleanResourceHtml } from './teamData'
@@ -14,7 +16,7 @@ type SetState = (next: TeamState | ((previous: TeamState) => TeamState)) => void
 
 export function DatesSection({ state, setState }: { state: TeamState; setState: SetState }) {
   const [editing, setEditing] = useState<UpcomingDate | null>(null)
-  const [draft, setDraft] = useState({ date: '', title: '', description: '', explanation: '', preparation: '', resourceIds: [] as string[] })
+  const [draft, setDraft] = useState({ date: '', title: '', description: '', explanation: '', preparation: '', resourceIds: [] as string[], links: [] as DateLink[] })
   const [alsoShow, setAlsoShow] = useState(true)
   const published = state.resources.filter(resource => resource.published && !resource.archived)
   const titleOf = (id?: string) => state.resources.find(resource => resource.id === id)?.published?.title
@@ -29,15 +31,20 @@ export function DatesSection({ state, setState }: { state: TeamState; setState: 
   const draftHidden = draft.resourceIds.filter(id => !state.visible.includes(id))
 
   function open(date: UpcomingDate) {
-    setDraft({ date: date.date, title: date.title, description: date.description, explanation: date.guidance?.explanation ?? '', preparation: date.guidance?.preparation ?? '', resourceIds: date.guidance?.resourceIds ?? [] })
+    setDraft({ date: date.date, title: date.title, description: date.description, explanation: date.guidance?.explanation ?? '', preparation: date.guidance?.preparation ?? '', resourceIds: date.guidance?.resourceIds ?? [], links: date.guidance?.links ?? [] })
     setAlsoShow(true)
     setEditing(date)
+  }
+  function setLink(index: number, change: Partial<DateLink>) {
+    setDraft(previous => ({ ...previous, links: previous.links.map((link, i) => i === index ? { ...link, ...change } : link) }))
   }
   function save() {
     if (!editing) return
     if (!draft.title.trim() || !draft.date) { toast.error('Add a title and a date.'); return }
-    const hasGuidance = draft.explanation.trim() || draft.preparation.trim() || draft.resourceIds.length
-    const updated: UpcomingDate = { id: editing.id, date: draft.date, title: draft.title.trim(), description: draft.description.trim(), guidance: hasGuidance ? { explanation: draft.explanation.trim(), preparation: draft.preparation.trim(), resourceIds: draft.resourceIds } : undefined }
+    // Links need a title and a web address. Blank rows are dropped, and a missing https:// is added.
+    const links = draft.links.map(link => ({ ...link, title: link.title.trim(), url: link.url.trim() })).filter(link => link.title && link.url).map(link => ({ ...link, url: /^https?:\/\//i.test(link.url) ? link.url : `https://${link.url}` }))
+    const hasGuidance = draft.explanation.trim() || draft.preparation.trim() || draft.resourceIds.length || links.length
+    const updated: UpcomingDate = { id: editing.id, date: draft.date, title: draft.title.trim(), description: draft.description.trim(), guidance: hasGuidance ? { explanation: draft.explanation.trim(), preparation: draft.preparation.trim(), resourceIds: draft.resourceIds, links: links.length ? links : undefined } : undefined }
     const show = draftHidden.length > 0 && alsoShow
     setState(previous => ({ ...previous, dates: previous.dates.map(item => item.id === editing.id ? updated : item), visible: show ? [...previous.visible, ...draftHidden] : previous.visible }))
     toast.success(show ? `Date updated, and ${draftHidden.length === 1 ? 'its resource is' : 'its resources are'} now visible` : 'Date updated in Tim and Alex’s portal')
@@ -69,6 +76,16 @@ export function DatesSection({ state, setState }: { state: TeamState; setState: 
         <Autocomplete multiple options={published.map(resource => resource.id)} value={draft.resourceIds} onChange={(_, value) => setDraft({ ...draft, resourceIds: value })} getOptionLabel={id => `${titleOf(id) ?? id}${state.visible.includes(id) ? '' : ' · hidden'}`} disableCloseOnSelect filterSelectedOptions
           renderValue={(value, getItemProps) => value.map((id, index) => { const { key, ...itemProps } = getItemProps({ index }); return <Chip key={key} {...itemProps} size="small" label={titleOf(id) ?? id} variant="outlined" /> })}
           renderInput={params => <TextField {...params} label="Attached resources" helperText="One resource shows as a link next to the date. Two or more show as a list when the client opens the date." />} />
+        <Stack spacing={1.5}>
+          <Typography variant="labelM">Links</Typography>
+          {draft.links.map((link, index) => <Box key={link.id} className="team-date-link-fields">
+            <TextField label="Website title" value={link.title} onChange={event => setLink(index, { title: event.target.value })} fullWidth />
+            <TextField label="URL" value={link.url} onChange={event => setLink(index, { url: event.target.value })} placeholder="example.com/page" fullWidth />
+            <IconButton aria-label={`Remove link ${link.title || index + 1}`} onClick={() => setDraft({ ...draft, links: draft.links.filter((_, i) => i !== index) })}><CloseRounded /></IconButton>
+          </Box>)}
+          <Box><Button size="small" startIcon={<AddRounded />} onClick={() => setDraft({ ...draft, links: [...draft.links, { id: `link-${Date.now()}`, title: '', url: '' }] })}>Add link</Button></Box>
+          <Typography variant="labelS" color="text.secondary">Clients see each link under the date’s explanation. It opens in a new tab.</Typography>
+        </Stack>
         {draftHidden.length > 0 && <FormControlLabel control={<Checkbox checked={alsoShow} onChange={event => setAlsoShow(event.target.checked)} />} label={`${draftHidden.length === 1 ? 'One of these is' : `${draftHidden.length} of these are`} hidden. Also show ${draftHidden.length === 1 ? 'it' : 'them'} to clients so the ${draftHidden.length === 1 ? 'link appears' : 'links appear'}.`} />}
       </Stack>
     </PlaceModal>

@@ -1,10 +1,14 @@
 /* design-build · self-critique: Clarity5 Warmth4 Restraint5 Craft4 Variety4 SlopFree5 */
 import { useEffect, useRef, useState } from 'react'
-import { Box, Button, Dialog, DialogContent, Drawer, IconButton, Typography } from '@mui/material'
+import { useHorizontalScrollBounds } from '../hooks/useHorizontalScrollBounds'
+import { Box, Button, IconButton, Typography } from '@mui/material'
 import CloseOutlined from '@mui/icons-material/CloseOutlined'
 import ChevronLeftOutlined from '@mui/icons-material/ChevronLeftOutlined'
 import ChevronRightOutlined from '@mui/icons-material/ChevronRightOutlined'
 import PlayArrowRounded from '@mui/icons-material/PlayArrowRounded'
+import { PlaceModal } from '../components/PlaceModal'
+import { PlaceSheet } from '../components/PlaceSheet'
+import { HeadlineStat, Stat } from '../components/Stat'
 import { AdvertisingRow, ShowingFeedbackRow, TransactionRowList } from '../transaction-portal/components'
 import type { SellerTransaction } from './sellerTransaction'
 import type { MarketingSnapshotData } from './MarketingSnapshot'
@@ -23,22 +27,16 @@ type MarketingDashboardSheetProps = {
 }
 
 const categories: MarketingMaterial['category'][] = ['Social graphics', 'Printed media', 'Videos']
-type CarouselCategory = Exclude<MarketingMaterial['category'], 'Videos'>
 const navigation: Array<{ id: MarketingDashboardSection; label: string }> = [
   { id: 'overview', label: 'Overview' },
-  { id: 'materials', label: 'Materials' },
   { id: 'feedback', label: 'Showing feedback' },
   { id: 'activity', label: 'Advertising' },
+  { id: 'materials', label: 'Materials' },
 ]
 
 export function MarketingDashboardSheet({ open, onClose, initialSection, transaction, data }: MarketingDashboardSheetProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
-  const carouselRefs = useRef<Partial<Record<CarouselCategory, HTMLDivElement | null>>>({})
   const [selectedMaterial, setSelectedMaterial] = useState<MarketingMaterial | null>(null)
-  const [carouselBounds, setCarouselBounds] = useState<Record<CarouselCategory, { left: boolean; right: boolean }>>({
-    'Social graphics': { left: false, right: false },
-    'Printed media': { left: false, right: false },
-  })
   const { listing } = transaction
   const materials = data.materials
   const photos = listing.photos.length > 0
@@ -54,30 +52,6 @@ export function MarketingDashboardSheet({ open, onClose, initialSection, transac
     return () => cancelAnimationFrame(frame)
   }, [open, initialSection])
 
-  useEffect(() => {
-    if (!open) return
-    const update = () => {
-      for (const category of ['Social graphics', 'Printed media'] as const) {
-        const carousel = carouselRefs.current[category]
-        if (!carousel) continue
-        const next = {
-          left: carousel.scrollLeft > 2,
-          right: carousel.scrollLeft < carousel.scrollWidth - carousel.clientWidth - 2,
-        }
-        setCarouselBounds((current) => current[category].left === next.left && current[category].right === next.right
-          ? current
-          : { ...current, [category]: next })
-      }
-    }
-    const frame = requestAnimationFrame(update)
-    const observer = new ResizeObserver(update)
-    for (const carousel of Object.values(carouselRefs.current)) if (carousel) observer.observe(carousel)
-    return () => {
-      cancelAnimationFrame(frame)
-      observer.disconnect()
-    }
-  }, [open, materials])
-
   function closeSheet() {
     setSelectedMaterial(null)
     onClose()
@@ -88,34 +62,15 @@ export function MarketingDashboardSheet({ open, onClose, initialSection, transac
     scrollRef.current?.querySelector(`#marketing-dashboard-${section}`)?.scrollIntoView({ behavior, block: 'start' })
   }
 
-  function scrollMaterials(category: CarouselCategory, direction: -1 | 1) {
-    const carousel = carouselRefs.current[category]
-    if (!carousel) return
-    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
-    carousel.scrollBy({ left: direction * carousel.clientWidth * 0.8, behavior })
-  }
-
-  function updateCarouselBounds(category: CarouselCategory) {
-    const carousel = carouselRefs.current[category]
-    if (!carousel) return
-    const next = {
-      left: carousel.scrollLeft > 2,
-      right: carousel.scrollLeft < carousel.scrollWidth - carousel.clientWidth - 2,
-    }
-    setCarouselBounds((current) => current[category].left === next.left && current[category].right === next.right
-      ? current
-      : { ...current, [category]: next })
-  }
-
   return (
-    <Drawer
-      anchor="bottom"
+    <PlaceSheet
       open={open}
       onClose={closeSheet}
       className="listing-sheet-root marketing-dashboard-root"
-      slotProps={{ paper: { className: 'listing-sheet-paper marketing-dashboard-paper', role: 'dialog', 'aria-label': `Listing marketing for ${listing.address}` } }}
+      paperClassName="listing-sheet-paper marketing-dashboard-paper"
+      label={`Listing marketing for ${listing.address}`}
     >
-      <Box ref={scrollRef} className="listing-sheet-scroll marketing-dashboard-scroll">
+      <Box ref={scrollRef} className="place-sheet-scroll listing-sheet-scroll marketing-dashboard-scroll">
         <Box component="header" className="marketing-dashboard-hero">
           {listing.photoUrl && <Box component="img" src={listing.photoUrl} alt="" className="marketing-dashboard-hero-image" />}
           <Box className="marketing-dashboard-hero-copy">
@@ -143,15 +98,11 @@ export function MarketingDashboardSheet({ open, onClose, initialSection, transac
             </Box>
             {data.insights && (
               <Box className="marketing-dashboard-insights" aria-label="Listing performance">
-                <Box className="marketing-dashboard-insights-primary">
-                  <Typography variant="labelM">Total listing views</Typography>
-                  <Typography variant="displayL" component="p">{data.insights.totalViews.toLocaleString('en-US')}</Typography>
-                  <Typography variant="bodySStandard">Across listing sites</Typography>
-                </Box>
+                <HeadlineStat label="Total listing views" value={data.insights.totalViews.toLocaleString('en-US')} context="Across listing sites" className="marketing-dashboard-insights-primary" />
                 <Box className="marketing-dashboard-insights-secondary">
-                  <Box><Typography variant="metricM" component="p">{data.insights.uniqueVisitors.toLocaleString('en-US')}</Typography><Typography variant="bodySStandard">Unique visitors</Typography></Box>
-                  <Box><Typography variant="metricM" component="p">{data.insights.saves.toLocaleString('en-US')}</Typography><Typography variant="bodySStandard">Saves</Typography></Box>
-                  <Box><Typography variant="metricM" component="p">{data.insights.socialReach.toLocaleString('en-US')}</Typography><Typography variant="bodySStandard">People reached on social</Typography></Box>
+                  <Stat value={data.insights.uniqueVisitors.toLocaleString('en-US')} label="Unique visitors" />
+                  <Stat value={data.insights.saves.toLocaleString('en-US')} label="Saves" />
+                  <Stat value={data.insights.socialReach.toLocaleString('en-US')} label="People reached on social" />
                 </Box>
               </Box>
             )}
@@ -163,58 +114,6 @@ export function MarketingDashboardSheet({ open, onClose, initialSection, transac
                 </Box>
               ))}
             </Box>
-          </Box>
-
-          <Box component="section" id="marketing-dashboard-materials" className="marketing-dashboard-section marketing-dashboard-materials" aria-labelledby="marketing-dashboard-materials-title">
-            <Box className="marketing-dashboard-section-intro">
-              <Box>
-                <Box className="marketing-dashboard-category-title">
-                  <Typography component="h2" variant="titleM" id="marketing-dashboard-materials-title">Marketing materials</Typography>
-                  <Typography variant="labelM" className="marketing-dashboard-count" aria-label={`${materials.length} materials`}>{materials.length}</Typography>
-                </Box>
-                <Typography variant="bodyMStandard" color="text.secondary">The creative your team has produced for your home.</Typography>
-              </Box>
-            </Box>
-
-            {categories.map((category) => {
-              const categoryMaterials = materials.filter((material) => material.category === category)
-              const isCarousel = category !== 'Videos'
-              return (
-                <Box component="section" key={category} className="marketing-dashboard-category" aria-label={category}>
-                  <Box className="marketing-dashboard-category-heading">
-                    <Box className="marketing-dashboard-category-title">
-                      <Typography component="h3" variant="titleS">{category}</Typography>
-                      <Typography variant="labelM" className="marketing-dashboard-count">{categoryMaterials.length}</Typography>
-                    </Box>
-                    {isCarousel && (
-                      <Box className="marketing-dashboard-carousel-controls">
-                        <IconButton aria-label={`Scroll ${category.toLowerCase()} left`} disabled={!carouselBounds[category].left} onClick={() => scrollMaterials(category, -1)}><ChevronLeftOutlined /></IconButton>
-                        <IconButton aria-label={`Scroll ${category.toLowerCase()} right`} disabled={!carouselBounds[category].right} onClick={() => scrollMaterials(category, 1)}><ChevronRightOutlined /></IconButton>
-                      </Box>
-                    )}
-                  </Box>
-                  <Box
-                    className={isCarousel ? 'marketing-dashboard-material-carousel' : 'marketing-dashboard-material-grid'}
-                    data-category={category}
-                    ref={isCarousel ? (node: HTMLDivElement | null) => { carouselRefs.current[category] = node } : undefined}
-                    onScroll={isCarousel ? () => updateCarouselBounds(category) : undefined}
-                    role={isCarousel ? 'region' : undefined}
-                    aria-label={isCarousel ? `${category} previews` : undefined}
-                    tabIndex={isCarousel ? 0 : undefined}
-                  >
-                    {categoryMaterials.map((material) => (
-                      <Box component="button" type="button" key={material.id} className="marketing-material-card" onClick={() => setSelectedMaterial(material)} aria-label={`View ${material.title}`}>
-                        <MaterialPreview material={material} photos={photos} address={listing.address} />
-                        <Box className="marketing-material-caption">
-                          <Typography variant="bodySStandard">{material.title}</Typography>
-                          <Typography variant="labelS" color="text.secondary">{material.format} · {material.date}</Typography>
-                        </Box>
-                      </Box>
-                    ))}
-                  </Box>
-                </Box>
-              )
-            })}
           </Box>
 
           <Box className="marketing-dashboard-history">
@@ -237,22 +136,100 @@ export function MarketingDashboardSheet({ open, onClose, initialSection, transac
               </TransactionRowList>
             </Box>
           </Box>
+
+          <Box component="section" id="marketing-dashboard-materials" className="marketing-dashboard-section marketing-dashboard-materials" aria-labelledby="marketing-dashboard-materials-title">
+            <Box className="marketing-dashboard-section-intro">
+              <Box>
+                <Box className="marketing-dashboard-category-title">
+                  <Typography component="h2" variant="titleM" id="marketing-dashboard-materials-title">Marketing materials</Typography>
+                  <Typography variant="labelM" className="marketing-dashboard-count" aria-label={`${materials.length} materials`}>{materials.length}</Typography>
+                </Box>
+                <Typography variant="bodyMStandard" color="text.secondary">The creative your team has produced for your home.</Typography>
+              </Box>
+            </Box>
+
+            {categories.map((category) => (
+              <MaterialCategory
+                key={category}
+                category={category}
+                materials={materials.filter((material) => material.category === category)}
+                carousel={category !== 'Videos'}
+                photos={photos}
+                address={listing.address}
+                onSelect={setSelectedMaterial}
+              />
+            ))}
+          </Box>
         </Box>
       </Box>
 
-      <Dialog open={selectedMaterial !== null} onClose={() => setSelectedMaterial(null)} fullWidth maxWidth="sm" aria-label={selectedMaterial ? `${selectedMaterial.title} preview` : undefined}>
-        {selectedMaterial && (
-          <DialogContent className="marketing-material-dialog-content">
-            <IconButton onClick={() => setSelectedMaterial(null)} aria-label="Close material preview" className="marketing-material-dialog-close"><CloseOutlined /></IconButton>
-            <MaterialPreview material={selectedMaterial} photos={photos} address={listing.address} />
-            <Box className="marketing-material-dialog-caption">
-              <Typography variant="titleS">{selectedMaterial.title}</Typography>
-              <Typography variant="bodySStandard" color="text.secondary">{selectedMaterial.format} · {selectedMaterial.date}</Typography>
-            </Box>
-          </DialogContent>
+      <MaterialPreviewModal material={selectedMaterial} photos={photos} address={listing.address} onClose={() => setSelectedMaterial(null)} />
+    </PlaceSheet>
+  )
+}
+
+/** One materials category: heading with a count, then a scrolling carousel (with arrows) or a grid. */
+function MaterialCategory({ category, materials, carousel, photos, address, onSelect }: {
+  category: MarketingMaterial['category']
+  materials: MarketingMaterial[]
+  carousel: boolean
+  photos: Array<{ url: string; alt: string }>
+  address: string
+  onSelect: (material: MarketingMaterial) => void
+}) {
+  const scroller = useHorizontalScrollBounds<HTMLDivElement>()
+  return (
+    <Box component="section" className="marketing-dashboard-category" aria-label={category}>
+      <Box className="marketing-dashboard-category-heading">
+        <Box className="marketing-dashboard-category-title">
+          <Typography component="h3" variant="titleS">{category}</Typography>
+          <Typography variant="labelM" className="marketing-dashboard-count">{materials.length}</Typography>
+        </Box>
+        {carousel && (
+          <Box className="marketing-dashboard-carousel-controls">
+            <IconButton aria-label={`Scroll ${category.toLowerCase()} left`} disabled={!scroller.bounds.left} onClick={() => scroller.scrollByPage(-1)}><ChevronLeftOutlined /></IconButton>
+            <IconButton aria-label={`Scroll ${category.toLowerCase()} right`} disabled={!scroller.bounds.right} onClick={() => scroller.scrollByPage(1)}><ChevronRightOutlined /></IconButton>
+          </Box>
         )}
-      </Dialog>
-    </Drawer>
+      </Box>
+      <Box
+        className={carousel ? 'marketing-dashboard-material-carousel' : 'marketing-dashboard-material-grid'}
+        data-category={category}
+        ref={carousel ? scroller.ref : undefined}
+        onScroll={carousel ? scroller.onScroll : undefined}
+        role={carousel ? 'region' : undefined}
+        aria-label={carousel ? `${category} previews` : undefined}
+        tabIndex={carousel ? 0 : undefined}
+      >
+        {materials.map((material) => (
+          <Box component="button" type="button" key={material.id} className="marketing-material-card" onClick={() => onSelect(material)} aria-label={`View ${material.title}`}>
+            <MaterialPreview material={material} photos={photos} address={address} />
+            <Box className="marketing-material-caption">
+              <Typography variant="bodySStandard">{material.title}</Typography>
+              <Typography variant="labelS" color="text.secondary">{material.format} · {material.date}</Typography>
+            </Box>
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  )
+}
+
+function MaterialPreviewModal({ material, photos, address, onClose }: {
+  material: MarketingMaterial | null
+  photos: Array<{ url: string; alt: string }>
+  address: string
+  onClose: () => void
+}) {
+  // Keep the last material while the modal animates closed.
+  const [shown, setShown] = useState(material)
+  if (material && material !== shown) setShown(material)
+  const current = material ?? shown
+  if (!current) return null
+  return (
+    <PlaceModal open={material !== null} onClose={onClose} title={current.title} description={`${current.format} · ${current.date}`} size="s" closeLabel="Close material preview" className="marketing-material-modal">
+      <MaterialPreview material={current} photos={photos} address={address} />
+    </PlaceModal>
   )
 }
 

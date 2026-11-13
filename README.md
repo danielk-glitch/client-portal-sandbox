@@ -22,6 +22,7 @@ The component gallery at `/components` shows the MUI components customized by th
 
 ## Design tokens
 
-- `src/design-tokens.css` contains all 107 Figma color tokens. Primitive sRGB values are represented as OKLCH; semantic colors default to Light and switch to Goth when the root element uses `data-color-mode="goth"`.
+- `src/design-tokens.css` contains all 107 Figma color tokens. Primitive sRGB values are represented as OKLCH; semantic colors are light mode only (the earlier Goth dark mode was removed; v1 is light only). The same file holds the typography variables (`--type-*`).
 - `src/design-tokens.ts` contains the 17 Figma Manrope type styles. Use them through the custom MUI Typography variants, such as `displayL`, `titleM`, `bodyMStandard`, `labelS`, and `metricL`.
 - Manrope weights 400 and 500 are bundled locally through Fontsource.
+- `src/system-tokens.css` holds corner radius (`--radius-*`), elevation (`--elevation-*`), and spacing (`--space-*`, `--padding-*`, `--gap-*`). `src/system-tokens.ts` exposes the same names to the MUI theme and `sx` props.

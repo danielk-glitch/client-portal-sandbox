@@ -1,60 +1,48 @@
-.people-section.MuiPaper-root {
-  min-width: 0;
-  padding: 12px 32px 32px;
-  border-radius: 14px;
-  background: var(--color-semantic-surface-primary-darkest);
-  scroll-margin-top: 24px;
-}
+/* People: team and viewers in one card (PlaceCard). Tabs use the theme's tab style. */
+.people-section { scroll-margin-top: var(--space-24); container: people / inline-size; }
 
 .people-tabs {
-  border-bottom: 1px solid var(--color-semantic-stroke-primary-light);
+  position: relative;
 }
-
-.people-tabs .MuiTabs-list {
-  width: 100%;
-}
-
-.people-tabs .MuiTab-root {
-  min-width: 0;
-  max-width: none;
-  min-height: 48px;
-  flex: 1 1 50%;
-  padding: 0;
-  color: var(--color-semantic-text-primary);
-  font-size: 0.875rem;
-  text-transform: none;
-}
-
-.people-tabs .MuiTab-root.Mui-selected {
-  color: var(--color-semantic-text-dark);
-}
-
-.people-tabs .MuiTabs-indicator {
-  height: 2px;
-  background: var(--color-semantic-text-dark);
-}
-
-.people-tabs .MuiTab-root:focus-visible {
-  outline: 2px solid var(--color-semantic-stroke-primary-dark);
-  outline-offset: -2px;
+/* The tab bar bleeds past the column (see MuiTabs in theme.ts), so its hairline is inset by the same amount. */
+.people-tabs::before {
+  content: '';
+  position: absolute;
+  inset: auto var(--row-hover-bleed) 0;
+  height: 1px;
+  background: var(--color-semantic-stroke-primary-light);
 }
 
 .people-panel[hidden] { display: none; }
 
-.people-section .portal-person-row {
-  padding-inline: 0;
-}
+.people-section .portal-person-row { padding-inline: 0; }
 
 .team-list {
   display: grid;
-  gap: 24px;
-  margin-top: 30px;
+  gap: var(--space-24);
+  margin-top: var(--space-24);
 }
 
-.viewers-list.MuiStack-root { margin-top: 30px; }
+/* With contact shown, a hairline separates each person, and each row gets equal space above and below it. */
+.team-list:has(.portal-person-contact) { gap: 0; margin-top: var(--space-8); }
+.people-section .portal-person-row:has(.portal-person-contact) { padding-block: var(--space-20); }
+.people-section .portal-person-row:has(.portal-person-contact) + .portal-person-row:has(.portal-person-contact) { border-top: 1px solid var(--color-semantic-stroke-primary-light); }
+.team-list:has(.portal-person-contact) > .portal-person-row:last-child { padding-bottom: 0; }
 
-@media (max-width: 400px) {
-  .people-section.MuiPaper-root {
-    padding: 4px 24px 24px;
+/* When the card is wide (a tablet, or any layout that gives it the full width), the contact moves into the space on the right:
+   photo, then name and role, then phone and email in two equal columns. The card's own width decides, not the screen's. */
+@container people (min-width: 600px) {
+  .people-section .portal-person-row:has(.portal-person-contact) {
+    grid-template-columns: 42px minmax(0, 1fr) minmax(0, 1.6fr);
+    grid-template-rows: auto auto;
+    column-gap: var(--space-16);
+  }
+  .people-section .portal-person-row:has(.portal-person-contact) .portal-person-contact {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-24);
+    margin: 0 0 0 calc(var(--space-12) * -1);
   }
 }

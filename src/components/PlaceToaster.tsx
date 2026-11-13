@@ -9,13 +9,14 @@ export function PlaceToaster() {
       position="top-center"
       theme="dark"
       gap={8}
+      closeButton
       toastOptions={{
         style: {
           fontFamily: theme.typography.fontFamily,
           background: 'var(--color-primitive-neutral-900)',
           color: 'var(--color-primitive-neutral-50)',
           borderColor: 'var(--color-primitive-neutral-700)',
-          boxShadow: 'var(--elevation-raised)',
+          boxShadow: 'var(--elevation-2)',
         },
       }}
     />

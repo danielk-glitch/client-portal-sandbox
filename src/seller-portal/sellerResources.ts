@@ -95,6 +95,7 @@ export const sellerMilestoneGuidance: Record<string, NonNullable<UpcomingDate['g
     explanation: 'Seller disclosures help the buyer understand what you know about the property’s condition and history.',
     preparation: 'Review the form carefully. Ask your agent about unclear questions and confirm the correct form for your property before signing.',
     resourceIds: ['disclosures'],
+    links: [{ id: 'link-form-17', title: 'Montana Association of Realtors', url: 'https://www.montanarealtors.com/' }],
   },
   'date-3': {
     explanation: 'The buyer’s lender uses an independent estimate of your home’s value to help decide how much it can lend. This is different from a home inspection.',

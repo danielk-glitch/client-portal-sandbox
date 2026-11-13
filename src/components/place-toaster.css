@@ -4,3 +4,10 @@
     animation: none !important;
   }
 }
+
+/* Sonner puts the close button at the top left. Move it to the top right, overlapping the corner the same way. */
+[data-sonner-toaster] [data-sonner-toast] [data-close-button] {
+  left: auto;
+  right: 0;
+  transform: translate(35%, -35%);
+}
