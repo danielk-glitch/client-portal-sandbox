@@ -67,7 +67,7 @@ function PersonContactLink({ label, value, href }: { label: string; value: strin
   return (
     <ButtonBase component="a" href={href} className="portal-person-contact-link" disableRipple>
       <Typography component="span" variant="labelS" color="text.secondary" className="portal-person-contact-label">{label}</Typography>
-      <Typography component="span" variant="bodySStandard" className="portal-person-contact-value" data-text={value}>{value}</Typography>
+      <Typography component="span" variant="bodySStandard" className="portal-person-contact-value">{value}</Typography>
     </ButtonBase>
   )
 }

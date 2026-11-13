@@ -82,6 +82,10 @@ type SellerPortalProps = {
   showReviewTools?: boolean
   /** 'timeline' swaps the dates + activity overview for the milestone timeline exploration. */
   layout?: 'dashboard' | 'timeline' | 'timeline-columns'
+  /** Buyer: the same page for the home being bought (MVP buyer portal). Pair with `timeline` and showReviewTools={false}. */
+  side?: 'seller' | 'buyer'
+  /** Replaces the seller timeline picked by the journey view. */
+  timeline?: SellerTimelineData
 }
 
 export type OverviewLayout = 'timeline' | 'classic'
@@ -108,7 +112,7 @@ function timelineDocuments(transaction: SellerTransaction, beforeListing: boolea
     : buildClientDocuments(sellerDocumentRecords, timelineResources, underContractTimeline)
 }
 
-export function SellerPortal({ transaction: baseTransaction = sampleSellerTransaction, marketingSnapshot, marketActivity, initialListingOpen = false, basePath = '/seller', visualTheme, readOnly = false, showReviewTools = true, layout = 'dashboard', documentRows = false, listingPerformanceTabs = false, defaultHeader = 'light-bottom', headerPreparation = false }: SellerPortalProps) {
+export function SellerPortal({ transaction: baseTransaction = sampleSellerTransaction, marketingSnapshot, marketActivity, initialListingOpen = false, basePath = '/seller', visualTheme, readOnly = false, showReviewTools = true, layout = 'dashboard', documentRows = false, listingPerformanceTabs = false, defaultHeader = 'light-bottom', headerPreparation = false, side = 'seller', timeline }: SellerPortalProps) {
   /** Both timeline explorations share the timeline; 'timeline-columns' rearranges the page into two columns. */
   const timelineLayout = layout === 'timeline' || layout === 'timeline-columns'
   const columnsLayout = layout === 'timeline-columns'
@@ -407,7 +411,7 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
   }
 
 
-  const timelineData = beforeListing ? beforeListingTimeline : listed ? listedTimeline : underContractTimeline
+  const timelineData = timeline ?? (beforeListing ? beforeListingTimeline : listed ? listedTimeline : underContractTimeline)
   const marketingBlock = !beforeListing && (marketingSnapshot && marketingLayout === 'views' && marketingSnapshot.insights ? (
     <AdvertisingSnapshot
       data={marketingSnapshot.insights}
@@ -531,7 +535,7 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
         </Container>
       ) : (
       <Container maxWidth="xl" className="portal-main">
-        <ListingOverview transaction={transaction} onSeeListing={openListing} listingLink={listingLink} variant={beforeListing ? 'no-listing' : headerVariant} polestarLayout={visualTheme === 'polestar'} compact={timelineLayout} preparation={beforeListing && headerPreparation ? transaction.clientMessage : undefined} />
+        <ListingOverview transaction={transaction} onSeeListing={openListing} listingLink={listingLink} variant={beforeListing ? 'no-listing' : headerVariant} polestarLayout={visualTheme === 'polestar'} compact={timelineLayout} preparation={beforeListing && headerPreparation ? transaction.clientMessage : undefined} side={side} />
 
         {beforeListing && transaction.clientMessage && !headerPreparation && <ListingPreparation message={transaction.clientMessage} />}
 
@@ -640,7 +644,7 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
               <Box>
                 <Typography component="h2" variant="titleS" id="transaction-dates-title">Transaction dates</Typography>
                 <Typography variant="bodySStandard" color="text.secondary">
-                  Key dates and activity for your sale
+                  Key dates and activity for your {side === 'buyer' ? 'purchase' : 'sale'}
                 </Typography>
               </Box>
               <PlaceIconButton onClick={() => setDatesDrawerOpen(false)} aria-label="Close transaction dates">

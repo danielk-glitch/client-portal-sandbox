@@ -314,23 +314,6 @@
   background: var(--tl-ink);
 }
 
-/* Live pulse on the current stage. */
-.timeline-marker--current::after {
-  position: absolute;
-  inset: 8px;
-  content: '';
-  border-radius: var(--radius-circle);
-  border: 2px solid var(--tl-ink);
-  opacity: 0;
-  animation: timeline-pulse 2.8s var(--timeline-ease) infinite;
-  pointer-events: none;
-}
-
-@keyframes timeline-pulse {
-  0% { opacity: 0.35; scale: 1; }
-  70%, 100% { opacity: 0; scale: 2; }
-}
-
 /* Hover: lift and a soft halo. */
 .timeline-node:hover .timeline-marker::before,
 .timeline-node:hover .timeline-marker > * { scale: 1.12; }
@@ -535,7 +518,6 @@
 @media (prefers-reduced-motion: reduce) {
   .timeline-panel,
   .timeline-stack-body,
-  .timeline-marker--current::after,
   .timeline-spotlight { animation: none; }
   .timeline-glint { display: none; }
   .timeline-rail-fill,

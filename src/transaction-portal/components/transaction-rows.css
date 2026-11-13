@@ -414,9 +414,7 @@
   transition: background-color var(--motion-hover), scale var(--motion-press);
 }
 .portal-person-contact-value.MuiTypography-root { max-width: 100%; min-width: 0; overflow-wrap: anywhere; text-decoration: none; transition: color var(--motion-hover); }
-/* Reserves the width of the bold text so the hover weight change doesn't shift anything. */
-.portal-person-contact-value.MuiTypography-root::after { content: attr(data-text); display: block; height: 0; overflow: hidden; visibility: hidden; font-weight: 600; }
 .portal-person-contact-link.MuiButtonBase-root:hover { background: var(--color-semantic-surface-primary-dark); }
-.portal-person-contact-link.MuiButtonBase-root:hover .portal-person-contact-value { color: var(--color-semantic-text-dark); font-weight: 600; }
+.portal-person-contact-link.MuiButtonBase-root:hover .portal-person-contact-value { color: var(--color-semantic-text-dark); }
 .portal-person-contact-link.MuiButtonBase-root:active { scale: 0.99; }
 .portal-person-contact-link.MuiButtonBase-root:focus-visible { outline: var(--focus-ring); outline-offset: -2px; }

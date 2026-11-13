@@ -21,6 +21,7 @@ import { SellerPortal } from '../seller-portal/SellerPortal'
 import { currentSellerTransaction } from '../seller-portal/currentSellerTransaction'
 import { TimelineFirstPortal } from '../seller-portal/timeline-first/TimelineFirstPortal'
 import { BuyerPortal } from '../buyer-portal/BuyerPortal'
+import { mvpBuyerTimeline, mvpBuyerTransaction } from '../buyer-portal/mvpBuyerTransaction'
 import { futureMarketingSnapshot, futureSellerTransaction } from '../seller-portal/futureSellerTransaction'
 import { sampleMarketActivity } from '../seller-portal/market-activity/marketActivityData'
 import { EmailGallery } from './email-gallery/EmailGallery'
@@ -35,7 +36,7 @@ type PrototypePage = {
   number: string
   title: string
   description: string
-  actionLabel: string
+  actionLabel?: string
   icon: ReactNode
   featured?: boolean
   href: string
@@ -44,28 +45,26 @@ type PrototypePage = {
 const prototypePages: PrototypePage[] = [
   {
     number: '01',
-    title: 'Latest seller portal',
+    title: 'Seller portal · MVP',
     description: 'A clear view of the listing, the people supporting it, and what comes next.',
     actionLabel: 'Open seller portal',
     icon: <OtherHousesOutlined />,
     featured: true,
-    href: '/seller/v1-iteration2',
+    href: '/seller',
   },
   {
     number: '02',
     title: 'Component gallery',
     description: 'A minimal, storybook-like view of the design tokens and building blocks behind the portal.',
-    actionLabel: 'Open gallery',
     icon: <AutoStoriesOutlined />,
     href: '/components',
   },
   {
     number: '03',
-    title: 'Latest buyer portal',
-    description: 'A steady guide from signed contract through closing day and move-in.',
-    actionLabel: 'Open buyer portal',
+    title: 'Buyer portal · MVP',
+    description: 'From signed contract to closing day.',
     icon: <HomeOutlined />,
-    href: '/buyer/v1-iteration2',
+    href: '/buyer',
   },
 ]
 
@@ -75,6 +74,7 @@ type PrototypeView = {
 }
 
 const buyerViews: PrototypeView[] = [
+  { label: 'MVP', href: '/buyer' },
   { label: 'Future Vision', href: '/buyer/v1-iteration2' },
 ]
 
@@ -109,7 +109,7 @@ const resources = [
 function App() {
   const currentPath = window.location.pathname.replace(/\/$/, '') || '/'
   if (currentPath === '/team/preview' || currentPath === '/team/preview/listing') {
-    return <ClientPortalPreview buyerPortal={<BuyerPortalPreview />} />
+    return <ClientPortalPreview buyerPortal={<MvpBuyerPortal readOnly />} />
   }
   if (currentPath === '/team' || currentPath.startsWith('/team/')) return <TeamPortal />
   if (currentPath === '/seller') return <SellerPortal transaction={currentSellerTransaction} documentRows listingPerformanceTabs defaultHeader="light-compact" headerPreparation />
@@ -145,7 +145,7 @@ function App() {
   if (currentPath === '/transactions') return <TransactionsIndex />
   if (currentPath === '/profile') return <ClientProfile />
   if (currentPath === '/components') return <ComponentGallery />
-  if (currentPath === '/buyer') return <BuyerPortalPreview />
+  if (currentPath === '/buyer') return <MvpBuyerPortal />
   if (currentPath === '/buyer/v1-iteration2') return <BuyerPortal />
   if (currentPath === '/seller/future-vision') {
     return <UpcomingPage eyebrow="Seller transaction" title="Future Vision" description="A space for the next direction of the seller portal." />
@@ -457,46 +457,9 @@ function UpcomingPage({ eyebrow, title, description }: { eyebrow: string; title:
   )
 }
 
-function BuyerPortalPreview() {
-  return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary' }}>
-      <Box component="header" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Container maxWidth="lg" sx={{ minHeight: 72, display: 'flex', alignItems: 'center' }}>
-          <Box
-            component="a"
-            href="/"
-            sx={{
-              minHeight: 44,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 1.5,
-              color: 'text.primary',
-              textDecoration: 'none',
-              borderRadius: 1,
-              '&:focus-visible': { outline: 'var(--focus-ring)', outlineOffset: 3 },
-            }}
-          >
-            <ArrowBackOutlined aria-hidden="true" sx={{ fontSize: 20 }} />
-            <Typography variant="titleS">PLACE client portal</Typography>
-          </Box>
-        </Container>
-      </Box>
-      <Container component="main" maxWidth="lg" sx={{ py: { xs: 8, md: 13 } }}>
-        <Typography variant="labelS" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-          Buyer transaction
-        </Typography>
-        <Typography component="h1" variant="displayS" sx={{ maxWidth: 700, mt: 2, textWrap: 'balance' }}>
-          Buyer portal
-        </Typography>
-        <Typography variant="bodyMStandard" color="text.secondary" sx={{ maxWidth: 560, mt: 2, textWrap: 'pretty' }}>
-          The buyer prototype is taking shape. This view will bring the path from accepted offer to closing into one clear place.
-        </Typography>
-        <Button component="a" href="/" variant="contained" color="primary" sx={{ mt: 4 }}>
-          Back to sandbox
-        </Button>
-      </Container>
-    </Box>
-  )
+/** MVP buyer portal: the MVP seller page, showing the home being bought. Post-contract only. */
+function MvpBuyerPortal({ readOnly = false }: { readOnly?: boolean }) {
+  return <SellerPortal transaction={mvpBuyerTransaction} timeline={mvpBuyerTimeline} side="buyer" basePath="/buyer" documentRows defaultHeader="light-compact" readOnly={readOnly} showReviewTools={false} />
 }
 
 function DestinationCard({ page }: { page: PrototypePage }) {
@@ -572,7 +535,7 @@ function DestinationCard({ page }: { page: PrototypePage }) {
             >
               <Typography variant="labelM">{page.actionLabel}</Typography>
             </Box>
-          ) : (
+          ) : page.actionLabel && (
             <Typography variant="labelM" sx={{ mt: 1 }}>{page.actionLabel}</Typography>
           )}
         </Stack>

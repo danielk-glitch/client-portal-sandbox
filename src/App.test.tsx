@@ -15,8 +15,8 @@ describe('App', () => {
 
     expect(screen.getByText('Prototype environment')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Component gallery' })).toHaveAttribute('href', '/components')
-    expect(screen.getByRole('link', { name: /latest seller portal/i })).toHaveAttribute('href', '/seller/future-v1')
-    expect(screen.queryByRole('link', { name: 'Future Vision' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /seller portal · MVP/i })).toHaveAttribute('href', '/seller')
+    expect(screen.getByRole('link', { name: /buyer portal · MVP/i })).toHaveAttribute('href', '/buyer')
     expect(screen.getByRole('link', { name: /client portal PRD/i })).toHaveAttribute(
       'href',
       'https://app.clickup.com/8562814/v/dc/85a3y-43077/85a3y-57637',

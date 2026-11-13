@@ -13,6 +13,9 @@
   background: var(--color-semantic-stroke-primary-light);
 }
 
+/* Tabs share the bar's width evenly. */
+.people-tabs .MuiTab-root { flex: 1 1 0; margin-right: 0; }
+
 .people-panel[hidden] { display: none; }
 
 .people-section .portal-person-row { padding-inline: 0; }
