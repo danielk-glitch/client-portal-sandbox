@@ -264,12 +264,11 @@ export function AdvertisingRow({ event, compact = false }: { event: AdvertisingE
       <Stack direction={compact ? 'column' : { xs: 'column', sm: 'row' }} sx={{ flex: 1, minWidth: 0, alignItems: compact ? 'flex-start' : { sm: 'center' }, gap: compact ? 0.75 : { xs: 1, sm: 2 } }}>
         {!compact && <PortalIconBadge><CampaignOutlined /></PortalIconBadge>}
         <Box className="portal-advertising-copy">
-          <Typography variant="bodySStandard">{event.action} on <strong>{event.platform}</strong></Typography>
+          <Typography variant="bodySStandard">{event.action} on <strong>{event.platform}</strong>{event.url && <Box component="span" className="portal-advertising-go" aria-hidden="true"><ArrowOutwardRounded /></Box>}</Typography>
           <Typography variant="labelS" className="portal-advertising-meta">Added by {event.postedBy}{compact && ` · ${shortDate}`}</Typography>
         </Box>
         {!compact && <Typography variant="labelS" color="text.secondary" className="portal-advertising-date">{event.occurredAt}</Typography>}
       </Stack>
-      {event.url && <Box component="span" className="portal-advertising-go" aria-hidden="true"><ArrowOutwardRounded /></Box>}
     </>
   )
   return (

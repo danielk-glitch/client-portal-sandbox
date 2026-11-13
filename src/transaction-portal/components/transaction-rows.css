@@ -256,20 +256,21 @@
   text-decoration: none;
 }
 
-/* Linked rows: the outward arrow sits at the end of the row, hidden below a clipping mask,
+/* Linked rows: the outward arrow follows the title, hidden below a clipping mask,
    and slides up into view on hover or keyboard focus. */
 .portal-advertising-go {
-  width: 20px;
-  height: 20px;
-  flex: 0 0 auto;
-  display: block;
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin-left: var(--space-4);
+  vertical-align: -2px;
   overflow: hidden;
   color: var(--color-semantic-text-lightest);
 }
 .portal-advertising-go svg {
   display: block;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   translate: 0 100%;
   transition: translate 220ms var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1));
 }
