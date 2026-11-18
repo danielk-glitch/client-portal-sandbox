@@ -39,7 +39,8 @@ export function DocumentsPanel({ documents, storageKey, onOpen, readOnly = false
         {cards(pinned)}
       </Box>}
       {remaining.length > 0 && <Box>
-        <Typography component="h3" variant="titleXS" className="document-group-title">{pinned.length ? 'Other documents' : 'All documents'} <Typography component="span" variant="labelS" color="text.secondary">{remaining.length}</Typography></Typography>
+        {/* A heading only earns its place when it separates the list from a pinned group. */}
+        {pinned.length > 0 && <Typography component="h3" variant="titleXS" className="document-group-title">Other documents <Typography component="span" variant="labelS" color="text.secondary">{remaining.length}</Typography></Typography>}
         <PaginatedTabList items={remaining} itemName="documents" ariaLabel="Document pages">{renderRow ? rows : cards}</PaginatedTabList>
       </Box>}
     </Box>

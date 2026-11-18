@@ -18,7 +18,7 @@ import { buyerDeal, happenedBy } from './buyerTimelineData'
 const team: TeamMember[] = [
   { id: 'agent', name: 'Avery Coleman', role: 'Buyer’s agent', initials: 'AC', photoUrl: averyPhoto, phone: '+14065550101', email: 'avery.coleman@example.com' },
   { id: 'transaction', name: 'Morgan Ellis', role: 'Transaction coordinator', initials: 'ME', photoUrl: morganPhoto, phone: '+14065550103', email: 'morgan.ellis@example.com' },
-  { id: 'lender', name: 'Cameron Tate', role: 'Loan officer', initials: 'CT', photoUrl: cameronPhoto, phone: '+14065550107', email: 'cameron.tate@glacierhomeloans.example.com' },
+  { id: 'lender', name: 'Cameron Tate', role: 'Loan officer', initials: 'CT', photoUrl: cameronPhoto, phone: '+14065550107', email: 'cameron.tate@example.com' },
   { id: 'compliance', name: 'Jordan Lee', role: 'Quality & compliance coordinator', initials: 'JL', photoUrl: jordanPhoto, phone: '+14065550102', email: 'jordan.lee@example.com' },
 ]
 
@@ -139,11 +139,11 @@ If something comes up, call me first. It’s almost always fixable when I know a
 
 const avery = { name: 'Avery Coleman', email: 'avery.coleman@example.com' }
 const morgan = { name: 'Morgan Ellis', email: 'morgan.ellis@example.com' }
-const cameron = { name: 'Cameron Tate', email: 'cameron.tate@glacierhomeloans.example.com' }
+const cameron = { name: 'Cameron Tate', email: 'cameron.tate@example.com' }
 const linh = { name: 'Linh Nguyen', email: 'linh.nguyen@example.com' }
 const david = { name: 'David Nguyen', email: 'david.nguyen@example.com' }
-const title = { name: 'Priya Nair', email: 'priya.nair@flatheadtitle.example.com' }
-const inspector = { name: 'Chris Dahl', email: 'chris@bigskyinspect.example.com' }
+const title = { name: 'Priya Nair', email: 'priya.nair@example.com' }
+const inspector = { name: 'Chris Dahl', email: 'chris.dahl@example.com' }
 
 const emails: TransactionEmail[] = [
   { id: 'be-mail-1', threadId: 'b-thread-contract', subject: 'You’re under contract on 128 Meadowbrook Lane', from: avery, to: [linh, david], cc: [morgan], sentAt: '2026-10-02T15:20:00-06:00', body: 'Linh and David,\n\nCongratulations! The seller signed, and you’re officially under contract. Your contract is in your portal.\n\nYour first deadline is earnest money on Monday. Morgan will send the title company’s details. Please call them to confirm wiring instructions before you send anything.\n\nAvery', attachments: [{ id: 'b-att-1', fileName: 'PSA_128_Meadowbrook_executed.pdf', size: '612 KB' }] },

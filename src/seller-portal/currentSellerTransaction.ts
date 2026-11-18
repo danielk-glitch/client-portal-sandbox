@@ -44,11 +44,11 @@ function orderNotes(notes: TeamNote[]) {
 
 /** Outside partners on the sale. They're not on the PLACE team, but the seller may need to reach them. */
 const collaborators: TeamMember[] = [
-  { id: 'escrow', name: 'Priya Natarajan', role: 'Escrow officer · Cascade Title', initials: 'PN', phone: '+14065550141', email: 'priya.natarajan@cascadetitle.example.com' },
-  { id: 'title', name: 'Daniel Okafor', role: 'Title officer · Cascade Title', initials: 'DO', phone: '+14065550142', email: 'daniel.okafor@cascadetitle.example.com' },
-  { id: 'lender', name: 'Hannah Brooks', role: 'Buyer’s lender · Summit Home Loans', initials: 'HB', phone: '+14065550143', email: 'hannah.brooks@summitloans.example.com' },
-  { id: 'attorney', name: 'Marcus Chen', role: 'Real estate attorney', initials: 'MC', phone: '+14065550144', email: 'marcus.chen@chenlaw.example.com' },
-  { id: 'inspector', name: 'Elena Ruiz', role: 'Home inspector · Northline Inspections', initials: 'ER', phone: '+14065550145', email: 'elena.ruiz@northline.example.com' },
+  { id: 'escrow', name: 'Priya Natarajan', role: 'Escrow officer · Cascade Title', initials: 'PN', phone: '+14065550141', email: 'priya.natarajan@example.com' },
+  { id: 'title', name: 'Daniel Okafor', role: 'Title officer · Cascade Title', initials: 'DO', phone: '+14065550142', email: 'daniel.okafor@example.com' },
+  { id: 'lender', name: 'Hannah Brooks', role: 'Buyer’s lender · Summit Home Loans', initials: 'HB', phone: '+14065550143', email: 'hannah.brooks@example.com' },
+  { id: 'attorney', name: 'Marcus Chen', role: 'Real estate attorney', initials: 'MC', phone: '+14065550144', email: 'marcus.chen@example.com' },
+  { id: 'inspector', name: 'Elena Ruiz', role: 'Home inspector · Northline Inspections', initials: 'ER', phone: '+14065550145', email: 'elena.ruiz@example.com' },
 ]
 
 const viewerContacts: Record<string, { phone: string; email: string }> = {

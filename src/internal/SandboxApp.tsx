@@ -32,6 +32,9 @@ import { teamViews } from '../team-portal/teamData'
 import { TransactionsIndex } from '../client-account/TransactionsIndex'
 import { ClientProfile } from '../client-account/ClientProfile'
 
+/** Shown on the home page so collaborators can see how fresh the design is. Update on every push (see AGENTS.md). */
+const lastUpdated = 'November 18, 2026'
+
 type PrototypePage = {
   number: string
   title: string
@@ -228,6 +231,9 @@ function SandboxGallery() {
               Explore early ideas for the PLACE client portal. This is a working space for designers
               to shape a clearer, more considered transaction experience. Start from the quick links
               below in the "latest pages" section, or access all views via the "Portal Views" section.
+            </Typography>
+            <Typography variant="labelS" color="text.secondary">
+              Last updated {lastUpdated}
             </Typography>
           </Stack>
         </Box>

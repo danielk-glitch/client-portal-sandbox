@@ -22,6 +22,8 @@ type SellerReviewToolsProps = {
   journeyView: SellerJourneyView
   selectJourneyView: (view: SellerJourneyView) => void
   beforeListing: boolean
+  branding: 'team' | 'solo'
+  selectBranding: (value: 'team' | 'solo') => void
   visualTheme?: 'polestar'
   marketingSnapshot?: MarketingSnapshotData
   /** Shown only on the current-functionality page. */
@@ -40,7 +42,7 @@ type SellerReviewToolsProps = {
   selectMarketScenario?: (scenario: MarketActivityScenario) => void
 }
 
-export function SellerReviewTools({ containerStyle, selectContainerStyle, timelineTransition, selectTimelineTransition, journeyView, selectJourneyView, beforeListing, visualTheme, marketingSnapshot, overviewLayout, selectOverviewLayout, listingLink, selectListingLink, headerVariant, selectHeaderVariant, marketingLayout, selectMarketingLayout, feedbackLayout, selectFeedbackLayout, marketScenario, selectMarketScenario }: SellerReviewToolsProps) {
+export function SellerReviewTools({ containerStyle, selectContainerStyle, timelineTransition, selectTimelineTransition, journeyView, selectJourneyView, beforeListing, branding, selectBranding, visualTheme, marketingSnapshot, overviewLayout, selectOverviewLayout, listingLink, selectListingLink, headerVariant, selectHeaderVariant, marketingLayout, selectMarketingLayout, feedbackLayout, selectFeedbackLayout, marketScenario, selectMarketScenario }: SellerReviewToolsProps) {
   const [viewMenuAnchor, setViewMenuAnchor] = useState<HTMLElement | null>(null)
   const [designPanelAnchor, setDesignPanelAnchor] = useState<HTMLElement | null>(null)
   return (
@@ -82,6 +84,13 @@ export function SellerReviewTools({ containerStyle, selectContainerStyle, timeli
           </IconButton>
         </Box>
         <Box className="design-panel-content">
+          <Box className="design-panel-option-section">
+            <Typography component="h3" variant="titleXS" id="branding-label">Agent branding</Typography>
+            <RadioGroup aria-labelledby="branding-label" value={branding} onChange={(event) => selectBranding(event.target.value as 'team' | 'solo')}>
+              <FormControlLabel value="team" control={<Radio />} label="Team and brokerage logos" />
+              <FormControlLabel value="solo" control={<Radio />} label="Solo agent · Brokerage logo only" />
+            </RadioGroup>
+          </Box>
           {containerStyle && selectContainerStyle && (
             <Box className="design-panel-option-section">
               <Typography component="h3" variant="titleXS" id="container-style-label">Containers</Typography>
@@ -109,7 +118,7 @@ export function SellerReviewTools({ containerStyle, selectContainerStyle, timeli
               </RadioGroup>
             </Box>
           )}
-          {beforeListing && <Typography variant="bodySStandard" color="text.secondary">Before listing uses the compact header with team and brokerage logos. Switch to Pending to compare listing layouts.</Typography>}
+          {beforeListing && <Typography variant="bodySStandard" color="text.secondary">Before listing uses the compact header with the agent's logos. Switch to Pending to compare listing layouts.</Typography>}
           {!beforeListing && <Box className="design-panel-option-section">
             <Typography component="h3" variant="titleXS" id="header-listing-link-label">Header listing link</Typography>
             <RadioGroup aria-labelledby="header-listing-link-label" value={listingLink} onChange={(event) => selectListingLink(event.target.value as HeaderListingLink)}>

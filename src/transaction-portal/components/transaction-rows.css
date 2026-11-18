@@ -213,7 +213,9 @@
   font-variant-numeric: tabular-nums;
 }
 
-.portal-task-row { padding: var(--space-20) 0; }
+/* Tab rows share one rhythm: --padding-row-block above and below, a titleXS title, a bodyS description,
+   and a labelS meta line (who and when) in text-light. */
+.portal-task-row { padding: var(--padding-row-block) 0; }
 .portal-task-row:first-child { padding-top: 0; }
 .portal-task-row:last-child { padding-bottom: 0; }
 
@@ -228,20 +230,18 @@
 .portal-task-description.MuiTypography-root {
   display: block;
   max-width: 70ch;
-  margin-top: 5px;
+  margin-top: var(--space-6);
+  color: var(--color-semantic-text-primary);
 }
 
-.portal-task-assignee.MuiTypography-root { display: block; margin-top: var(--space-16); }
+.portal-task-assignee.MuiTypography-root { display: block; margin-top: var(--space-12); color: var(--color-semantic-text-light); }
 
 .portal-task-due.place-tag {
   align-self: flex-start;
   margin-left: auto;
 }
 
-.portal-advertising-row {
-  min-height: 68px;
-  padding: var(--space-16) 0;
-}
+.portal-advertising-row { padding: var(--padding-row-block) 0; }
 
 .portal-advertising-main,
 .portal-advertising-main.MuiButtonBase-root {
@@ -291,18 +291,18 @@
 .portal-advertising-copy { flex: 1; min-width: 0; display: grid; gap: var(--space-6); }
 .portal-advertising-copy .MuiTypography-root { display: block; }
 .portal-advertising-meta.MuiTypography-root { color: var(--color-semantic-text-light); }
-.portal-advertising-copy strong {
-  font-weight: 500;
-  color: var(--color-semantic-text-dark);
-}
+.portal-advertising-copy strong { font-weight: inherit; }
 
 .portal-advertising-date.MuiTypography-root {
-  min-width: 170px;
+  min-width: 140px;
+  color: var(--color-semantic-text-light);
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-.portal-feedback-row { padding: 19px 0; }
+.portal-feedback-row { padding: var(--padding-row-block) 0; }
+.portal-feedback-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-8) var(--space-16); }
+.portal-feedback-date.MuiTypography-root { display: block; margin-top: var(--space-12); color: var(--color-semantic-text-light); font-variant-numeric: tabular-nums; }
 .portal-feedback-row:first-child { padding-top: 0; }
 .portal-feedback-row:last-child { padding-bottom: 0; }
 
@@ -310,15 +310,15 @@
 .portal-tabular-numbers.MuiTypography-root { font-variant-numeric: tabular-nums; }
 
 .portal-feedback-quote.MuiTypography-root {
-  margin-top: 11px;
-  max-width: 75ch;
+  margin-top: var(--space-6);
+  max-width: 70ch;
   color: var(--color-semantic-text-primary);
   text-wrap: pretty;
 }
 
 .portal-document-row {
   min-height: 76px;
-  padding: var(--space-24) 0;
+  padding: var(--padding-row-block) 0;
 }
 
 .portal-document-row:first-child { padding-top: 0; }

@@ -117,13 +117,21 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
   const timelineLayout = layout === 'timeline' || layout === 'timeline-columns'
   const columnsLayout = layout === 'timeline-columns'
   const [journeyView, setJourneyView] = useState(() => readSellerJourneyView(window.location.search))
+  /** `?branding=solo` previews a solo agent: no team logo, only the brokerage's. */
+  const [branding, setBranding] = useState<'team' | 'solo'>(() =>
+    new URLSearchParams(window.location.search).get('branding') === 'solo' ? 'solo' : 'team',
+  )
   const beforeListing = journeyView === 'before-listing'
   const listed = journeyView === 'listed'
   const transaction = useMemo(() => {
-    const journeyTransaction = beforeListing ? createBeforeListingTransaction(baseTransaction) : listed ? createListedTransaction(baseTransaction) : baseTransaction
+    const stageTransaction = beforeListing ? createBeforeListingTransaction(baseTransaction) : listed ? createListedTransaction(baseTransaction) : baseTransaction
+    const { brokerage } = stageTransaction.teamBrand
+    const journeyTransaction = branding === 'solo' && brokerage
+      ? { ...stageTransaction, teamBrand: { ...stageTransaction.teamBrand, name: brokerage.name, logoUrl: brokerage.logoUrl, brokerage: undefined } }
+      : stageTransaction
     // V1 data: on the timeline pages resources are documents (type "resource"), not their own list.
     return timelineLayout ? { ...journeyTransaction, listing: { ...journeyTransaction.listing, status: journeyTransaction.listing.status === 'Under contract' ? 'Pending' : journeyTransaction.listing.status }, documents: timelineDocuments(journeyTransaction, beforeListing), resources: undefined } : journeyTransaction
-  }, [beforeListing, listed, baseTransaction, timelineLayout])
+  }, [beforeListing, listed, baseTransaction, timelineLayout, branding])
   const showListingTabs = listingPerformanceTabs && !beforeListing
   const availableTabs = portalTabs.filter((tab) => {
     if (tab.id === 'feedback' || tab.id === 'advertising') return showListingTabs
@@ -297,6 +305,14 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
     const url = new URL(window.location.href)
     if (value === 'light-bottom') url.searchParams.delete('header')
     else url.searchParams.set('header', value)
+    window.history.replaceState(null, '', url)
+  }
+
+  function selectBranding(value: 'team' | 'solo') {
+    setBranding(value)
+    const url = new URL(window.location.href)
+    if (value === 'team') url.searchParams.delete('branding')
+    else url.searchParams.set('branding', value)
     window.history.replaceState(null, '', url)
   }
 
@@ -492,7 +508,8 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
 
   return (
     <Box className={`seller-portal${visualTheme === 'polestar' ? ' seller-portal--polestar' : ''}`} ref={portalRef}>
-      <PortalTopbar viewer={transaction.viewers[0]} />
+      {/* The compact header drops its logos; they sit in the top bar instead. */}
+      <PortalTopbar viewer={transaction.viewers[0]} brand={!beforeListing && headerVariant === 'light-compact' ? transaction.teamBrand : undefined} />
 
       {columnsLayout ? (
         <Container maxWidth="xl" className={`portal-main portal-main--columns portal-main--containers-${containerStyle}`}>
@@ -600,6 +617,8 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
         journeyView={journeyView}
         selectJourneyView={selectJourneyView}
         beforeListing={beforeListing}
+        branding={branding}
+        selectBranding={selectBranding}
         visualTheme={visualTheme}
         marketingSnapshot={marketingSnapshot}
         overviewLayout={timelineLayout || columnsLayout ? undefined : overviewLayout}
@@ -771,7 +790,7 @@ function OverviewDates({ today, dates, resources, onReadGuide }: { today: string
   )
 }
 
-/** Every date in order as one connected timeline. Past dates are struck through. When it opens, the list scrolls to the first date that is today or later; earlier dates are above it. */
+/** Every date in order as one connected timeline. Past dates are struck through and lighter; the next date gets an "Up next" tag and a darker bubble. When it opens, the list scrolls to the first date that is today or later; earlier dates are above it. */
 function AllDatesList({ today, dates, resources, onReadGuide }: { today: string; dates: UpcomingDate[]; resources?: TransactionResource[]; onReadGuide: (resourceId: string) => void }) {
   const firstUpcoming = dates.find(item => item.date >= today)
   const firstUpcomingDate = firstUpcoming?.date
@@ -787,7 +806,8 @@ function AllDatesList({ today, dates, resources, onReadGuide }: { today: string;
       <DateEventList>
         {dates.map((item) => {
           const attached = (item.guidance?.resourceIds ?? []).map(id => resources?.find(resource => resource.id === id)).filter((resource): resource is TransactionResource => !!resource)
-          return <DateEventRow key={item.id} today={today} date={item.date} title={item.title} past={item.date < today} resources={attached} onReadResource={resource => onReadGuide(resource.id)} guidance={item.guidance} />
+          const next = item.id === firstUpcoming?.id
+          return <DateEventRow key={item.id} today={today} date={item.date} title={item.title} past={item.date < today} featured={next} titleAdornment={next ? <PlaceTag>Up next</PlaceTag> : undefined} resources={attached} onReadResource={resource => onReadGuide(resource.id)} guidance={item.guidance} />
         })}
       </DateEventList>
     </Box>

@@ -721,9 +721,8 @@
 .tf-sticky-agent-copy { display: grid; gap: 1px; margin-right: var(--space-4); }
 .tf-sticky-agent .portal-person-actions { gap: 0; }
 .tf-sticky-divider { width: 1px; height: 28px; margin-inline: var(--space-8); background: var(--color-semantic-stroke-primary-light); }
-.tf-sticky-brand .partner-brand-lockup { --partner-team-width: 92px; --partner-brokerage-width: 72px; gap: var(--space-12); }
+.tf-sticky-brand .partner-brand-lockup { --partner-team-width: 92px; --partner-brokerage-width: 72px; }
 .tf-sticky-brand .partner-brand-lockup img { max-height: 32px; }
-.tf-sticky-brand .partner-brand-divider { height: 22px; }
 
 @media (max-width: 1099.95px) {
   .tf-sticky-agent-copy, .tf-sticky-divider, .tf-sticky-brand { display: none; }

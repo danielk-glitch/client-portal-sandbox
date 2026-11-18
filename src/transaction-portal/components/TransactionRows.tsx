@@ -19,6 +19,7 @@ import type {
 import { PortalIconBadge } from '../../components/PortalIconBadge'
 import { MilestoneExplanation } from './MilestoneExplanation'
 import { InterestRating } from './FeedbackQuote'
+import { formatRowDate } from '../dates'
 import './transaction-rows.css'
 
 type Person = Pick<TeamMember, 'name' | 'role' | 'initials' | 'photoUrl'>
@@ -247,7 +248,7 @@ export function TaskRow({ task }: { task: TransactionTask }) {
         <PlaceTag className="portal-task-due">{`Due ${task.dueDate}`}</PlaceTag>
       </Box>
       <Typography variant="bodySStandard" color="text.secondary" className="portal-task-description">{task.description}</Typography>
-      <Typography variant="labelS" color="text.secondary" className="portal-task-assignee">Assigned to {task.assignee}</Typography>
+      <Typography variant="labelS" className="portal-task-assignee">Assigned to {task.assignee}</Typography>
     </Box>
   )
 }
@@ -264,10 +265,10 @@ export function AdvertisingRow({ event, compact = false }: { event: AdvertisingE
       <Stack direction={compact ? 'column' : { xs: 'column', sm: 'row' }} sx={{ flex: 1, minWidth: 0, alignItems: compact ? 'flex-start' : { sm: 'center' }, gap: compact ? 0.75 : { xs: 1, sm: 2 } }}>
         {!compact && <PortalIconBadge><CampaignOutlined /></PortalIconBadge>}
         <Box className="portal-advertising-copy">
-          <Typography variant="bodySStandard">{event.action} on <strong>{event.platform}</strong>{event.url && <Box component="span" className="portal-advertising-go" aria-hidden="true"><ArrowOutwardRounded /></Box>}</Typography>
+          <Typography variant={compact ? 'bodySStandard' : 'titleXS'}>{event.action} on <strong>{event.platform}</strong>{event.url && <Box component="span" className="portal-advertising-go" aria-hidden="true"><ArrowOutwardRounded /></Box>}</Typography>
           <Typography variant="labelS" className="portal-advertising-meta">Added by {event.postedBy}{compact && ` · ${shortDate}`}</Typography>
         </Box>
-        {!compact && <Typography variant="labelS" color="text.secondary" className="portal-advertising-date">{event.occurredAt}</Typography>}
+        {!compact && <Typography variant="labelS" className="portal-advertising-date">{formatRowDate(event.occurredAt)}</Typography>}
       </Stack>
     </>
   )
@@ -280,20 +281,16 @@ export function AdvertisingRow({ event, compact = false }: { event: AdvertisingE
   )
 }
 
+/** One showing's feedback, laid out like the other tab rows: title and rating, the quote, then the date as the meta line. */
 export function ShowingFeedbackRow({ feedback }: { feedback: ShowingFeedback }) {
   return (
     <Box component="li" className="portal-feedback-row">
-      <Stack direction={{ xs: 'column', sm: 'row' }} sx={{ justifyContent: 'space-between', alignItems: { sm: 'center' }, gap: 1 }}>
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-          <Typography variant="labelM" className="portal-tabular-numbers">{feedback.date}</Typography>
-          <Typography className="portal-metadata-separator">·</Typography>
-          <Typography variant="bodySStandard" color="text.secondary">{feedback.showingType}</Typography>
-        </Stack>
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }} className="portal-feedback-interest">
-          <InterestRating value={feedback.interest} />
-        </Stack>
-      </Stack>
+      <Box className="portal-feedback-heading">
+        <Typography variant="titleXS">{feedback.showingType}</Typography>
+        <Box className="portal-feedback-interest"><InterestRating value={feedback.interest} /></Box>
+      </Box>
       <Typography variant="bodySStandard" className="portal-feedback-quote">“{feedback.feedback}”</Typography>
+      <Typography variant="labelS" className="portal-feedback-date">{formatRowDate(feedback.date)}</Typography>
     </Box>
   )
 }

@@ -18,8 +18,8 @@ const { transaction } = buyerTransactionAt(today)
 
 /** Outside partners on the purchase. Not on the team, but the buyer may need to reach them. */
 const collaborators: TeamMember[] = [
-  { id: 'title', name: 'Priya Nair', role: 'Escrow officer · Flathead Title', initials: 'PN', phone: '+14065550151', email: 'priya.nair@flatheadtitle.example.com' },
-  { id: 'inspector', name: 'Chris Dahl', role: 'Home inspector · Big Sky Inspections', initials: 'CD', phone: '+14065550152', email: 'chris@bigskyinspect.example.com' },
+  { id: 'title', name: 'Priya Nair', role: 'Escrow officer · Flathead Title', initials: 'PN', phone: '+14065550151', email: 'priya.nair@example.com' },
+  { id: 'inspector', name: 'Chris Dahl', role: 'Home inspector · Big Sky Inspections', initials: 'CD', phone: '+14065550152', email: 'chris.dahl@example.com' },
 ]
 
 /** ISO day to the MM/DD/YYYY the task rows expect. */

@@ -10,7 +10,7 @@ export type PartnerBrand = {
   }
 }
 
-/** The agent team's logo, plus the brokerage logo after a hairline when there is one. Used wherever the partner is credited:
+/** The agent team's logo, plus the brokerage logo beside it when there is one (spacing alone separates them, no divider). Used wherever the partner is credited:
  * portal header and footer, agent cards, listing details, and emails. Width is set per placement with
  * `--partner-team-width` and `--partner-brokerage-width`. */
 export function PartnerBrandLockup({ brand }: { brand: PartnerBrand }) {
@@ -18,10 +18,7 @@ export function PartnerBrandLockup({ brand }: { brand: PartnerBrand }) {
     <Box className="partner-brand-lockup">
       <Box component="img" src={brand.logoUrl} alt={brand.name} className="partner-brand-team" />
       {brand.brokerage && (
-        <>
-          <Box component="span" className="partner-brand-divider" aria-hidden="true" />
-          <Box component="img" src={brand.brokerage.logoUrl} alt={brand.brokerage.name} className="partner-brand-brokerage" />
-        </>
+        <Box component="img" src={brand.brokerage.logoUrl} alt={brand.brokerage.name} className="partner-brand-brokerage" />
       )}
     </Box>
   )

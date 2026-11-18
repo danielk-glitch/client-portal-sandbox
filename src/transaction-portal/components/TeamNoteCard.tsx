@@ -84,7 +84,7 @@ function WrittenNoteCard({ note }: { note: TeamNote }) {
           <div className="team-note-card-when">
             {note.starredAt && <StarRounded className="team-note-card-star" titleAccess="Important" />}
             <Typography variant="labelS" color="text.secondary" className="team-note-card-time">
-              {note.createdAt}
+              {formatRowDate(note.createdAt)}
             </Typography>
           </div>
         </div>

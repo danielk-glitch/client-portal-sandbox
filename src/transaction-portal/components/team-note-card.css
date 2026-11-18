@@ -39,9 +39,10 @@
   color: var(--color-semantic-text-dark);
 }
 
-.team-note-card-time.MuiTypography-root {
-  font-variant-numeric: tabular-nums;
-}
+/* Meta (who and when) in text-light, matching the tab rows. */
+.team-note-card-author .MuiTypography-root,
+.team-note-card-time.MuiTypography-root { color: var(--color-semantic-text-light); }
+.team-note-card-time.MuiTypography-root { font-variant-numeric: tabular-nums; }
 
 .team-note-card-divider.MuiDivider-root {
   margin-block: var(--space-16) var(--space-20);

@@ -48,7 +48,7 @@ describe('Seller journey views', () => {
     expect(screen.getByRole('heading', { name: 'Before your home goes live' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Review your tasks' })).not.toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Listing performance' })).not.toBeInTheDocument()
-    expect(screen.getByText('Not published')).toBeInTheDocument()
+    expect(screen.queryByText('Not published')).not.toBeInTheDocument()
     expect(screen.getAllByText(/^We’re aiming to launch on September 1\./).length).toBeGreaterThan(0)
     expect(screen.queryByText(/^Closing is scheduled for November 6\./)).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Copy link' })).not.toBeInTheDocument()

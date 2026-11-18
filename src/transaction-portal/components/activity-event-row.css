@@ -40,9 +40,13 @@
   gap: var(--space-8) var(--space-16);
 }
 
-.activity-event-actor.MuiTypography-root {
-  color: var(--color-semantic-text-primary);
+/* Same rhythm as the other tab rows: description in text-primary, a 12px step to the meta line, meta in text-light. */
+.activity-event-copy > .MuiTypography-bodySStandard { color: var(--color-semantic-text-primary); }
+.activity-event-actor.MuiTypography-root,
+.activity-event-date.MuiTypography-root {
+  color: var(--color-semantic-text-light);
 }
+.activity-event-row--standard .activity-event-actor.MuiTypography-root { margin-top: var(--space-6); }
 
 .activity-event-date.MuiTypography-root {
   max-width: 140px;

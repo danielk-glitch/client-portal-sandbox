@@ -545,8 +545,8 @@ export function StickyTransactionHeader({ visible, transaction, onOpenListing, a
     <Box component="header" className={`tf-sticky${visible ? ' is-visible' : ''}`} aria-hidden={!visible} inert={!visible}>
       <Container maxWidth="xl" className="tf-sticky-inner">
         <Box className="tf-sticky-lead">
-          <ButtonBase component="a" href="/" className="tf-sticky-back" aria-label="Back to the PLACE client portal home" disableRipple>
-            <Typography variant="labelM" component="span">Client portal</Typography>
+          <ButtonBase component="a" href="/" className="tf-sticky-back" aria-label="Back to the Client Portal home" disableRipple>
+            <Typography variant="labelM" component="span">Client Portal</Typography>
           </ButtonBase>
           <Box className="tf-sticky-back-divider" aria-hidden="true" />
         <ButtonBase className="tf-sticky-home" onClick={onOpenListing} aria-label={`See listing for ${listing.address}`} disableRipple>

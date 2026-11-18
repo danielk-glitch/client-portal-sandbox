@@ -12,6 +12,27 @@
   justify-content: space-between;
 }
 
+.portal-topbar-lead {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+}
+
+.portal-topbar-divider {
+  width: 1px;
+  height: 28px;
+  flex: 0 0 auto;
+  background: var(--color-semantic-stroke-primary-light);
+}
+
+.portal-topbar .partner-brand-lockup {
+  --partner-team-width: 92px;
+  --partner-brokerage-width: 76px;
+}
+
+.portal-topbar .partner-brand-lockup img { max-height: 36px; }
+
 .portal-brand-link {
   min-height: 44px;
   margin-left: calc(var(--space-8) * -1);
@@ -57,18 +78,6 @@
   .portal-account-link { transition: none; }
 }
 
-.place-wordmark {
-  width: auto;
-  height: 20px;
-  display: block;
-}
-
-.topbar-divider {
-  width: 1px;
-  height: 20px;
-  background: var(--color-semantic-stroke-primary-light);
-}
-
 .account-avatar.MuiAvatar-root {
   width: 36px;
   height: 36px;
@@ -90,9 +99,10 @@
 }
 
 @media (max-width: 599.95px) {
-  .portal-brand-link .topbar-divider,
-  .portal-brand-label.MuiTypography-root {
-    display: none;
+  .portal-topbar-lead { gap: var(--space-12); }
+  .portal-topbar .partner-brand-lockup {
+    --partner-team-width: 72px;
+    --partner-brokerage-width: 60px;
   }
 }
 

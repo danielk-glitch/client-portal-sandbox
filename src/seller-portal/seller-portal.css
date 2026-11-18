@@ -497,13 +497,6 @@
   color: var(--color-semantic-text-on-color-light);
 }
 
-/* On the dark full-bleed overview the quiet tag keeps its outline but drops the white fill. */
-.listing-overview--full .published-chip.place-tag {
-  color: var(--color-semantic-text-on-color-primary);
-  background: transparent;
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-semantic-text-on-color-primary) 34%, transparent);
-}
-
 .listing-overview--full .listing-detail-link--full.MuiButton-root {
   align-self: flex-start;
   margin-top: var(--space-24);
@@ -593,9 +586,6 @@
   }
 }
 
-.listing-overview--full .partner-brand-divider {
-  background: var(--color-primitive-neutral-200);
-}
 
 
 /* design-build · self-critique: Clarity5 Warmth4 Restraint5 Craft4 Variety5 SlopFree5 */
@@ -892,6 +882,10 @@
 /* Light split · Compact: a shorter light header. The photo is as tall as the text column plus its padding, so it reads as
    only a little taller than the text. Logos sit where the agent's contact buttons would be. */
 .listing-overview--light-compact.MuiPaper-root {
+  /* Same color as the page, so it stays in the page column: its text lines up with the top bar at any scrollbar width. */
+  width: auto;
+  margin-left: 0;
+  padding-inline: 0;
   min-height: 0;
   padding-block: var(--space-32);
   /* The text column is at most half the row; the photo sits at the far edge. */
@@ -899,20 +893,28 @@
   justify-content: space-between;
   align-items: center;
 }
-.listing-overview--light-compact .listing-summary { padding-block: var(--space-20); justify-content: center; }
+/* Text starts on the page edge, in line with "Client Portal" in the top bar. */
+.listing-overview--light-compact .listing-summary { padding: var(--space-20) var(--space-32) var(--space-20) 0; justify-content: center; }
 .listing-overview--light-compact .listing-summary-header { margin-top: 0; }
 .listing-overview--light-compact .listing-photo { align-self: stretch; height: auto; }
 .listing-overview--light-compact .listing-image { position: absolute; inset: 0; }
-.listing-overview--light-compact .listing-agent-feature-info--inline .partner-brand-lockup {
-  --partner-team-width: 104px;
-  --partner-brokerage-width: 88px;
-  justify-self: end;
+.listing-overview--light-compact .listing-agent-feature-info--inline { gap: var(--space-24); }
+.listing-overview--light-compact .listing-agent-feature-info--inline .listing-agent-feature-contacts {
+  margin-top: 0;
+  grid-template-columns: auto auto;
+  gap: var(--space-24);
 }
 .listing-overview--light-compact .listing-light-agent { margin-top: var(--space-24); padding-top: var(--space-20); }
 
 @media (max-width: 1099.95px) {
   .listing-overview--light-compact .listing-photo { height: clamp(200px, 30vw, 280px); }
-  .listing-overview--light-compact .listing-summary { padding: var(--space-24) var(--space-8) 0; }
+  .listing-overview--light-compact .listing-summary { max-width: none; padding: var(--space-24) 0 0; }
+}
+
+/* Narrow: phone and email drop below the agent instead of squeezing beside them. */
+@media (max-width: 699.95px) {
+  .listing-overview--light-compact .listing-agent-feature-info--inline { grid-template-columns: minmax(0, 1fr); gap: var(--space-16); }
+  .listing-overview--light-compact .listing-agent-feature-info--inline .listing-agent-feature-contacts { grid-template-columns: minmax(0, 1fr); gap: var(--space-12); }
 }
 
 /* Compact header (timeline exploration): shorter photo, tighter padding, no brand lockups. */

@@ -206,9 +206,8 @@
 
 .tf-pass-agent { display: flex; align-items: center; gap: var(--space-12); min-width: 0; }
 .tf-pass-agent .portal-person-actions { gap: 0; }
-.tf-pass-brand .partner-brand-lockup { --partner-team-width: 84px; --partner-brokerage-width: 66px; gap: var(--space-8); }
+.tf-pass-brand .partner-brand-lockup { --partner-team-width: 84px; --partner-brokerage-width: 66px; gap: var(--space-16); }
 .tf-pass-brand .partner-brand-lockup img { max-height: 28px; }
-.tf-pass-brand .partner-brand-divider { height: 20px; }
 
 .tf-hero-pass-copy { display: grid; gap: var(--space-16); align-content: center; animation: tf-hero-rise 900ms var(--hero-ease) both 200ms; }
 .tf-hero-pass-copy h1 { margin: 0; color: var(--hero-ink); }
@@ -353,10 +352,7 @@
   border-bottom: 0;
   background: transparent;
 }
-.tf-portal:has(.tf-hero-cine--immersive) .portal-topbar .place-wordmark { filter: brightness(0) invert(1); }
-.tf-portal:has(.tf-hero-cine--immersive) .portal-topbar .topbar-divider { background: oklch(1 0 0 / 0.35); }
 .tf-portal:has(.tf-hero-cine--immersive) .portal-topbar .MuiTypography-root { color: var(--hero-ink, #fff); }
-.tf-portal:has(.tf-hero-cine--immersive) .portal-topbar .portal-brand-label.MuiTypography-root,
 .tf-portal:has(.tf-hero-cine--immersive) .portal-topbar .account-name .MuiTypography-labelS { color: oklch(1 0 0 / 0.76); }
 .tf-portal:has(.tf-hero-cine--immersive) .portal-topbar .portal-brand-link:hover { background: oklch(1 0 0 / 0.14); }
 .tf-portal:has(.tf-hero-cine--immersive) .portal-topbar .account-avatar.MuiAvatar-root { color: #fff; background: oklch(1 0 0 / 0.2); }

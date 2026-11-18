@@ -4,6 +4,10 @@
 
 Unless the user specifies otherwise, assume they are a product designer with little to no technical expertise. Explain work in terms of the experience and visible result, use plain language, and explain implementation choices to the user using simple, easy to understand language.
 
+## Last updated date
+
+Before every push, set `lastUpdated` at the top of `src/internal/SandboxApp.tsx` to that day's date (for example, `November 16, 2026`). It shows on the home page so collaborators can see how recent the design is.
+
 ## Product context
 
 This repo explores the first product in the PLACE consumer family: a real estate transaction client portal. The broader family will include nationwide home search, a homeownership portal, and a native homeowner app. Design decisions should support a coherent system across those products.

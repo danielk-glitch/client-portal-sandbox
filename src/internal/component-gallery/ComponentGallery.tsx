@@ -953,7 +953,7 @@ function AgentIdentitySection() {
 function BrandLockupSection() {
   return (
     <Section id="brand-lockup" title="Brand lockup"
-      description="The partner's team logo, then the brokerage logo after a hairline when there is one. Use it wherever the partner is credited: portal header and footer, agent cards, listing details, and emails. Set the logo widths per placement with --partner-team-width and --partner-brokerage-width rather than restyling the images."
+      description="The partner's team logo, then the brokerage logo 24px to its right when there is one. Spacing alone separates them; there is no divider line. Use it wherever the partner is credited: portal header and footer, agent cards, listing details, and emails. Set the logo widths per placement with --partner-team-width and --partner-brokerage-width rather than restyling the images."
       source="PartnerBrandLockup · src/components/PartnerBrandLockup.tsx · src/components/partner-brand-lockup.css">
       <SpecimenList>
         <Specimen label="Team and brokerage"><PartnerBrandLockup brand={sampleSellerTransaction.teamBrand} /></Specimen>

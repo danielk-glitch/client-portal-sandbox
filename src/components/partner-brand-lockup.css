@@ -1,7 +1,7 @@
 .partner-brand-lockup {
   display: flex;
   align-items: center;
-  gap: var(--space-12);
+  gap: var(--space-24);
   min-width: 0;
 }
 
@@ -20,11 +20,4 @@
 .partner-brand-brokerage {
   width: var(--partner-brokerage-width, 100px);
   max-height: 56px;
-}
-
-.partner-brand-divider {
-  width: 1px;
-  height: 32px;
-  flex: 0 0 auto;
-  background: var(--color-semantic-stroke-primary-light);
 }

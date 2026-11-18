@@ -7,8 +7,8 @@ const jordan = { name: 'Jordan Lee', email: 'jordan.lee@example.com' }
 const tim = { name: 'Tim Bennett', email: 'tim.bennett@example.com' }
 const alex = { name: 'Alex Bennett', email: 'alex.bennett@example.com' }
 const buyerAgent = { name: 'Sam Rivera', email: 'sam.rivera@northforkrealty.example.com' }
-const title = { name: 'Priya Nair', email: 'priya.nair@flatheadtitle.example.com' }
-const inspector = { name: 'Chris Dahl', email: 'chris@bigskyinspect.example.com' }
+const title = { name: 'Priya Nair', email: 'priya.nair@example.com' }
+const inspector = { name: 'Chris Dahl', email: 'chris.dahl@example.com' }
 
 export const sampleTransactionEmails: TransactionEmail[] = [
   {

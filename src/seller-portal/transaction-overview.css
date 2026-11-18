@@ -9,12 +9,23 @@
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
   gap: var(--space-48);
-  padding: var(--space-8) var(--padding-card) var(--space-48);
+  /* No side padding: dates and notes line up with the hero and the top bar. */
+  padding: var(--space-8) 0 var(--space-48);
 }
 .transaction-overview-dates,
 .transaction-overview-notes { min-width: 0; }
 .transaction-overview-notes .portal-section-content { padding-top: var(--space-16); }
 .transaction-overview .section-label { margin-bottom: var(--space-16); }
+/* Sentence case here: the timeline steps and date stamps keep the page's only uppercase. */
+.transaction-overview .section-label-text.MuiTypography-root {
+  font: var(--type-title-xs);
+  letter-spacing: var(--type-title-xs-tracking);
+  text-transform: none;
+}
+.transaction-overview .seller-timeline-eyebrow.MuiTypography-root {
+  letter-spacing: var(--type-label-s-tracking);
+  text-transform: none;
+}
 
 /* Next date: one elevated card, never a button. A small "Up next" eyebrow right above the title, the standard outlined bubble, a larger title,
    and how far away it is on the right of the title. */
@@ -24,8 +35,6 @@
   gap: var(--space-8);
   margin: 0 0 var(--space-4);
   color: var(--color-semantic-text-primary);
-  letter-spacing: var(--tracking-uppercase);
-  text-transform: uppercase;
 }
 .overview-next-eyebrow.MuiTypography-root::before {
   width: 6px;
@@ -96,4 +105,9 @@
 .all-dates-timeline .portal-date-stamp { position: relative; z-index: 1; }
 .all-dates-timeline .portal-date-title .MuiTypography-root { font-size: 1.0625rem; }
 .all-dates-timeline .portal-date-row--past::before { background: var(--color-semantic-stroke-primary-light); }
-.all-dates-timeline .portal-date-row--past .portal-date-stamp { color: var(--color-semantic-text-light); }
+/* Past: the bubble and title fade back so the dates still to come stand out. */
+.all-dates-timeline .portal-date-row--past .portal-date-stamp { box-shadow: inset 0 0 0 1px var(--color-semantic-stroke-primary-lightest); }
+.all-dates-timeline .portal-date-row--past .portal-date-stamp .MuiTypography-root,
+.all-dates-timeline .portal-date-row--past .portal-date-title .MuiTypography-root { color: var(--color-semantic-text-lightest); }
+/* Next: a darker bubble ring and an "Up next" tag beside the title. */
+.all-dates-timeline .portal-date-row--featured .portal-date-stamp { box-shadow: inset 0 0 0 1.5px var(--color-semantic-text-dark); }
