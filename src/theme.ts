@@ -97,6 +97,10 @@ export const theme = createTheme({
     button: { ...type.labelM, textTransform: 'none' },
   },
   components: {
+    // MUI 9 only maps color="textSecondary"; the app writes color="text.secondary" (209 places), which MUI silently ignores.
+    MuiTypography: {
+      variants: [{ props: { color: 'text.secondary' }, style: { color: color('text-primary') } }],
+    },
     // Every ButtonBase (buttons, icon buttons, tabs, menu items) draws its press ripple in this color.
     MuiButtonBase: {
       styleOverrides: {
