@@ -777,7 +777,7 @@ function OverviewDates({ today, dates, resources, onReadGuide }: { today: string
   const upcoming = sorted.filter(item => item.date >= today)
   const [next, ...later] = upcoming
   const [allOpen, setAllOpen] = useState(false)
-  const listedCount = 5
+  const listedCount = 4
   if (!next) return <><SectionLabel component="h2">Dates</SectionLabel><Typography variant="bodySStandard" color="text.secondary" className="overview-empty">No upcoming dates.</Typography></>
   const days = daysBetween(today, next.date)
   const away = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`
