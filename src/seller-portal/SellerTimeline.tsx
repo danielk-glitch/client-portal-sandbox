@@ -301,6 +301,7 @@ function StackedTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: 
   const [openId, setOpenId] = useState<MilestoneId | null>(currentId)
   const baseId = useId()
   const isStatic = Boolean(handlers.trackerOnly && handlers.staticTracker)
+  const currentIndex = data.milestones.findIndex((milestone) => milestone.id === currentId)
 
   return (
     <>
@@ -309,6 +310,8 @@ function StackedTimeline({ data, currentId, titleId, onOpenStep, ...handlers }: 
       </Box>
       <Box component="ol" className={`timeline-stack${isStatic ? ' timeline-stack--static' : ''}`}>
         {data.milestones.map((milestone, index) => {
+          // Display-only stepper: a "barrel" of just the stage before this one and the one after. The ends fade out (CSS).
+          if (isStatic && Math.abs(index - currentIndex) > 1) return null
           const open = openId === milestone.id
           return (
             <Box component="li" key={milestone.id} className={`timeline-stack-item timeline-stack-item--${milestone.status}${open ? ' is-open' : ''}`}>

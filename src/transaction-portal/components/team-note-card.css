@@ -115,7 +115,7 @@
 .note-row-text.MuiTypography-root,
 .note-row-body.MuiTypography-root { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; text-wrap: pretty; }
 .note-row-body.MuiTypography-root { color: var(--color-semantic-text-primary); }
-.note-row-meta.MuiTypography-root { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--space-6); margin-top: var(--space-2); color: var(--color-semantic-text-light); }
+.note-row-meta.MuiTypography-root { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-6); margin-top: var(--space-2); color: var(--color-semantic-text-light); }
 .note-row-meta svg { width: 14px; height: 14px; color: var(--color-semantic-text-dark); }
 .note-row-date.MuiTypography-root { padding-top: var(--space-4); color: var(--color-semantic-text-primary); white-space: nowrap; font-variant-numeric: tabular-nums; }
 

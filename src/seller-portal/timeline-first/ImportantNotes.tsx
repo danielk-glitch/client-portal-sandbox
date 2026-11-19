@@ -6,7 +6,7 @@
  * - A meeting note previews as its meeting title, never its raw summary markup.
  * - embedded: no card of its own, for sitting inside another card (the current seller portal's overview block).
  *   pinnedOnly limits it to starred notes, `title` renames the heading, and `limit` caps how many show (pinned first, then newest).
- * - A row opens the full note. "See all notes" (a TextLink) jumps to the Notes tab below.
+ * - A row opens the full note: its name line ends in a "View note →" that animates in on hover. "See all notes" (a TextLink) jumps to the Notes tab below.
  */
 import { useState } from 'react'
 import { Box, ButtonBase, Typography } from '@mui/material'
@@ -14,7 +14,7 @@ import StarRounded from '@mui/icons-material/StarRounded'
 import { PlaceCard } from '../../components/PlaceCard'
 import { PlaceModal } from '../../components/PlaceModal'
 import { TextLink } from '../../components/TextLink'
-import { MeetingNoteCard } from '../../transaction-portal/components'
+import { MeetingNoteCard, NoteSeeMore } from '../../transaction-portal/components'
 import { SectionLabel } from '../../components/SectionLabel'
 import { PortalSectionHeader } from '../../components/PortalSection'
 import { sortImportantNotes } from '../../transaction-portal/notes'
@@ -47,6 +47,7 @@ export function ImportantNotes({ notes, onSeeAll, embedded = false, pinnedOnly =
                     <Typography component="span" variant="labelS" className="important-note-author">{note.author}</Typography>
                     <Typography component="span" variant="labelS" aria-hidden="true">·</Typography>
                     <Typography component="span" variant="labelS" className="important-note-date">{formatRowDate(note.createdAt, { time: false })}</Typography>
+                    <NoteSeeMore />
                   </Box>
                 </ButtonBase>
               </Box>

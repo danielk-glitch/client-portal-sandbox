@@ -6,6 +6,7 @@ import { PlaceModal } from '../../components/PlaceModal'
 import { formatRowDate } from '../dates'
 import type { TeamNote } from '../types'
 import { MeetingNoteCard } from './MeetingNoteCard'
+import { NoteSeeMore } from './NoteSeeMore'
 import './team-note-card.css'
 
 /**
@@ -41,7 +42,7 @@ function WrittenNoteRow({ note }: { note: TeamNote }) {
         <Box component="span" className="note-row-copy">
           <Typography variant="bodyMStandard" component="span" className="note-row-text">{note.body}</Typography>
           <Typography variant="labelS" component="span" className="note-row-meta">
-            {note.starredAt && <StarRounded titleAccess="Important" />}{note.author}
+            {note.starredAt && <StarRounded titleAccess="Important" />}{note.author}<NoteSeeMore />
           </Typography>
         </Box>
         <Typography variant="labelS" component="span" className="note-row-date">{formatRowDate(note.createdAt)}</Typography>

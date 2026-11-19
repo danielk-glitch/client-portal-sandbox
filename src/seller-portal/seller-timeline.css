@@ -791,3 +791,7 @@
 .timeline-tracker--static .timeline-node.MuiButtonBase-root,
 .timeline-stack--static .timeline-stack-header.MuiButtonBase-root { pointer-events: none; cursor: default; }
 .timeline-stack--static .timeline-chevron { display: none; }
+
+/* Barrel stepper (display-only, mobile): the stage before and the stage after the current one, faded so the current stage leads. */
+.timeline-stack--static .timeline-stack-item:not(.timeline-stack-item--current) .timeline-stack-heading .MuiTypography-root { opacity: 0.55; }
+.timeline-stack--static .timeline-stack-item:not(.timeline-stack-item--current) .timeline-marker { opacity: 0.55; }

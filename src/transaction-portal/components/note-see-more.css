@@ -1,0 +1,33 @@
+/* "View note →" on a note row: hidden until the row is hovered or focused, then the label fades in sliding from the left
+   and the arrow follows a beat later. Always shown on touch screens. */
+.note-see-more {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-left: auto;
+  padding-left: var(--space-12);
+  color: var(--color-semantic-text-dark);
+  font: var(--type-label-m);
+  letter-spacing: var(--type-label-m-tracking);
+  white-space: nowrap;
+  opacity: 0;
+  translate: -6px 0;
+  transition: opacity 180ms ease-out, translate 220ms var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1));
+}
+.note-see-more-arrow.MuiSvgIcon-root {
+  width: 16px;
+  height: 16px;
+  translate: -4px 0;
+  transition: translate 260ms var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1)) 40ms;
+}
+.note-row-main:is(:hover, :focus-visible) .note-see-more,
+.important-note-button:is(:hover, :focus-visible) .note-see-more { opacity: 1; translate: 0 0; }
+.note-row-main:is(:hover, :focus-visible) .note-see-more-arrow,
+.important-note-button:is(:hover, :focus-visible) .note-see-more-arrow { translate: 0 0; }
+@media (hover: none) {
+  .note-see-more { opacity: 1; translate: 0 0; }
+  .note-see-more-arrow.MuiSvgIcon-root { translate: 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .note-see-more, .note-see-more-arrow.MuiSvgIcon-root { transition: none; }
+}

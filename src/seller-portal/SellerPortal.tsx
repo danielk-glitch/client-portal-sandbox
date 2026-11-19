@@ -2,10 +2,8 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   Box,
-  Button,
   Container,
   Divider,
-  Stack,
   Tab,
   Tabs,
   Typography,
@@ -14,7 +12,6 @@ import CloseOutlined from '@mui/icons-material/CloseOutlined'
 import {
   sampleSellerTransaction,
   type SellerTransaction,
-  type TeamNote,
   type TimelineEvent,
   type TransactionDocument,
   type TransactionTask,
@@ -26,12 +23,11 @@ import { MarketingSnapshot, type MarketingSnapshotData } from './MarketingSnapsh
 import { AdvertisingSnapshot } from './AdvertisingSnapshot'
 import { marketingFeedbackLayouts, type MarketingFeedbackLayout } from './marketingFeedbackLayouts'
 import { MarketingDashboardSheet, type MarketingDashboardSection } from './MarketingDashboardSheet'
-import { AdvertisingRow, ShowingFeedbackRow, ResourcesPanel, ResourceGuideSheet, ActivityEventRow, ActivityPanel, DateEventList, DateEventRow, DocumentsPanel, DocumentViewer, useDocumentPins, PeopleSection, PaginatedTabList, PortalFooter, PortalTopbar, TaskRow, TeamNoteCard, TransactionRowList, type PeopleTab } from '../transaction-portal/components'
+import { AdvertisingRow, ShowingFeedbackRow, ResourcesPanel, ResourceGuideSheet, ActivityEventRow, ActivityPanel, DateEventList, DateEventRow, DocumentsPanel, DocumentViewer, useDocumentPins, PeopleSection, PaginatedTabList, PortalFooter, PortalTopbar, TaskRow, NotesPanel, TransactionRowList, type PeopleTab } from '../transaction-portal/components'
 import { PortalSection } from '../components/PortalSection'
 import type { TransactionResource } from '../transaction-portal/types'
 import { TextLink } from '../components/TextLink'
 import { SectionLabel } from '../components/SectionLabel'
-import { PlaceCard } from '../components/PlaceCard'
 import { PlaceIconButton } from '../components/PlaceIconButton'
 import { PlaceSheet } from '../components/PlaceSheet'
 import { PlaceModal } from '../components/PlaceModal'
@@ -93,12 +89,12 @@ export type OverviewLayout = 'timeline' | 'classic'
 export type PortalTab = 'activity' | 'tasks' | 'notes' | 'feedback' | 'advertising' | 'documents' | 'resources'
 
 export const portalTabs: Array<{ id: PortalTab; label: string }> = [
+  { id: 'documents', label: 'Documents' },
   { id: 'activity', label: 'Activity' },
-  { id: 'tasks', label: 'Tasks' },
   { id: 'notes', label: 'Notes' },
+  { id: 'tasks', label: 'Tasks' },
   { id: 'feedback', label: 'Showing feedback' },
   { id: 'advertising', label: 'Advertising' },
-  { id: 'documents', label: 'Documents' },
   { id: 'resources', label: 'Resources' },
 ]
 
@@ -481,7 +477,13 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
         {visibleTab === 'resources' && transaction.resources && <ResourcesPanel resources={transaction.resources} onOpen={setSelectedResource} />}
         {visibleTab === 'activity' && <ActivityPanel events={transaction.timeline} />}
         {visibleTab === 'tasks' && <TasksPanel tasks={transaction.tasks} />}
-        {visibleTab === 'notes' && <NotesPanel notes={transaction.notes} />}
+        {visibleTab === 'notes' && (
+          <Box component="section" aria-label="Team notes" className="portal-tab-content">
+            <PaginatedTabList items={transaction.notes} itemName="notes" ariaLabel="Note pages">
+              {(visible) => <NotesPanel notes={visible} />}
+            </PaginatedTabList>
+          </Box>
+        )}
         {visibleTab === 'feedback' && (
           <Box component="section" aria-label="Showing feedback" className="portal-tab-content">
             <PaginatedTabList items={transaction.feedback} itemName="responses" ariaLabel="Showing feedback pages">
@@ -770,18 +772,18 @@ function OverviewDates({ today, dates, resources, onReadGuide }: { today: string
   return (
     <>
       <SectionLabel id="overview-dates-label" component="h2">Dates</SectionLabel>
-      <PlaceCard className="overview-next">
+      <Box className="overview-next">
         <DateEventList>
           <DateEventRow today={today} date={next.date} title={next.title} featured eyebrow={<Typography variant="labelS" component="span" className="overview-next-eyebrow">Up next</Typography>} titleAdornment={<PlaceTag className="overview-next-away">{away}</PlaceTag>} resources={attached} onReadResource={resource => onReadGuide(resource.id)} guidance={next.guidance} />
         </DateEventList>
-      </PlaceCard>
+      </Box>
       {later.length > 0 && (
         <Box className="overview-later">
           <UpcomingDatesList today={today} dates={later.slice(0, listedCount)} resources={resources} onReadGuide={onReadGuide} featureNext={false} />
         </Box>
       )}
       <Box className="overview-all">
-        <Button variant="outlined" onClick={() => setAllOpen(true)} aria-haspopup="dialog">See all dates</Button>
+        <TextLink onClick={() => setAllOpen(true)} aria-haspopup="dialog">See all dates</TextLink>
       </Box>
       <PlaceModal open={allOpen} onClose={() => setAllOpen(false)} title="All dates" size="m" closeLabel="Close all dates">
         <AllDatesList today={today} dates={sorted} resources={resources} onReadGuide={onReadGuide} />
@@ -840,20 +842,6 @@ function TasksPanel({ tasks }: { tasks: TransactionTask[] }) {
           <TransactionRowList>
             {visibleTasks.map((task) => <TaskRow key={task.id} task={task} />)}
           </TransactionRowList>
-        )}
-      </PaginatedTabList>
-    </Box>
-  )
-}
-
-function NotesPanel({ notes }: { notes: TeamNote[] }) {
-  return (
-    <Box component="section" aria-label="Team notes" className="portal-tab-content">
-      <PaginatedTabList items={notes} itemName="notes" ariaLabel="Note pages">
-        {(visibleNotes) => (
-          <Stack className="notes-list" spacing={2}>
-            {visibleNotes.map((note) => <TeamNoteCard key={note.id} note={note} />)}
-          </Stack>
         )}
       </PaginatedTabList>
     </Box>

@@ -49,3 +49,7 @@
     margin: 0 0 0 calc(var(--space-12) * -1);
   }
 }
+
+/* Phone only: the "People" heading above the tabs, and the Show more under the list. */
+.people-section .people-heading.section-label { margin-bottom: var(--space-12); }
+.people-section > .disclosure-button { margin-top: var(--space-16); }

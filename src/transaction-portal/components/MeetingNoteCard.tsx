@@ -19,6 +19,7 @@ import { Eyebrow } from '../../components/Eyebrow'
 import { PlaceIconButton } from '../../components/PlaceIconButton'
 import { PlaceModal } from '../../components/PlaceModal'
 import { formatRowDate } from '../dates'
+import { NoteSeeMore } from './NoteSeeMore'
 import type { MeetingRecording, TeamNote } from '../types'
 import './meeting-note-card.css'
 
@@ -204,7 +205,7 @@ export function MeetingNoteCard({ note, meeting, variant = 'card' }: { note: Tea
           <Typography variant="titleXS" component="span">{meeting.title}</Typography>
           <Typography variant="bodySStandard" component="span" className="note-row-body">{plainSummary(note.body)}</Typography>
           <Typography variant="labelS" component="span" className="note-row-meta">
-            <SubjectOutlined aria-hidden="true" />Recording · {clock(meeting.durationSeconds)}<Box component="span" aria-hidden="true">·</Box>{note.author}
+            <SubjectOutlined aria-hidden="true" />Recording · {clock(meeting.durationSeconds)}<Box component="span" aria-hidden="true">·</Box>{note.author}<NoteSeeMore />
           </Typography>
         </Box>
         <Typography variant="labelS" component="span" className="note-row-date">{formatRowDate(note.createdAt)}</Typography>
