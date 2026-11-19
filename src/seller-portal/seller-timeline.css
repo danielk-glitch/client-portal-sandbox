@@ -792,6 +792,9 @@
 .timeline-stack--static .timeline-stack-header.MuiButtonBase-root { pointer-events: none; cursor: default; }
 .timeline-stack--static .timeline-chevron { display: none; }
 
-/* Barrel stepper (display-only, mobile): the stage before and the stage after the current one, faded so the current stage leads. */
-.timeline-stack--static .timeline-stack-item:not(.timeline-stack-item--current) .timeline-stack-heading .MuiTypography-root { opacity: 0.55; }
-.timeline-stack--static .timeline-stack-item:not(.timeline-stack-item--current) .timeline-marker { opacity: 0.55; }
+/* Barrel stepper (display-only, mobile): the stage before and the stage after the current one in lighter grays, so the current stage leads.
+   Solid grays rather than opacity, so the rail never shows through the checkmark. */
+.timeline-stack--static .timeline-stack-item:not(.timeline-stack-item--current) .timeline-stack-heading .MuiTypography-root { color: var(--color-semantic-text-lightest); }
+.timeline-stack--static .timeline-stack-item--complete .timeline-marker--complete::before { background: var(--color-semantic-text-lightest); }
+.timeline-stack--static .timeline-stack-item--upcoming .timeline-marker::before { box-shadow: inset 0 0 0 1.5px var(--color-semantic-stroke-primary-light); }
+.timeline-stack--static .timeline-stack-item--upcoming .timeline-marker-number { color: var(--color-semantic-text-lightest); }
