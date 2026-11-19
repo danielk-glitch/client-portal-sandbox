@@ -205,10 +205,11 @@ export function MeetingNoteCard({ note, meeting, variant = 'card' }: { note: Tea
           <Typography variant="titleXS" component="span">{meeting.title}</Typography>
           <Typography variant="bodySStandard" component="span" className="note-row-body">{plainSummary(note.body)}</Typography>
           <Typography variant="labelS" component="span" className="note-row-meta">
-            <SubjectOutlined aria-hidden="true" />Recording · {clock(meeting.durationSeconds)}<Box component="span" aria-hidden="true">·</Box>{note.author}<NoteSeeMore />
+            <SubjectOutlined aria-hidden="true" />Recording · {clock(meeting.durationSeconds)}<Box component="span" aria-hidden="true">·</Box>{note.author}
           </Typography>
         </Box>
         <Typography variant="labelS" component="span" className="note-row-date">{formatRowDate(note.createdAt)}</Typography>
+        <NoteSeeMore />
       </ButtonBase>
     </Box>
   )

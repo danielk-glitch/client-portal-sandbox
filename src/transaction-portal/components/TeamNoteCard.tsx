@@ -42,10 +42,11 @@ function WrittenNoteRow({ note }: { note: TeamNote }) {
         <Box component="span" className="note-row-copy">
           <Typography variant="bodyMStandard" component="span" className="note-row-text">{note.body}</Typography>
           <Typography variant="labelS" component="span" className="note-row-meta">
-            {note.starredAt && <StarRounded titleAccess="Important" />}{note.author}<NoteSeeMore />
+            {note.starredAt && <StarRounded titleAccess="Important" />}{note.author}
           </Typography>
         </Box>
         <Typography variant="labelS" component="span" className="note-row-date">{formatRowDate(note.createdAt)}</Typography>
+        <NoteSeeMore />
       </ButtonBase>
       <PlaceModal open={open} onClose={() => setOpen(false)} size="m" title="Note" description={`Added by ${note.author} · ${note.createdAt}`} closeLabel="Close note">
         <Typography component="p" variant="bodyMStandard" className="team-note-modal-body">{note.body}</Typography>
