@@ -29,6 +29,9 @@ type SellerReviewToolsProps = {
   /** Shown only on the current-functionality page. */
   overviewLayout?: OverviewLayout
   selectOverviewLayout?: (layout: OverviewLayout) => void
+  /** With the timeline overview row: dates and notes in cards. */
+  overviewCards?: boolean
+  selectOverviewCards?: (value: boolean) => void
   listingLink: HeaderListingLink
   selectListingLink: (link: HeaderListingLink) => void
   headerVariant: ListingOverviewVariant
@@ -42,7 +45,7 @@ type SellerReviewToolsProps = {
   selectMarketScenario?: (scenario: MarketActivityScenario) => void
 }
 
-export function SellerReviewTools({ containerStyle, selectContainerStyle, timelineTransition, selectTimelineTransition, journeyView, selectJourneyView, beforeListing, branding, selectBranding, visualTheme, marketingSnapshot, overviewLayout, selectOverviewLayout, listingLink, selectListingLink, headerVariant, selectHeaderVariant, marketingLayout, selectMarketingLayout, feedbackLayout, selectFeedbackLayout, marketScenario, selectMarketScenario }: SellerReviewToolsProps) {
+export function SellerReviewTools({ containerStyle, selectContainerStyle, timelineTransition, selectTimelineTransition, journeyView, selectJourneyView, beforeListing, branding, selectBranding, visualTheme, marketingSnapshot, overviewLayout, selectOverviewLayout, overviewCards, selectOverviewCards, listingLink, selectListingLink, headerVariant, selectHeaderVariant, marketingLayout, selectMarketingLayout, feedbackLayout, selectFeedbackLayout, marketScenario, selectMarketScenario }: SellerReviewToolsProps) {
   const [viewMenuAnchor, setViewMenuAnchor] = useState<HTMLElement | null>(null)
   const [designPanelAnchor, setDesignPanelAnchor] = useState<HTMLElement | null>(null)
   return (
@@ -115,6 +118,15 @@ export function SellerReviewTools({ containerStyle, selectContainerStyle, timeli
               <RadioGroup aria-labelledby="overview-layout-label" value={overviewLayout} onChange={(event) => selectOverviewLayout(event.target.value as OverviewLayout)}>
                 <FormControlLabel value="timeline" control={<Radio />} label="Timeline, dates and notes" />
                 <FormControlLabel value="classic" control={<Radio />} label="Upcoming dates and recent activity" />
+              </RadioGroup>
+            </Box>
+          )}
+          {overviewLayout === 'timeline' && selectOverviewCards && (
+            <Box className="design-panel-option-section">
+              <Typography component="h3" variant="titleXS" id="overview-cards-label">Dates and notes</Typography>
+              <RadioGroup aria-labelledby="overview-cards-label" value={overviewCards ? 'cards' : 'open'} onChange={(event) => selectOverviewCards(event.target.value === 'cards')}>
+                <FormControlLabel value="open" control={<Radio />} label="On the page" />
+                <FormControlLabel value="cards" control={<Radio />} label="In containers" />
               </RadioGroup>
             </Box>
           )}

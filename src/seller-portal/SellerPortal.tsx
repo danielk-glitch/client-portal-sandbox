@@ -145,6 +145,8 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
   const [containerStyle, setContainerStyle] = useState<ContainerStyle>(() =>
     new URLSearchParams(window.location.search).get('containers') === 'stroke' ? 'stroke' : 'shadow',
   )
+  /** `?cards=1`: dates and notes in cards instead of on the page background. */
+  const [overviewCards, setOverviewCards] = useState(() => new URLSearchParams(window.location.search).get('cards') === '1')
   const [timelineTransition, setTimelineTransition] = useState<TimelineTransition>(() =>
     new URLSearchParams(window.location.search).get('timeline') === 'dark' ? 'dark' : 'divider',
   )
@@ -333,6 +335,14 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
     const url = new URL(window.location.href)
     if (value === 'shadow') url.searchParams.delete('containers')
     else url.searchParams.set('containers', value)
+    window.history.replaceState(null, '', url)
+  }
+
+  function selectOverviewCards(value: boolean) {
+    setOverviewCards(value)
+    const url = new URL(window.location.href)
+    if (value) url.searchParams.set('cards', '1')
+    else url.searchParams.delete('cards')
     window.history.replaceState(null, '', url)
   }
 
@@ -573,6 +583,7 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
           />
         ) : overviewLayout === 'timeline' ? (
           <TransactionOverview
+            contained={overviewCards}
             timeline={
               <SellerTimeline
                 data={timelineData}
@@ -625,6 +636,8 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
         marketingSnapshot={marketingSnapshot}
         overviewLayout={timelineLayout || columnsLayout ? undefined : overviewLayout}
         selectOverviewLayout={selectOverviewLayout}
+        overviewCards={overviewCards}
+        selectOverviewCards={selectOverviewCards}
         listingLink={listingLink}
         selectListingLink={selectListingLink}
         headerVariant={headerVariant}
