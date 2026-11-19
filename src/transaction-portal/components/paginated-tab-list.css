@@ -33,3 +33,9 @@
   outline: var(--focus-ring);
   outline-offset: var(--focus-ring-offset);
 }
+
+/* Phone: the pager is centered under the list. The negative margin that lined it up with the rows would pull it off-center. */
+@media (max-width: 599.95px) {
+  .tab-list-pagination { justify-content: center; }
+  .tab-list-pagination .MuiPagination-ul { margin-left: 0; justify-content: center; }
+}
