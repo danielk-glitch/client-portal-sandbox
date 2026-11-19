@@ -117,3 +117,5 @@
 .overview-later .portal-date-row:not(:first-child, :last-child) { padding-block: calc(var(--padding-row-block) + 4px); }
 .overview-later .portal-date-row:first-child:not(:last-child) { padding-bottom: calc(var(--padding-row-block) + 4px); }
 .overview-later .portal-date-row:last-child:not(:first-child) { padding-top: calc(var(--padding-row-block) + 4px); }
+/* A hairline closes the list under the last date, matching the ones between rows. */
+.overview-later .portal-date-row:last-child { padding-bottom: calc(var(--padding-row-block) + 4px); border-bottom: 1px solid var(--color-semantic-stroke-primary-light); }
