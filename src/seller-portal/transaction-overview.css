@@ -120,8 +120,8 @@
 /* A hairline closes the list under the last date, matching the ones between rows. */
 .overview-later .portal-date-row:last-child { padding-bottom: calc(var(--padding-row-block) + 4px); border-bottom: 1px solid var(--color-semantic-stroke-primary-light); }
 
-/* Contained (design panel option): dates and notes each in a card. The cards line up with the top of the row and the page's side edges. */
-.transaction-overview--contained .transaction-overview-body { align-items: start; gap: var(--space-24); padding: var(--space-32) 0; }
+/* Contained (design panel option): dates and notes each in a card. Side by side, the two cards are always the same height (the grid stretches the shorter one). */
+.transaction-overview--contained .transaction-overview-body { align-items: stretch; gap: var(--space-24); padding: var(--space-32) 0; }
 @media (max-width: 1099.95px) {
   .transaction-overview--contained .transaction-overview-body { padding-block: var(--space-24); }
 }
