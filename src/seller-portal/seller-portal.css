@@ -910,6 +910,10 @@
   .listing-overview--light-compact .listing-photo { height: clamp(200px, 30vw, 280px); }
   .listing-overview--light-compact .listing-summary { max-width: none; padding: var(--space-24) 0 0; }
 }
+/* Phone: a taller photo (it was 200px). */
+@media (max-width: 599.95px) {
+  .listing-overview--light-compact .listing-photo { height: 240px; }
+}
 
 /* Narrow: phone and email drop below the agent instead of squeezing beside them. */
 @media (max-width: 699.95px) {
