@@ -1,13 +1,12 @@
 /**
  * People · the team and the viewers on this sale, in one card with tabs.
- * On a phone it gets a "People" heading, so it reads as its own section, and shows the first two people with a "Show more" to see the rest.
+ * On a phone it shows the first two people with a "Show more" to see the rest.
  * Pass `collaborators` to add a middle tab (title, escrow, lender and other outside partners). `showContact` replaces the call and email buttons with labelled, tappable phone and email lines in each row.
  */
 import { useState } from 'react'
 import { Box, Tab, Tabs, useMediaQuery } from '@mui/material'
 import { DisclosureButton } from '../../components/DisclosureButton'
 import { PlaceCard } from '../../components/PlaceCard'
-import { SectionLabel } from '../../components/SectionLabel'
 import type { TeamMember, TransactionViewer } from '../types'
 import { PersonContactActions, PersonRow } from './TransactionRows'
 import './people-section.css'
@@ -30,7 +29,6 @@ export function PeopleSection({ team, collaborators, viewers, value, onChange, s
   const shown = <T,>(list: T[]) => (capped ? list.slice(0, phoneCap) : list)
   return (
     <PlaceCard component="section" id="people" className="people-section" aria-label="People">
-      {phone && <SectionLabel component="h2" className="people-heading">People</SectionLabel>}
       <Tabs value={value} onChange={(_, nextValue: PeopleTab) => { setExpanded(false); onChange(nextValue) }} aria-label="People" className="people-tabs">
         <Tab value="team" label={collaborators ? 'Team' : 'Your Team'} id="people-tab-team" aria-controls="people-panel-team" />
         {collaborators && <Tab value="collaborators" label="Collaborators" id="people-tab-collaborators" aria-controls="people-panel-collaborators" />}

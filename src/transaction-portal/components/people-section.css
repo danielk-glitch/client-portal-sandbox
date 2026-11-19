@@ -50,7 +50,5 @@
   }
 }
 
-/* Phone only: a centered "People" heading (one step up from the usual section label) above the tabs, and a centered Show more under the list. */
-.people-section .people-heading.section-label { justify-content: center; margin-bottom: var(--space-12); }
-.people-section .people-heading .section-label-text.MuiTypography-root { font: var(--type-label-m); letter-spacing: var(--type-label-m-tracking); }
+/* Phone only: a centered Show more under the capped list. */
 .people-section > .disclosure-button.MuiButtonBase-root { display: flex; width: fit-content; margin: var(--space-16) auto 0; }
