@@ -35,5 +35,6 @@
 /* On the Notes tab rows it sits in the last column, under the date, flush with the row's right edge. */
 .note-row-main > .note-see-more { grid-column: 3; grid-row: 2; align-self: end; margin-left: 0; padding-left: 0; }
 @media (max-width: 767.95px) {
-  .note-row-main > .note-see-more { grid-column: 2; grid-row: 3; justify-self: end; }
+  /* Phone: same row as the date (date left, this right) so the row stays two lines tall. */
+  .note-row-main > .note-see-more { grid-column: 2; grid-row: 2; justify-self: end; align-self: center; }
 }
