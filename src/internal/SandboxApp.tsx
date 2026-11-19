@@ -33,7 +33,7 @@ import { TransactionsIndex } from '../client-account/TransactionsIndex'
 import { ClientProfile } from '../client-account/ClientProfile'
 
 /** Shown on the home page so collaborators can see how fresh the design is. Update on every push (see AGENTS.md). */
-const lastUpdated = 'November 18, 2026'
+const lastUpdated = 'November 19, 2026'
 
 type PrototypePage = {
   number: string
