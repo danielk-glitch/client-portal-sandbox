@@ -126,3 +126,5 @@
   .transaction-overview--contained .transaction-overview-body { padding-block: var(--space-24); }
 }
 .transaction-overview--contained { border-bottom: 0; }
+/* In cards the title is a card header with a hairline below, so both cards use the standard 20px of space under it. */
+.transaction-overview--contained .transaction-overview-notes .portal-section-content { padding-top: var(--space-20); }

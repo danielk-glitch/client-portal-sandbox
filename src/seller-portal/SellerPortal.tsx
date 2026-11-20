@@ -18,13 +18,14 @@ import {
   type UpcomingDate,
 } from './sellerTransaction'
 import { ListingDetailsSheet } from './ListingDetailsSheet'
+import { ListingMarketing } from './ListingMarketing'
 import { ListingOverview, type ListingOverviewVariant, type HeaderListingLink } from './ListingOverview'
 import { MarketingSnapshot, type MarketingSnapshotData } from './MarketingSnapshot'
 import { AdvertisingSnapshot } from './AdvertisingSnapshot'
 import { marketingFeedbackLayouts, type MarketingFeedbackLayout } from './marketingFeedbackLayouts'
 import { MarketingDashboardSheet, type MarketingDashboardSection } from './MarketingDashboardSheet'
 import { AdvertisingRow, ShowingFeedbackRow, ResourcesPanel, ResourceGuideSheet, ActivityEventRow, ActivityPanel, DateEventList, DateEventRow, DocumentsPanel, DocumentViewer, useDocumentPins, PeopleSection, PaginatedTabList, PortalFooter, PortalTopbar, TaskRow, NotesPanel, TransactionRowList, type PeopleTab } from '../transaction-portal/components'
-import { PortalSection } from '../components/PortalSection'
+import { PortalSection, PortalSectionHeader } from '../components/PortalSection'
 import type { TransactionResource } from '../transaction-portal/types'
 import { TextLink } from '../components/TextLink'
 import { SectionLabel } from '../components/SectionLabel'
@@ -145,8 +146,8 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
   const [containerStyle, setContainerStyle] = useState<ContainerStyle>(() =>
     new URLSearchParams(window.location.search).get('containers') === 'stroke' ? 'stroke' : 'shadow',
   )
-  /** `?cards=1`: dates and notes in cards instead of on the page background. */
-  const [overviewCards, setOverviewCards] = useState(() => new URLSearchParams(window.location.search).get('cards') === '1')
+  /** Dates and notes sit in cards by default; `?cards=0` puts them on the page background instead. */
+  const [overviewCards, setOverviewCards] = useState(() => new URLSearchParams(window.location.search).get('cards') !== '0')
   const [timelineTransition, setTimelineTransition] = useState<TimelineTransition>(() =>
     new URLSearchParams(window.location.search).get('timeline') === 'dark' ? 'dark' : 'divider',
   )
@@ -341,8 +342,8 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
   function selectOverviewCards(value: boolean) {
     setOverviewCards(value)
     const url = new URL(window.location.href)
-    if (value) url.searchParams.set('cards', '1')
-    else url.searchParams.delete('cards')
+    if (value) url.searchParams.delete('cards')
+    else url.searchParams.set('cards', '0')
     window.history.replaceState(null, '', url)
   }
 
@@ -448,6 +449,9 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
       onOpenDashboard={() => setMarketingDashboardSection('overview')}
     />
   ))
+
+  // Simplified Listing marketing (feedback carousel plus advertising links): only while the home is live, and only where the page has no marketing snapshot of its own.
+  const listingMarketingBlock = listed && !marketingSnapshot && <ListingMarketing feedback={transaction.feedback} advertising={transaction.advertising} />
 
   // Competing homes matter while the home is live. Before listing there's no list date; once pending, the comparison is moot.
   const scenarioActivity = marketScenario === 'empty' ? emptyMarketActivity : marketScenario === 'hidden' ? hiddenMarketActivity : marketActivity
@@ -598,8 +602,8 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
                 onOpenDocument={setSelectedDocument}
               />
             }
-            dates={<OverviewDates today={timelineData.today} dates={transaction.upcomingDates} resources={transaction.resources} onReadGuide={openMilestoneGuide} />}
-            notes={<ImportantNotes embedded title="Notes" limit={3} emptyText="No notes yet." notes={transaction.notes} onSeeAll={showAllNotes} />}
+            dates={<OverviewDates today={timelineData.today} dates={transaction.upcomingDates} resources={transaction.resources} onReadGuide={openMilestoneGuide} cardHeader={overviewCards} />}
+            notes={<ImportantNotes embedded cardHeader={overviewCards} title="Notes" limit={3} emptyText="No notes yet." notes={transaction.notes} onSeeAll={showAllNotes} />}
           />
         ) : <Box className="priority-grid" aria-label="Current transaction activity">
           <UpcomingDatesPanel today={timelineData.today} dates={transaction.upcomingDates} resources={transaction.resources} onSeeAll={() => setDatesDrawerOpen(true)} onReadGuide={openMilestoneGuide} />
@@ -613,6 +617,8 @@ export function SellerPortal({ transaction: baseTransaction = sampleSellerTransa
         </Box>}
 
         {marketingBlock}
+
+        {listingMarketingBlock}
 
         {marketActivityBlock}
 
@@ -772,19 +778,21 @@ function UpcomingDatesList({ today, dates, resources, onReadGuide, featureNext =
 }
 
 /** Overview block, one "Dates" section: the next date in an elevated card, the dates after it, and a button that opens every date. */
-function OverviewDates({ today, dates, resources, onReadGuide }: { today: string; dates: UpcomingDate[]; resources?: TransactionResource[]; onReadGuide: (resourceId: string) => void }) {
+function OverviewDates({ today, dates, resources, onReadGuide, cardHeader = false }: { today: string; dates: UpcomingDate[]; resources?: TransactionResource[]; onReadGuide: (resourceId: string) => void; /** In a card: the card title style (PortalSectionHeader) instead of the on-page label. */ cardHeader?: boolean }) {
   const sorted = [...dates].sort((first, second) => first.date.localeCompare(second.date))
   const upcoming = sorted.filter(item => item.date >= today)
   const [next, ...later] = upcoming
   const [allOpen, setAllOpen] = useState(false)
   const listedCount = 4
-  if (!next) return <><SectionLabel component="h2">Dates</SectionLabel><Typography variant="bodySStandard" color="text.secondary" className="overview-empty">No upcoming dates.</Typography></>
+  const heading = cardHeader ? <PortalSectionHeader title="Dates" titleId="overview-dates-label" prominent /> : <SectionLabel id="overview-dates-label" component="h2">Dates</SectionLabel>
+  if (!next) return <>{heading}<Typography variant="bodySStandard" color="text.secondary" className="overview-empty">No upcoming dates.</Typography></>
   const days = daysBetween(today, next.date)
   const away = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`
   const attached = (next.guidance?.resourceIds ?? []).map(id => resources?.find(resource => resource.id === id)).filter((resource): resource is TransactionResource => !!resource)
   return (
     <>
-      <SectionLabel id="overview-dates-label" component="h2">Dates</SectionLabel>
+      {heading}
+      <Box className={cardHeader ? 'portal-section-content' : undefined}>
       <Box className="overview-next">
         <DateEventList>
           <DateEventRow today={today} date={next.date} title={next.title} featured eyebrow={<Typography variant="labelS" component="span" className="overview-next-eyebrow">Up next</Typography>} titleAdornment={<PlaceTag className="overview-next-away">{away}</PlaceTag>} resources={attached} onReadResource={resource => onReadGuide(resource.id)} guidance={next.guidance} />
@@ -797,6 +805,7 @@ function OverviewDates({ today, dates, resources, onReadGuide }: { today: string
       )}
       <Box className="overview-all">
         <TextLink onClick={() => setAllOpen(true)} aria-haspopup="dialog">See all dates</TextLink>
+      </Box>
       </Box>
       <PlaceModal open={allOpen} onClose={() => setAllOpen(false)} title="All dates" size="m" closeLabel="Close all dates">
         <AllDatesList today={today} dates={sorted} resources={resources} onReadGuide={onReadGuide} />

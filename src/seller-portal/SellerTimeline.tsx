@@ -139,7 +139,12 @@ function daysBetween(from: string, to: string) {
 /** Eyebrow, plus a countdown headline that only the card layout shows. */
 function TimelineHeading({ titleId, data, action }: { titleId: string; data: SellerTimelineData; action?: ReactNode }) {
   const days = data.countdown ? daysBetween(data.today, data.countdown.date) : null
-  const eyebrow = <Eyebrow component="h2" id={titleId} className="seller-timeline-eyebrow">Transaction timeline</Eyebrow>
+  // Before listing and while listed, the label is the section's headline, so it takes the countdown's type token (titleL). Later stages keep the small label above the countdown.
+  const stage = data.milestones.find((milestone) => milestone.status === 'current')?.id
+  const headline = stage === 'pre-listing' || stage === 'active-listing'
+  const eyebrow = headline
+    ? <Typography component="h2" variant="titleL" id={titleId} className="seller-timeline-title">Transaction timeline</Typography>
+    : <Eyebrow component="h2" id={titleId} className="seller-timeline-eyebrow">Transaction timeline</Eyebrow>
   return (
     <Box className="seller-timeline-heading">
       {action

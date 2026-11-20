@@ -907,12 +907,12 @@
 .listing-overview--light-compact .listing-light-agent { margin-top: var(--space-24); padding-top: var(--space-20); }
 
 @media (max-width: 1099.95px) {
-  .listing-overview--light-compact .listing-photo { height: clamp(200px, 30vw, 280px); }
+  .listing-overview--light-compact .listing-photo { height: clamp(260px, 42vw, 340px); }
   .listing-overview--light-compact .listing-summary { max-width: none; padding: var(--space-24) 0 0; }
 }
-/* Phone: a taller photo (it was 200px). */
+/* Phone: a taller photo. */
 @media (max-width: 599.95px) {
-  .listing-overview--light-compact .listing-photo { height: 240px; }
+  .listing-overview--light-compact .listing-photo { height: 280px; }
 }
 
 /* Narrow: phone and email drop below the agent instead of squeezing beside them. */
@@ -931,13 +931,13 @@
 
 @media (max-width: 1099.95px) {
   .listing-overview--compact.MuiPaper-root { padding: var(--space-24) var(--space-24) var(--space-28); }
-  .listing-overview--compact .listing-photo { width: 100%; height: clamp(220px, 32vw, 300px); }
+  .listing-overview--compact .listing-photo { width: 100%; height: clamp(260px, 40vw, 340px); }
   .listing-overview--compact.listing-overview--light-bottom .listing-summary { padding: var(--space-24) var(--space-24) 0; }
   .listing-overview--compact.listing-overview--light-bottom .listing-summary-header { margin-top: var(--space-24); }
 }
 
 @media (max-width: 599.95px) {
-  .listing-overview--compact .listing-photo { height: 220px; }
+  .listing-overview--compact .listing-photo { height: 260px; }
 }
 
 

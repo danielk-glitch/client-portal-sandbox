@@ -254,6 +254,23 @@ export function TaskRow({ task }: { task: TransactionTask }) {
 }
 
 /**
+ * The badge on an advertising row: the linked site's own icon (from Google's favicon service, by hostname only, no referrer sent),
+ * or the campaign icon when the row has no link, the link isn't a valid URL, or the icon doesn't load.
+ */
+function AdvertisingIcon({ url }: { url?: string }) {
+  const [failed, setFailed] = useState(false)
+  let host = ''
+  try { host = url ? new URL(url).hostname : '' } catch { /* not a URL: use the campaign icon */ }
+  return (
+    <PortalIconBadge>
+      {host && !failed
+        ? <Box component="img" src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64`} alt="" referrerPolicy="no-referrer" className="portal-advertising-favicon" onError={() => setFailed(true)} />
+        : <CampaignOutlined />}
+    </PortalIconBadge>
+  )
+}
+
+/**
  * One advertising update. With a `url`, the whole row is a link that opens in a new tab,
  * and an up-and-right arrow fades in at the end of the row on hover or keyboard focus.
  */
@@ -263,7 +280,7 @@ export function AdvertisingRow({ event, compact = false }: { event: AdvertisingE
   const content = (
     <>
       <Stack direction={compact ? 'column' : { xs: 'column', sm: 'row' }} sx={{ flex: 1, minWidth: 0, alignItems: compact ? 'flex-start' : { sm: 'center' }, gap: compact ? 0.75 : { xs: 1, sm: 2 } }}>
-        {!compact && <PortalIconBadge><CampaignOutlined /></PortalIconBadge>}
+        {!compact && <AdvertisingIcon url={event.url} />}
         <Box className="portal-advertising-copy">
           <Typography variant={compact ? 'bodySStandard' : 'titleXS'}>{event.action} on <strong>{event.platform}</strong>{event.url && <Box component="span" className="portal-advertising-go" aria-hidden="true"><ArrowOutwardRounded /></Box>}</Typography>
           <Typography variant="labelS" className="portal-advertising-meta">Added by {event.postedBy}{compact && ` · ${shortDate}`}</Typography>

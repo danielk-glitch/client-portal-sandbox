@@ -36,13 +36,18 @@ describe('ImportantNotes', () => {
   })
 
   it('opens the full note and jumps to all notes', async () => {
-    const onSeeAll = renderNotes([make('a', 1)])
-    fireEvent.click(screen.getByRole('button', { name: /Body of a/ }))
-    expect(screen.getByRole('dialog')).toHaveTextContent('Body of a')
+    const onSeeAll = renderNotes([make('a', 1), make('b', 2), make('c', 3), make('d', 4), make('e', 5), make('f', 6)])
+    fireEvent.click(screen.getByRole('button', { name: /Body of f/ }))
+    expect(screen.getByRole('dialog')).toHaveTextContent('Body of f')
     fireEvent.click(screen.getByRole('button', { name: 'Close note' }))
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     fireEvent.click(screen.getByRole('button', { name: 'See all notes' }))
     expect(onSeeAll).toHaveBeenCalledTimes(1)
+  })
+
+  it('hides "See all notes" when every note is already listed', () => {
+    renderNotes([make('a', 1), make('b', 2)])
+    expect(screen.queryByRole('button', { name: 'See all notes' })).not.toBeInTheDocument()
   })
 
   it('has no title or heading on a note row', () => {

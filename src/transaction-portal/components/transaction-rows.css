@@ -419,3 +419,6 @@
 .portal-person-contact-link.MuiButtonBase-root:hover .portal-person-contact-value { color: var(--color-semantic-text-dark); }
 .portal-person-contact-link.MuiButtonBase-root:active { scale: 0.99; }
 .portal-person-contact-link.MuiButtonBase-root:focus-visible { outline: var(--focus-ring); outline-offset: -2px; }
+
+/* Site icon inside the round badge. */
+.portal-advertising-favicon { width: 24px; height: 24px; display: block; border-radius: var(--radius-xs); object-fit: contain; }

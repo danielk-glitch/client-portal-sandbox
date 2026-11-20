@@ -798,3 +798,6 @@
 .timeline-stack--static .timeline-stack-item--complete .timeline-marker--complete::before { background: var(--color-semantic-text-lightest); }
 .timeline-stack--static .timeline-stack-item--upcoming .timeline-marker::before { box-shadow: inset 0 0 0 1.5px var(--color-semantic-stroke-primary-light); }
 .timeline-stack--static .timeline-stack-item--upcoming .timeline-marker-number { color: var(--color-semantic-text-lightest); }
+
+/* Headline form of the section label (before listing and while listed): the countdown's type token, centered like it. */
+.seller-timeline-title.MuiTypography-root { margin: 0 0 var(--space-4); text-align: center; color: var(--color-semantic-text-dark); }

@@ -125,8 +125,8 @@ export function SellerReviewTools({ containerStyle, selectContainerStyle, timeli
             <Box className="design-panel-option-section">
               <Typography component="h3" variant="titleXS" id="overview-cards-label">Dates and notes</Typography>
               <RadioGroup aria-labelledby="overview-cards-label" value={overviewCards ? 'cards' : 'open'} onChange={(event) => selectOverviewCards(event.target.value === 'cards')}>
-                <FormControlLabel value="open" control={<Radio />} label="On the page" />
                 <FormControlLabel value="cards" control={<Radio />} label="In containers" />
+                <FormControlLabel value="open" control={<Radio />} label="On the page" />
               </RadioGroup>
             </Box>
           )}

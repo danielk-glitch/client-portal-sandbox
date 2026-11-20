@@ -6,7 +6,7 @@
  * - A meeting note previews as its meeting title, never its raw summary markup.
  * - embedded: no card of its own, for sitting inside another card (the current seller portal's overview block).
  *   pinnedOnly limits it to starred notes, `title` renames the heading, and `limit` caps how many show (pinned first, then newest).
- * - A row opens the full note: its name line ends in a "View note →" that animates in on hover. "See all notes" (a TextLink) jumps to the Notes tab below.
+ * - A row opens the full note: its name line ends in a "View note →" that animates in on hover. "See all notes" (a TextLink) jumps to the Notes tab below, and only shows when some notes are not listed here.
  */
 import { useState } from 'react'
 import { Box, ButtonBase, Typography } from '@mui/material'
@@ -24,7 +24,7 @@ import './important-notes.css'
 
 export const importantNotesLimit = 5
 
-export function ImportantNotes({ notes, onSeeAll, embedded = false, pinnedOnly = false, title = 'Important notes', emptyText = 'No notes yet.', limit = importantNotesLimit }: { notes: TeamNote[]; onSeeAll: () => void; embedded?: boolean; pinnedOnly?: boolean; title?: string; emptyText?: string; limit?: number }) {
+export function ImportantNotes({ notes, onSeeAll, embedded = false, cardHeader = false, pinnedOnly = false, title = 'Important notes', emptyText = 'No notes yet.', limit = importantNotesLimit }: { notes: TeamNote[]; onSeeAll: () => void; embedded?: boolean; /** Embedded in a card: the card title style (PortalSectionHeader) instead of the on-page label. */ cardHeader?: boolean; pinnedOnly?: boolean; title?: string; emptyText?: string; limit?: number }) {
   // The note stays set while the dialog fades out, so its text doesn't blank mid-close.
   const [openNote, setOpenNote] = useState<TeamNote | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -32,7 +32,7 @@ export function ImportantNotes({ notes, onSeeAll, embedded = false, pinnedOnly =
 
   const body = (
     <>
-      {embedded ? <SectionLabel id="important-notes-title" component="h2">{title}</SectionLabel> : <PortalSectionHeader title={title} titleId="important-notes-title" prominent />}
+      {embedded && !cardHeader ? <SectionLabel id="important-notes-title" component="h2">{title}</SectionLabel> : <PortalSectionHeader title={title} titleId="important-notes-title" prominent />}
       <Box className="portal-section-content">
         {shown.length === 0 ? (
           <Typography variant="bodySStandard" color="text.secondary">{emptyText}</Typography>
@@ -54,7 +54,7 @@ export function ImportantNotes({ notes, onSeeAll, embedded = false, pinnedOnly =
             ))}
           </Box>
         )}
-        {shown.length > 0 && (
+        {notes.length > shown.length && (
           <Box className="important-notes-more"><TextLink onClick={onSeeAll}>See all notes</TextLink></Box>
         )}
       </Box>

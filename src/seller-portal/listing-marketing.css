@@ -1,0 +1,62 @@
+/* Listing marketing. The card surface comes from PlaceCard. */
+.listing-marketing-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(240px, 0.8fr);
+  gap: var(--space-32);
+  margin-top: var(--space-24);
+}
+.listing-marketing-feedback,
+.listing-marketing-advertising { min-width: 0; }
+.listing-marketing-advertising { padding-left: var(--space-32); border-left: 1px solid var(--color-semantic-stroke-primary-light); }
+
+.listing-marketing-heading.MuiTypography-root { min-height: 44px; display: flex; align-items: center; margin: 0; }
+.listing-marketing-feedback .listing-marketing-heading.MuiTypography-root { justify-content: center; }
+.listing-marketing-advertising .listing-marketing-heading.MuiTypography-root { justify-content: flex-start; }
+
+/* Feedback: one centered quote at a time, arrows on either side, dots below. The track snaps to each slide. */
+.listing-marketing-stage { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-8); margin-top: var(--space-8); }
+.listing-marketing-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.listing-marketing-track::-webkit-scrollbar { display: none; }
+.listing-marketing-slide { flex: 0 0 100%; min-width: 0; display: grid; place-items: center; scroll-snap-align: start; }
+.listing-marketing-quote { display: grid; justify-items: center; gap: var(--space-16); max-width: 48ch; padding-block: var(--space-8); text-align: center; }
+.listing-marketing-quote .feedback-quote-text.MuiTypography-root { margin: 0; font: var(--type-title-m); text-wrap: pretty; }
+.listing-marketing-quote .feedback-quote-meta.MuiTypography-root { margin: 0; color: var(--color-semantic-text-light); }
+
+.listing-marketing-dots { display: flex; justify-content: center; gap: var(--space-4); margin-top: var(--space-8); }
+.listing-marketing-dot.MuiButtonBase-root { position: relative; width: 24px; height: 24px; border-radius: var(--radius-circle); }
+.listing-marketing-dot::before {
+  position: absolute;
+  inset: 8px;
+  content: '';
+  border-radius: var(--radius-circle);
+  background: var(--color-semantic-stroke-primary);
+  transition: background-color var(--motion-hover), scale var(--motion-hover);
+}
+.listing-marketing-dot[aria-current="true"]::before { background: var(--color-semantic-text-dark); scale: 1.25; }
+.listing-marketing-dot:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+
+.listing-marketing-advertising .portal-advertising-row { padding-block: var(--space-12); }
+.listing-marketing-advertising .portal-advertising-row:first-child { padding-top: var(--space-8); }
+
+@media (max-width: 899.95px) {
+  .listing-marketing-body { grid-template-columns: 1fr; gap: var(--space-24); }
+  .listing-marketing-advertising { padding: var(--space-24) 0 0; border-top: 1px solid var(--color-semantic-stroke-primary-light); border-left: 0; }
+}
+
+/* Phone: the quote takes the full width (swipe or tap the dots instead of the side arrows) and steps down a size, so it stays short. */
+@media (max-width: 599.95px) {
+  .listing-marketing-stage { grid-template-columns: minmax(0, 1fr); }
+  .listing-marketing-stage > .place-icon-button { display: none; }
+  .listing-marketing-quote .feedback-quote-text.MuiTypography-root { font: var(--type-title-s); }
+}
+
+/* The feedback column is often shorter than the advertising list beside it. The heading stays at the top, level with "Advertising",
+   and the quote and dots sit centered in the space below it, so the extra space splits above and below the quote instead of pooling at the bottom. */
+.listing-marketing-feedback { display: flex; flex-direction: column; }
+.listing-marketing-feedback > .listing-marketing-stage { margin-top: auto; }
+.listing-marketing-feedback > .listing-marketing-dots { margin-bottom: auto; }
